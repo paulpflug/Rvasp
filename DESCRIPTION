@@ -1,0 +1,7 @@
+Package: Rvasp
+Title: Tools for loading, manipulating and plotting VASP files
+Description: 
+Version: 0.1
+Author: Paul Pflugradt <paulpflugradt@googlemail.com>
+Maintainer: Paul Pflugradt <paulpflugradt@googlemail.com>
+License: MIT

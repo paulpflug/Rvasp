@@ -219,7 +219,7 @@ plot.poscar.addlayers<-function(poscar
   points(data[,dir],col="black",bg=as.character(data[,5]),pch=21,cex=data[,6],lwd=data[,7],xpd=T)
 }
 
-plot.poscar.addlayerdistance<-function(poscar,layer,layers,color=rainbow(length(layer)),length=0.05,direction=1,...){
+plot.poscar.addlayerdistance<-function(poscar,layer,layers,color="black",length=0.05,direction=1,...){
   stopifnot(length(layer)>1)
   dir <- (1:3)[-direction]
   atoms <- poscar.getbasisconvertedatoms(poscar) 
@@ -230,8 +230,7 @@ plot.poscar.addlayerdistance<-function(poscar,layer,layers,color=rainbow(length(
   offset <- rbind(-off,+off)
   rng <- rawrng+offset
   z <- sapply(layer,FUN=function(x)mean(atoms[layerindices==x,3]))
-  if(length(color)<length(layer))
-    color <- rep(color,ceiling(length(layer)/length(color)))
+  color <- rep(color,length.out=length(layer))
   for (i in 1:length(layer))
 {
   lines(rawrng[2,1]+rbind(-off[[1]]*2,off[[1]]*0.5),c(z[[i]],z[[i]]),lty=2,col=color[[i]],xpd=T,...)
@@ -285,7 +284,7 @@ plot.atoms.addnumbers<-function(atoms,basis=NULL,direction=3,atomselector=NULL,.
   atoms <- atoms[,dir]  
   if (is.null(atomselector))
     atomselector<- 1:nrow(atoms)
-  text(atoms[atomselector,1],atoms[atomselector,2],labels=(1:nrow(atoms))[atomselector],...)
+  text(atoms[atomselector,1],atoms[atomselector,2],labels=(1:nrow(atoms))[atomselector],xpd=T,...)
 }
 
 plot.atoms.addarrows<-function(atomsold,atomsnew,basisold=NULL,basisnew=NULL,direction=3,length=0.1,...){

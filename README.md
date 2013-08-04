@@ -19,8 +19,8 @@ install.packages(pkgs="Rvasp_0.1.tar.gz")
 ```R
 library(Rvasp)
 ```
-
-Contains functions to work with
+### Content
+Contains functions to work with POSCAR, CHGCAR, vasprun.xml and more
 
 ### [POSCAR](../../wiki/POSCAR)
 * [read](../../wiki/Basics-(POSCAR\)) 
@@ -36,6 +36,7 @@ Contains functions to work with
 * read and [plot](../../wiki/example-Plots#dos) (projected) [dosdata](../../wiki/DOS)
 * read and [plot](../../wiki/example-Plots#bands) (projected) [bandsdata](../../wiki/BANDS) and fit a dirac cone or a quadratic function to a band
 
+### more
 Contains a wrapper for [calculations](../../wiki/CALCULATIONS) organized in the following scheme:   
    
 /manyCalculations/Calculation1/Parameter1/VASPfile1   

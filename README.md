@@ -54,9 +54,9 @@ so there are three levels:
 * Parameter
 
 On calculation level there are the following functions:
-* get / [plot](../../wiki/example-Plots#eacurve) / fit an e over a curve
-* get / [plot](../../wiki/example-Plots#ldos) a local dos curve
-* get / [plot](../../wiki/example-Plots#bbands) bulk band data
+* get / [plot](../../wiki/example-Plots#e-over-a) / fit an e over a curve
+* get / [plot](../../wiki/example-Plots#local-dos) a local dos curve
+* get / [plot](../../wiki/example-Plots#bulk-bands) bulk band data
 
 Furthermore there are some [miscellaneous](../../wiki/miscellaneous) functions like
-* [ploting](../../wiki/example-Plots#pt) a periodic table
+* [ploting](../../wiki/example-Plots#periodic-table) a periodic table

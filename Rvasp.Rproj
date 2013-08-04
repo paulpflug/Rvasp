@@ -13,5 +13,6 @@ RnwWeave: Sweave
 LaTeX: pdfLaTeX
 
 BuildType: Package
+PackagePath: Rvasp
 PackageInstallArgs: --no-multiarch
 PackageRoxygenize: rd

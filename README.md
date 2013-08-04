@@ -2,12 +2,26 @@ Rvasp
 =====
 Tools for loading, manipulating and plotting VASP files within R
 
+### Install
+* download [Rvasp package](raw/master/Rvasp_0.1.tar.gz)
+* install in R
+
+```R
+install.packages(pkgs="Rvasp_0.1.tar.gz")
+```
+
+* load in R
+
+```R
+library(Rvasp)
+```
+
 Contains functions to work with
 
-### POSCAR
-* read 
-* write 
-* manipulate
+### [POSCAR](wiki/POSCAR)
+* [read](wiki/Basics-(POSCAR\)) 
+* [write](wiki/Basics-(POSCAR\)) 
+* [manipulate](wiki/Manipulation-(POSCAR\))
 * plot
 
 ### CHGCAR 

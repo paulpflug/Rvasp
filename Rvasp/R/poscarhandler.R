@@ -368,11 +368,11 @@ atoms.centeratoms <- function(atomsdirect,directions=1:3,position=rep(0,3)){
     warning("wrong direction encountered in atoms.centeratoms")
   # range of atoms for old vacuum
   rng <- apply(atomsdirect[1:3],2,range)
-  position <- rep(position,length.out=3)
+  position <- rep(position,length.out=length(directions))
   for(i in directions[directions>0&directions<4])
   {
     span <- abs(rng[2,i]-rng[1,i])
-    atomsdirect[,i]<- atomsdirect[,i]-rng[1,i]-span/2+position[[i]]
+    atomsdirect[,i]<- atomsdirect[,i]-rng[1,i]-span/2+position[[which(directions==i)]]
   }
   return(atomsdirect)
 }

@@ -102,7 +102,7 @@ plot.stm.addatoms<-function(stm,atomselector,col="black",atomsize=2*super,
 #' @param atomnumber (optional) number of the atom on which the bottom left corner of the unitcell will be positioned
 #' @param ... further plotting parameters
 #' @export
-plot.stm.addunitcell<-function(stm,atomnumber=NULL,...){  
+plot.stm.addunitcell<-function(stm,atomnumber=NULL,col="black",...){  
   offset <- c(0,0)
   if(!is.null(atomnumber))
   {
@@ -112,7 +112,7 @@ plot.stm.addunitcell<-function(stm,atomnumber=NULL,...){
   base <- (stm$poscar$basis*stm$poscar$a)[1:2,1:2]  
   trellis.focus("panel", 1, 1, highlight=F) 
   points <- t(cbind(c(0,0),base[1,],base[1,]+base[2,],base[2,],c(0,0))+offset)/10
-  llines(points,lty=2,...)
+  llines(points,lty=2,col=col,...)
   trellis.unfocus()
 
 }

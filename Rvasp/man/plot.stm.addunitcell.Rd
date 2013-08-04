@@ -2,7 +2,8 @@
 \alias{plot.stm.addunitcell}
 \title{Adds unitcell}
 \usage{
-  plot.stm.addunitcell(stm, atomnumber = NULL, ...)
+  plot.stm.addunitcell(stm, atomnumber = NULL,
+    col = "black", ...)
 }
 \arguments{
   \item{stm}{object of class stm}

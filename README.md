@@ -22,21 +22,21 @@ library(Rvasp)
 ### Content
 Contains functions to work with POSCAR, CHGCAR, vasprun.xml and more
 
-### [POSCAR](../../wiki/POSCAR)
+#### [POSCAR](../../wiki/POSCAR)
 * [read](../../wiki/Basics-(POSCAR\)) 
 * [write](../../wiki/Basics-(POSCAR\)) 
 * [manipulate](../../wiki/Manipulation-(POSCAR\))
 * [plot](../../wiki/Plotting-(POSCAR\)) [(ex.)](../../wiki/example-Plots#poscar)
 
-### CHGCAR
+#### CHGCAR
 * [read](../../wiki/CHGCAR)
 * calculate and [plot](../../wiki/example-Plots#stm) [stm](../../wiki/STM)
 
-### vasprun.xml 
+#### vasprun.xml 
 * read and [plot](../../wiki/example-Plots#dos) (projected) [dosdata](../../wiki/DOS)
 * read and [plot](../../wiki/example-Plots#bands) (projected) [bandsdata](../../wiki/BANDS) and fit a dirac cone or a quadratic function to a band
 
-### more
+#### more
 Contains a wrapper for [calculations](../../wiki/CALCULATIONS) organized in the following scheme:   
    
 /manyCalculations/Calculation1/Parameter1/VASPfile1   

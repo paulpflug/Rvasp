@@ -5,3 +5,4 @@ Version: 0.1
 Author: Paul Pflugradt <paulpflugradt@googlemail.com>
 Maintainer: Paul Pflugradt <paulpflugradt@googlemail.com>
 License: MIT
+Depends: snowfall,lattice,akima,XML,grid,graphics,stats,utils,grDevices

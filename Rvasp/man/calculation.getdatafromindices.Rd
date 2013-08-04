@@ -1,6 +1,6 @@
 \name{calculation.getdatafromindices}
 \alias{calculation.getdatafromindices}
-\title{gives the CHGCAR data by a list of given dataindices}
+\title{retrives CHGCAR data}
 \usage{
   calculation.getdatafromindices(calculation, indices,
     efermi = 0, smearing = NULL)

@@ -1,4 +1,4 @@
-require(XML)
+
 
 read.dosdata <- function(xmlfile){  
   result <- list()

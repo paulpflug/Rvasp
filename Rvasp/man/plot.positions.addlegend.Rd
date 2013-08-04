@@ -1,6 +1,6 @@
 \name{plot.positions.addlegend}
 \alias{plot.positions.addlegend}
-\title{adds a positions legend to an existing plot.}
+\title{adds a positions legend to an existing plot}
 \usage{
   plot.positions.addlegend(positions, lty = 1,
     col = rainbow(length(positions)),
@@ -13,6 +13,6 @@
 }
 \description{
   \code{plot.positions.addlegend} adds a positions legend
-  to an existing plot
+  to an existing plot.
 }
 

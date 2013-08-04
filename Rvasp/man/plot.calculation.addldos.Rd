@@ -1,6 +1,6 @@
 \name{plot.calculation.addldos}
 \alias{plot.calculation.addldos}
-\title{adds a ldos to an existing plot. either positions or dataset must be given.}
+\title{adds a ldos to an existing plot}
 \usage{
   plot.calculation.addldos(calculation, positions = NULL,
     efermi = 0, smearing = NULL, dataset = NULL,
@@ -19,6 +19,6 @@
 }
 \description{
   \code{plot.calculation.addldos} adds a ldos to an
-  existing plot
+  existing plot. Either positions or dataset must be given.
 }
 

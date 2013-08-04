@@ -1,7 +1,6 @@
 \name{plot.calculation.ldos}
 \alias{plot.calculation.ldos}
-\title{Creates a ldos image.
-Based on base package.}
+\title{Creates a ldos image.}
 \usage{
   plot.calculation.ldos(calculation, positions,
     col = rainbow(length(positions)), typ = "l",
@@ -23,6 +22,7 @@ Based on base package.}
   should be created?}
 }
 \description{
-  \code{plot.calculation.ldos} Creates a ldos image
+  \code{plot.calculation.ldos} Creates a ldos image Based
+  on base package.
 }
 

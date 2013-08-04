@@ -1,10 +1,4 @@
-#source("./R/poscarhandler.R")
-#source("./R/chgcarhandler.R")
-#source("./R/bandshandler.R")
-#source("./R/doshandler.R")
-#source("./R/ldoshandler.R")
-#source("./R/stmhandler.R")
-require(snowfall)
+
 read.calculations <- function(folders,name="calculations",calculations=list(),chgcarname="",bandsxmlname="",dosxmlname="",update=F){
   class(calculations) <- "calculations"
   if (is.null(calculations[["name"]])) calculations[["name"]]<-name

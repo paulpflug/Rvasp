@@ -1,5 +1,9 @@
-#source("./R/poscarhandler.R")
-
+#' reads a CHGCAR-type file
+#' 
+#' \code{read.chgcar} reads a CHGCAR-type file
+#' 
+#' @param filename filename
+#' @export
 read.chgcar<-function(filename){
   chgcar <- list()
   class(chgcar)<-"chgcar"
@@ -28,6 +32,12 @@ read.chgcar<-function(filename){
   return(chgcar)
 }
 
+#' custom print for object of chgcar class
+#' 
+#' \code{print.chgcar} custom print for object of chgcar class
+#' 
+#' @param chgcar object of chgcar class
+#' @export
 print.chgcar <- function(chgcar,...){
     cat("chgcar\n")
     for (name in names(chgcar))
@@ -44,6 +54,17 @@ print.chgcar <- function(chgcar,...){
   
 }
 
+#' sums the charge over layers
+#' 
+#' \code{chgcar.sumoverlayer} sums the charge over layers.
+#' Only for coherent layers. Only in z-direction.
+#' As a cutoff the middle between highest / lowest selected and next unselected layer is used.
+#' If highest / lowest selected layer is top / bottom layer of the slab, the cut-off is set to z=0 / z=max(z)
+#' 
+#' @param chgcar object of chgcar class
+#' @param layer layers which should be summed
+#' @param layers total layer count
+#' @export
 chgcar.sumoverlayer <- function(chgcar,layer,layers){
   layer <- sort(layer)
   diff <- layer[-1]-layer[-length(layer)]
@@ -72,6 +93,11 @@ chgcar.sumoverlayer <- function(chgcar,layer,layers){
   return(sum(chgcar$data[selector,4]*vol))
 }
 
+#' total sum of the charge
+#' 
+#' \code{chgcar.sum} total sum of the charge.
+#' @param chgcar object of chgcar class
+#' @export
 chgcar.sum<- function(chgcar){
   return(chgcar.sumoverlayer(chgcar,1,1))
 }

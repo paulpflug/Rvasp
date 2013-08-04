@@ -1,6 +1,6 @@
 \name{plot.stm.addunitcell}
 \alias{plot.stm.addunitcell}
-\title{Adds the unitcell to a stm image indicated by a dashed line}
+\title{Adds unitcell}
 \usage{
   plot.stm.addunitcell(stm, atomnumber = NULL, ...)
 }
@@ -14,6 +14,7 @@
   \item{...}{further plotting parameters}
 }
 \description{
-  \code{plot.stm.addunitcell} Adds unitcell
+  \code{plot.stm.addunitcell} Adds the unitcell to a stm
+  image indicated by a dashed line
 }
 

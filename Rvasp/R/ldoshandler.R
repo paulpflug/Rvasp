@@ -1,6 +1,6 @@
-#' Adds a gaussian smearing to ldos vector
+#' Adds a gaussian smearing 
 #' 
-#' \code{ldosvector.calcsmearing} Adds a gaussian smearing
+#' \code{ldosvector.calcsmearing} Adds a gaussian smearing to ldos vector
 #' 
 #' @param energy vector containing the energy
 #' @param dos vector containing the dos
@@ -12,10 +12,10 @@ ldosvector.calcsmearing<-function(energy,dos,sigma=0.1){
 }
 
 #' Creates a ldos image.
-#' Based on base package.
 #' 
 #' \code{plot.calculation.ldos} Creates a ldos image
-#' 
+#' Based on base package.
+#'  
 #' @param calculation object of class calculation
 #' @param positions object of class positions
 #' @param smearing (optional) adds gaussian smearing
@@ -51,7 +51,7 @@ plot.calculation.ldos<- function(calculation,
   }
 }
 
-#' searches for the indices of the value in the CHGCAR for a list of given positions
+#' searches for the indices of the value in the CHGCAR
 #' 
 #' \code{calculation.getindicesfrompositions} searches for the index of the value in the CHGCAR by a given position
 #' 
@@ -74,7 +74,7 @@ calculation.getindicesfrompositions<-function(calculation,positions){
   return(NULL)
 }
 
-#' gives the CHGCAR data by a list of given dataindices
+#' retrives CHGCAR data
 #' 
 #' \code{calculation.getdatafromindices} gives the CHGCAR data by a given dataindex
 #' 
@@ -104,9 +104,9 @@ calculation.getdatafromindices <- function(calculation,indices,efermi=0,smearing
   return(dataset)
 }
 
-#' adds a ldos to an existing plot. either positions or dataset must be given.
+#' adds a ldos to an existing plot
 #' 
-#' \code{plot.calculation.addldos} adds a ldos to an existing plot
+#' \code{plot.calculation.addldos} adds a ldos to an existing plot. Either positions or dataset must be given.
 #' 
 #' @param calculation object of class calculation
 #' @param positions object of class positions
@@ -133,9 +133,9 @@ plot.calculation.addldos<-function(calculation
     lines(dataset[[i]],col=col[[i]],lty=lty[[i]],...)
 }
 
-#' adds a positions legend to an existing plot.
+#' adds a positions legend to an existing plot
 #' 
-#' \code{plot.positions.addlegend} adds a positions legend to an existing plot
+#' \code{plot.positions.addlegend} adds a positions legend to an existing plot.
 #' 
 #' @param positions object of class positions
 #' @param ... further ploting parameters

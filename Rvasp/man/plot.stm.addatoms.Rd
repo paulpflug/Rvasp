@@ -1,6 +1,6 @@
 \name{plot.stm.addatoms}
 \alias{plot.stm.addatoms}
-\title{Adds atoms to a stm image}
+\title{Adds atoms}
 \usage{
   plot.stm.addatoms(stm, atomselector, col = "black",
     atomsize = 2 * super, super = 1, xlim = NULL,
@@ -18,6 +18,6 @@
   \item{...}{further plotting parameters}
 }
 \description{
-  \code{plot.stm.addatoms} Adds atoms
+  \code{plot.stm.addatoms} Adds atoms to a stm image
 }
 

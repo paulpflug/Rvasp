@@ -1,7 +1,6 @@
 \name{plot.stm}
 \alias{plot.stm}
-\title{Creates a constant-current stm image.
-Based on lattice package.}
+\title{Plots a constant-current stm image}
 \usage{
   plot.stm(stm, super = 1, xlim = NULL, ylim = NULL, ...)
 }
@@ -14,6 +13,7 @@ Based on lattice package.}
   \item{...}{further plotting parameters}
 }
 \description{
-  \code{plot.stm} Plots a constant-current stm image
+  \code{plot.stm} Creates a constant-current stm image.
+  Based on lattice package.
 }
 

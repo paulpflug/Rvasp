@@ -1,6 +1,6 @@
 \name{calculation.getindicesfrompositions}
 \alias{calculation.getindicesfrompositions}
-\title{searches for the indices of the value in the CHGCAR for a list of given positions}
+\title{searches for the indices of the value in the CHGCAR}
 \usage{
   calculation.getindicesfrompositions(calculation,
     positions)

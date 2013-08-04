@@ -1,13 +1,8 @@
-#source("./R/poscarhandler.R")
-require(akima)
-require(snowfall)
-require(lattice)
 
-
-#' Creates a constant-current stm image.
-#' Based on lattice package.
+#' Plots a constant-current stm image
 #' 
-#' \code{plot.stm} Plots a constant-current stm image
+#' \code{plot.stm} Creates a constant-current stm image.
+#' Based on lattice package.
 #' 
 #' @param stm object of class stm
 #' @param super (optional) plots a supercell (symmetric in x and y)
@@ -55,9 +50,9 @@ plot.stm<- function(stm,super=1,xlim=NULL,ylim=NULL
   
   }
 
-#' Adds atoms to a stm image
+#' Adds atoms
 #' 
-#' \code{plot.stm.addatoms} Adds atoms
+#' \code{plot.stm.addatoms} Adds atoms to a stm image
 #' 
 #' @param stm object of class stm
 #' @param atomselector selector to filter atoms which should be added
@@ -99,9 +94,9 @@ plot.stm.addatoms<-function(stm,atomselector,col="black",atomsize=2*super,
   }
 }
 
-#' Adds the unitcell to a stm image indicated by a dashed line
+#' Adds unitcell
 #' 
-#' \code{plot.stm.addunitcell} Adds unitcell
+#' \code{plot.stm.addunitcell} Adds the unitcell to a stm image indicated by a dashed line
 #' 
 #' @param stm object of class stm
 #' @param atomnumber (optional) number of the atom on which the bottom left corner of the unitcell will be positioned
@@ -122,11 +117,12 @@ plot.stm.addunitcell<-function(stm,atomnumber=NULL,...){
 
 }
 
-#' Calculates a constant-current stm by a given chgcar.
+#' Calculates a constant-current stm
+#' 
+#' 
+#' \code{stm} Calculates a constant-current stm by a given chgcar.
 #' preferred orientation: z-direction 
 #' searches bottom-up (Will give the bottom side of a slab)
-#' 
-#' \code{stm} Calculates a constant-current stm
 #' 
 #' @param chgcar object of class chgcar
 #' @param emax cut-off electron density
@@ -224,14 +220,3 @@ stm<- function(chgcar,emax,cpus=4){
   gc()
   return (stm)
 }
-
-#load.calculationdata("stmdata1",T)
-#stmd <-stm(stmdata[["d25_8_on_7_STM"]][["EINT_-1.000"]][["chgcar"]],0.05,cpus=4)
-#stmd<-stmdata[["d25_8_on_7_STM"]][["EINT_-1.000"]][["stm"]]
-#load.calculationdata("stmdata3",T)
-#stmd<-stmdata[["d27_14_on_13_STM"]][["EINT_-1.000"]][["stm"]]
-#load.calculationdata("stmdata2",T)
-#stmd<-stmdata[["d26_18_on_16_STM"]][["EINT_-1.000"]][["stm"]]
-#stmd <-stm(stmdata[["d26_18_on_16_STM"]][["EINT_-1.000"]][["chgcar"]],0.05,cpus=1)
-#plot(stmd,atomoffset=0,atomcolor=grey(0.2),super=3,xlim=c(0,2.5),ylim=c(0,2.5),main="Test",xlab="x / nm",ylab="y / nm")
-#print(getatomlayerindices(stmd$poscar,14))

@@ -24,7 +24,7 @@ Contains functions to work with
 * [manipulate](../../wiki/Manipulation-(POSCAR\))
 * [plot](../../wiki/Plotting-(POSCAR\))
 
-### [CHGCAR](../../wiki/CHGCAR)
+### CHGCAR
 * [read](../../wiki/CHGCAR)
 * [calculate and plot stm](../../wiki/STM)
 

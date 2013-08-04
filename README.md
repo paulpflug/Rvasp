@@ -2,6 +2,10 @@ Rvasp
 =====
 Tools for loading, manipulating and plotting VASP files within R
 
+### Important
+Many features originated by a need to solve a specific problem and are propably not generalized enough to declare the general problem fully solved.
+All functions are implemented in pure R and are mostly easy to understand. Feel free to read the [source](../../tree/master/Rvasp/R), improve and submit changes.
+
 ### Install
 * download [Rvasp package](../../raw/master/Rvasp_0.1.tar.gz)
 * install in R
@@ -22,15 +26,15 @@ Contains functions to work with
 * [read](../../wiki/Basics-(POSCAR\)) 
 * [write](../../wiki/Basics-(POSCAR\)) 
 * [manipulate](../../wiki/Manipulation-(POSCAR\))
-* [plot](../../wiki/Plotting-(POSCAR\))
+* [plot](../../wiki/Plotting-(POSCAR\)) [(ex.)](../../wiki/example-Plots#poscar)
 
 ### CHGCAR
 * [read](../../wiki/CHGCAR)
-* [calculate and plot stm](../../wiki/STM)
+* calculate and [plot](../../wiki/example-Plots#stm) [stm](../../wiki/STM)
 
 ### vasprun.xml 
-* read and plot (projected) [bandsdata](../../wiki/BANDS) and fit a dirac cone or a quadratic function to a band
-* read and plot (projected) [dosdata](../../wiki/DOS)
+* read and [plot](../../wiki/example-Plots#dos) (projected) [dosdata](../../wiki/DOS)
+* read and [plot](../../wiki/example-Plots#bands) (projected) [bandsdata](../../wiki/BANDS) and fit a dirac cone or a quadratic function to a band
 
 Contains a wrapper for [calculations](../../wiki/CALCULATIONS) organized in the following scheme:   
    
@@ -50,9 +54,9 @@ so there are three levels:
 * Parameter
 
 On calculation level there are the following functions:
-* get / plot / fit an e over a curve
-* get / plot a local dos curve
-* get / plot bulk band data
+* get / [plot](../../wiki/example-Plots#eacurve) / fit an e over a curve
+* get / [plot](../../wiki/example-Plots#ldos) a local dos curve
+* get / [plot](../../wiki/example-Plots#bbands) bulk band data
 
 Furthermore there are some [miscellaneous](../../wiki/miscellaneous) functions like
-* plotting a periodic table
+* [ploting](../../wiki/example-Plots#pt) a periodic table

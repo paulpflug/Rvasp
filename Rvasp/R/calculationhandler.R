@@ -194,6 +194,7 @@ ea.fitEOS <- function(fitdata)
   starteos <- getstartEOS(fitdata)
   
   obj <- optim(starteos,objectivem,data=fitdata,method="BFGS")
+  obj$arange<-range(fitdata$a)
   class(obj)<-"EOS"
   return(obj)
 }
@@ -212,24 +213,50 @@ predict.EOS<-function(o,x)
   names(data) <- c("a","E")
   return(data)
 }
-calculations.getea<-function(calculations)
+calculation.getea<-function(calculation)
 {
-  data <- data.frame(do.call(rbind,lapply(calculations,FUN=function(x)
+  data <- data.frame(do.call(rbind,lapply(calculation,FUN=function(x)
     if(!is.null(x$poscar$a) & !is.null(x$energy))
     cbind(x$poscar$a,x$energy))))
   names(data)<-c("a","E")
   return(data)
 }
-calculations.plot.ea<-function(calculations,energyfactor=1,energyshift=0,fit=F,...)
+plot.calculation.ea<-function(calculation,energyfactor=1,energyshift=0,fit=F,type="p",...)
 {
-  data <- calculations.getea(calculations)
+  data <- calculation.getea(calculation)
   data$E <- data$E * energyfactor-energyshift
-  plot(data,type="p",...)
+  plot(data,type=type,...)
+  if(fit){
+    o <- ea.fitEOS(data)
+    plot.EOS.add(o,...)
+    return(o)
+  }
 }
-calculations.plot.ea.addpoints<-function(calculations,afactor=1,energyfactor=1,energyshift=0,fit=F,...)
+
+plot.calculation.ea.addpoints<-function(calculation,afactor=1,energyfactor=1,energyshift=0,fit=F,...)
 {
-  data <- calculations.getea(calculations)
+  data <- calculation.getea(calculation)
   data$a <- data$a*afactor
   data$E <- data$E * energyfactor-energyshift
   points(data,...)
+  if(fit){
+    o <- ea.fitEOS(data)
+    plot.EOS.add(o,...)
+    return(o)
+  }
+  
+}
+plot.calculation.ea.addfit<-function(calculation,afactor=1,energyfactor=1,energyshift=0,...)
+{
+  data <- calculation.getea(calculation)
+  data$a <- data$a*afactor
+  data$E <- data$E * energyfactor-energyshift
+  o <- ea.fitEOS(data)
+  plot.EOS.add(o,...)
+  return(o)
+}
+plot.EOS.add<-function(o,...)
+{
+  x <- seq(o$arange[[1]],o$arange[[2]],length.out=101)
+  lines(predict.EOS(o,x),...)
 }

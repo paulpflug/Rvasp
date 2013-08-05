@@ -2,6 +2,11 @@ Rvasp
 =====
 Tools for loading, manipulating and plotting VASP files within R
 
+### Workflow
+To be somewhat efficent, even in research, I developed a workflow for scientific computation, which works quite well for me.
+![scientific computation - workflow](../../raw/master/examples/workflow-01.png scientific computation - workflow)
+VASPmanager can be found [here](https://github.com/paulpflug/VASPmanager) 
+
 ### Important
 Many features originated by a need to solve a specific problem and are propably not generalized enough to declare the general problem fully solved.
 All functions are implemented in pure R and are mostly easy to understand. Feel free to read the [source](../../tree/master/Rvasp/R), improve and submit changes.

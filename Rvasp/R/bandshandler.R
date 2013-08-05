@@ -3,6 +3,12 @@ require(lattice)
 require(grid)
 require(snowfall)
 
+#' Reads bandsdata
+#' 
+#' \code{read.bandsdata} Reads bandsdata from vasprun.xml.
+#' 
+#' @param xmlfile vasprun.xml file
+#' @export
 read.bandsdata <- function(xmlfile){  
   result <- list()
   class(result)<-"bandsdata"
@@ -238,7 +244,12 @@ read.bandsdata <- function(xmlfile){
   return (result)
 }
 
-#custom print for bandsdata
+#' Custom print for object of class bandsdata
+#' 
+#' \code{print.bandsdata} custom print for object of class bandsdata.
+#' 
+#' @param bandsdata object of class bandsdata
+#' @export
 print.bandsdata <- function(bandsdata,...){
   for (name in names(bandsdata))
   {
@@ -257,7 +268,12 @@ print.bandsdata <- function(bandsdata,...){
   }
 }
 
-#custom print for banddata
+#' Custom print for object of class banddata
+#' 
+#' \code{print.banddata} custom print for object of class banddata.
+#' 
+#' @param banddata object of class banddata
+#' @export
 print.banddata <- function(banddata,...){
   for (name in names(banddata))
   {
@@ -273,11 +289,17 @@ print.banddata <- function(banddata,...){
   }
 }
 
-
+#' Adds a path of high symmetry points to bandsdata
+#' 
+#' \code{bandsdata.calcsympointpath} adds a custom path of high symmetry points to bandsdata.
+#'  ex. sympointpath=list(c(1,2),c(3,4)) 
+#'  goes from 1 to 2 and 3 to 4
+#' returns class of type bandsdata
+#' 
+#' @param bandsdata object of class bandsdata
+#' @param sympointpath list of vectors containing indices of high symmetry points
+#' @export
 bandsdata.calcsympointpath<-function(bandsdata,sympointpath){
-  # adds a path from sympoints to bandsdata
-  # ex. sympointpath=list(c(1,2),c(3,4)) 
-  # goes from 1 to 2 and 3 to 4
   print("calculating sympoints")
   xmax <- 0
   sympath <- list()
@@ -300,15 +322,38 @@ bandsdata.calcsympointpath<-function(bandsdata,sympointpath){
   return(bandsdata)
 }
 
-bandsdata.addsympoint <- function(bandsdata,index){
-  bandsdata$sympoints <-sort(c(bandsdata$sympoints[index],bandsdata$kpointsflat))
-  bandsdata$sympointindices <- sort(c(bandsdata$sympointindices,index))
-  bandsdata$sympointindicesrev <- sort(c(bandsdata$sympointindicesrev,index))
-  print("added sympoint to bandsdata")
+#' Adds custom high symmetry points to bandsdata
+#' 
+#' \code{bandsdata.addsympoint} adds custom high symmetry points to bandsdata.
+#' returns class of type bandsdata
+#' 
+#' @param bandsdata object of class bandsdata
+#' @param indices of high symmetry points in \code{bandsdata$kpoints}
+#' @export
+bandsdata.addsympoint <- function(bandsdata,indices){
+  bandsdata$sympoints <-sort(c(bandsdata$sympoints,bandsdata$kpointsflat[indices]))
+  bandsdata$sympointindices <- sort(c(bandsdata$sympointindices,indices))
+  bandsdata$sympointindicesrev <- sort(c(bandsdata$sympointindicesrev,indices))
+  print("added sympoints to bandsdata")
   print(paste("new sympointindices:",paste(bandsdata$sympointindices,collapse=" ")))
   return(bandsdata)
 }
 
+#' Plots bandsdata
+#' 
+#' \code{plot.bandsdata} plots bandsdata.
+#' returns class of type bandsdata
+#' 
+#' @param bandsdata object of class bandsdata
+#' @param bands limits plotting to specified bands
+#' @param sympointpath calls \code{\link{bandsdata.calcsympointpath}}
+#' @param fermi adds blue line at Fermi level
+#' @param symnames adds labels at high symmetry points
+#' @param symcolor color of high symmetry point lines
+#' @param symlty line typ of high symmetry point lines
+#' @param energyoffset will be added to energy of all bands
+#' @param ... further plotting parameters
+#' @export
 plot.bandsdata <- function(bandsdata
                            ,bands=1:length(bandsdata$bands)
                            ,sympointpath=NULL
@@ -330,6 +375,7 @@ plot.bandsdata <- function(bandsdata
     bandsdata <- bandsdata.calcsympointpath(bandsdata,sympointpath)    
   }
   bandsdata$energyoffset <- energyoffset  
+  rng[1:2,2]<- rng[1:2,2]+energyoffset
   if(!is.null(bandsdata$sympath))
   {
     rng[1:2,1]<-range(bandsdata$sympath$data[,2])
@@ -349,7 +395,16 @@ plot.bandsdata <- function(bandsdata
   return(bandsdata)
 }
 
-
+#' Adds high symmetry point labels to existing plot
+#' 
+#' \code{plot.bandsdata.addsymnnames} adds high symmetry point labels to existing plot
+#' 
+#' @param bandsdata object of class bandsdata
+#' @param symnames adds labels at high symmetry points
+#' @param symcolor color of high symmetry point lines
+#' @param symlty line typ of high symmetry point lines
+#' @param ... further plotting parameters
+#' @export
 plot.bandsdata.addsymnnames <- function(bandsdata,symnames,symcolor="red",symlty=3,...){
   print("adding symnames")
   sp <- bandsdata$sympoints
@@ -360,8 +415,17 @@ plot.bandsdata.addsymnnames <- function(bandsdata,symnames,symcolor="red",symlty
   select <- !duplicated(sp)
   abline(v=sp[select],col=symcolor,lty=symlty,...)
   axis(1,at=sp[select],labels=symnames[select],...)
-}
+} kpoint
 
+#' Adds line at Fermi level to existing plot
+#' 
+#' \code{plot.bandsdata.addsymnnames} adds line at Fermi level to existing plot
+#' 
+#' @param bandsdata object of class bandsdata
+#' @param fermicolor color of line at Fermi level
+#' @param lty line typ of line at Fermi level
+#' @param ... further plotting parameters
+#' @export
 plot.bandsdata.addfermi<-function(bandsdata,fermicolor="blue",lty=3,xlim=NULL,...){
   e <- 0
   if(is.null(bandsdata$energyoffset))
@@ -373,6 +437,15 @@ plot.bandsdata.addfermi<-function(bandsdata,fermicolor="blue",lty=3,xlim=NULL,..
   #text(xlim[1],0,"fermi",col=fermicolor,adj=c(-0.2,-0.5),...)
 }
 
+#' Adds bands to existing plot
+#' 
+#' \code{plot.bandsdata.addsymnnames} adds bands to existing plot
+#' 
+#' @param bandsdata object of class bandsdata
+#' @param bands limits plotting to specified bands
+#' @param energyoffset will be added to energy of all bands
+#' @param ... further plotting parameters
+#' @export
 plot.bandsdata.addbands <- function(bandsdata,bands=1:length(bandsdata$bands),energyoffset=NULL,...){
   if(is.null(energyoffset))
   {
@@ -403,6 +476,15 @@ plot.bandsdata.addbands <- function(bandsdata,bands=1:length(bandsdata$bands),en
   })
 }
 
+#' Adds number of all bands to existing plot
+#' 
+#' \code{plot.bandsdata.addsymnnames} adds number of all bands to existing plot.
+#' 
+#' @param bandsdata object of class bandsdata
+#' @param kpoints at which numbers will be plotted, is recycled
+#' @param energyoffset will be added to energy of all bands
+#' @param ... further plotting parameters
+#' @export
 plot.bandsdata.addnumbers <- function(bandsdata
                                       ,kpoints=NULL
                                       ,energyoffset=NULL
@@ -439,6 +521,13 @@ plot.bandsdata.addnumbers <- function(bandsdata
   return(0)
 }
 
+#' Will give a object of class bulkbands
+#' 
+#' \code{calculation.getbulkbands} will give a object of class bulkbands
+#' based on calculation object.
+#' 
+#' @param calculation object of class calculation
+#' @export
 calculation.getbulkbands<-function(calculation,...){
   print("calculating bulk polygons")
   kpointsbulk <-calculation[[1]]$banddata$kpointsflat
@@ -463,6 +552,13 @@ calculation.getbulkbands<-function(calculation,...){
   return(bb)
 }
 
+#' Adds bulkband polygons to existing plot
+#' 
+#' \code{plot.bulkbands.add} adds bulkband polygons to existing plot.
+#' 
+#' @param bulkbands object of class bulkbands
+#' @param ... further plotting parameters
+#' @export
 plot.bulkbands.add<-function(bulkbands,col="grey",...){
   print("plotting bulk polygons")
   for(p in bulkbands$poly)
@@ -471,7 +567,19 @@ plot.bulkbands.add<-function(bulkbands,col="grey",...){
   }
 }
 
-bandsdata.getprojecteddata <- function(bandsdata,atomindices=1:bandsdata$natoms,bands=1:bandsdata$nbands,cpus=1){
+#' Will give a object of class projectedbands
+#' 
+#' \code{bandsdata.getprojecteddata} will give a object of class projectedbands
+#' 
+#' 
+#' @param bandsdata object of class bandsdata
+#' @param atomindices indices of atoms over which will be summed
+#' @param bands which will included
+#' @export
+bandsdata.getprojecteddata <- function(bandsdata,
+                                       atomindices=1:bandsdata$natoms,
+                                       bands=1:bandsdata$nbands,
+                                       cpus=1){
   print("calculating projecteddata")
   print("sum over atoms")
   nkpoints <- length(bandsdata$kpointsflat)
@@ -503,12 +611,26 @@ bandsdata.getprojecteddata <- function(bandsdata,atomindices=1:bandsdata$natoms,
   return (d)
 }
 
+#' Adds projected orbitals to existing plot
+#' 
+#' \code{plot.projectedbands.add} adds projected orbitals to existing plot.
+#' 
+#' @param projectedbands object of class projectedbands
+#' @param bands limits plotting to specified bands
+#' @param orbitals list of orbitals to plot. To sum over orbitals 2 and 3 use \code{list(1,c(2,3),4)}
+#' @param col.palette color palette for orbitals
+#' @param legend position of legend, \code{NULL} will supress plotting
+#' @param legendcex size of legend
+#' @param energyoffset will be added to energy of all bands
+#' @param ... further plotting parameters
+#' @export
 plot.projectedbands.add <- function(projectedbands
                                     ,bands=1:length(projectedbands$bands)
                                     ,orbitals=list(1,2,3,4)
                                     ,col.palette=colorRampPalette(c("red","blue","green"))
                                     ,pch=15:(14+length(orbitals))
                                     ,cex=0.8
+                                    ,legend="topright"
                                     ,legendcex=0.8
                                     ,energyoffset=NULL
                                     ,...){
@@ -572,10 +694,20 @@ plot.projectedbands.add <- function(projectedbands
      return(paste(rawnames[orb],collapse="+"))
     }
   })
-  legend("topright",legend=parse(text=names),bg="white",col=col[1:length(orbitals)],pch=pch,cex=legendcex,seg.len=1,x.intersp=0.5,y.intersp=0.8,...)
+  if(!is.null(legend))
+    legend(legend,legend=parse(text=names),bg="white",col=col[1:length(orbitals)],pch=pch,cex=legendcex,seg.len=1,x.intersp=0.5,y.intersp=0.8,...)
 
 }
 
+#' Gives a intervall around a high symmetry point
+#' 
+#' \code{bandsdata.getintervallaroundsympoint} gives a intervall around a high symmetry point.
+#' uses flat (2d) kpoints.
+#' 
+#' @param bandsdata object of class bandsdata
+#' @param sympointnumber number of high symmetry point to use
+#' @param intervall in per cent
+#' @export
 bandsdata.getintervallaroundsympoint<-function(bandsdata,sympointnumber,intervall=0.2){
   rng <- range(bandsdata$sympoints)
   #print(rng)
@@ -595,36 +727,70 @@ bandsdata.getintervallaroundsympoint<-function(bandsdata,sympointnumber,interval
   return(c(min,max))
 }
 
+#' Gives the distance between to bands at one kpoint
+#' 
+#' \code{bandsdata.getbanddistance} gives the distance between to bands at one kpoint.
+#' 
+#' @param bandsdata object of class bandsdata
+#' @param kpoint index of kpoint to use
+#' @param bands vector containing two indices of the bands to use
+#' @export
 bandsdata.getbanddistance<-function(bandsdata,kpoint,bands){
   e1 <- bandsdata$bands[[bands[[1]]]]$simpledata[kpoint,2]
   e2 <- bandsdata$bands[[bands[[2]]]]$simpledata[kpoint,2]
   return(abs(e1-e2))
 }
 
+#' Gives the energy of a band at one kpoint
+#' 
+#' \code{bandsdata.getenergy} gives the energy of a band at one kpoint.
+#' 
+#' @param bandsdata object of class bandsdata
+#' @param kpoint index of kpoint to use
+#' @param band index of band to use
+#' @export
 bandsdata.getenergy<-function(bandsdata,kpoint,band){
   return(bandsdata$bands[[band]]$simpledata[kpoint,2])
 }
 
-bandsdata.fit <- function(bandsdata,bandnr,kpoints,fitname="dirac",startingparameters,additionalparameters=NULL)
-{
-  if (!is.null(additionalparameters)&&!is.null(additionalparameters$k0)&&additionalparameters$k0>1)
+#' Fit a function to a band
+#' 
+#' \code{bandsdata.fit} fit a function to a band.
+#' will return a object of class bandsfit.
+#' 
+#' @param bandsdata object of class bandsdata
+#' @param bandnr index of band to use
+#' @param kpoints indices of kpoints to use
+#' @param fitname used fitfunction
+#' @param startingparamters for use in fitfunction
+#' @param constants for use in fitfunction
+#' @export
+#' @seealso \code{\link{bandsdata.fit.dirac.function}} and \code{\link{bandsdata.fit.quadratic.function}}
+bandsdata.fit <- function(bandsdata,
+                          bandnr,
+                          kpoints,
+                          fitname=c("dirac","quadratic"),
+                          startingparameters,
+                          constants=NULL){
+  fitname <- match.arg(fitname)
+  if (!is.null(constants)&&!is.null(constants$k0)&&constants$k0>1)
   {
-    additionalparameters$k0<- bandsdata$kpointdistances[additionalparameters$k0]
+    constants$k0<- bandsdata$kpointdistances[constants$k0]
   }
-  objectivem <- function(parameters,fitfunction,data,additionalparameters=list())
+  objectivem <- function(parameters,fitfunction,data,constants=list())
   {
-    err <- sum((data$energy-fitfunction(parameters,data$kpoint,additionalparameters))^2)
+    err <- sum((data$energy-fitfunction(parameters,data$kpoint,constants))^2)
     return (err)
   }
   fitfunction<-get(paste("fitfunction",fitname,sep="."))
   data <- bandsdata$bands[[bandnr]]$simpledata[kpoints,]
   data$kpoint <- bandsdata$kpointdistances[kpoints]
-  if(is.null(additionalparameters))
+  if(is.null(constants))
     obj <- optim(startingparameters,objectivem,fitfunction=fitfunction,data=data,method="BFGS")
   else
-    obj <- optim(startingparameters,objectivem,fitfunction=fitfunction,data=data,method="BFGS",additionalparameters=additionalparameters)
+    obj <- optim(startingparameters,objectivem,fitfunction=fitfunction,data=data,method="BFGS",constants=constants)
   class(obj)<-"bandsfit"
-  obj$ap <-additionalparameters
+  obj$ap <-constants
   obj$fitname <- fitname
   obj$fitfunction <- fitfunction
   obj$kdist <- bandsdata$kpointdistances
@@ -637,15 +803,29 @@ bandsdata.fit <- function(bandsdata,bandnr,kpoints,fitname="dirac",startingparam
     obj$energyoffset <- bandsdata$energyoffset
   return(obj)
 }
-bandsdata.fit.dirac.makeparameters<-function(vF)
-{
+
+#' Creates startingparamters for dirac fit
+#' 
+#' \code{bandsdata.fit.dirac.makeparameters} creates startingparamters for dirac fit.
+#' 
+#' @param vF starting Fermi velocity
+#' @export
+bandsdata.fit.dirac.makeparameters<-function(vF){
   p <- c(vF)
   names(p) <- c("vF")
   return (p)
 }
 
-bandsdata.fit.dirac.makeconstants<-function(bandsdata,bands,k0=0,factor=1)
-{
+#' Creates constants for dirac fit
+#' 
+#' \code{bandsdata.fit.dirac.makeconstants} creates constants for dirac fit.
+#' 
+#' @param bandsdata object of class bandsdata
+#' @param bands indices of bands forming upper and lower dirac cone
+#' @param k0 index of high symmetry point where the dirac cone appears
+#' @param factor \code{-1}/\code{1} for lower/upper dirac cone 
+#' @export
+bandsdata.fit.dirac.makeconstants<-function(bandsdata,bands,k0=0,factor=1){
   d <- bandsdata.getbanddistance(bandsdata,k0,bands)
   evalence <- bandsdata.getenergy(bandsdata,k0,bands[[1]])
   ap <- list()
@@ -655,46 +835,99 @@ bandsdata.fit.dirac.makeconstants<-function(bandsdata,bands,k0=0,factor=1)
   ap$factor<-factor
   return (ap)
 }
-bandsdata.fit.dirac.function<-function(parameters,kpoints,additionalparameters)
-{
+
+#' Fit function for dirac fit
+#' 
+#' \code{bandsdata.fit.dirac.function} contains fit function for dirac fit.
+#' 
+#' @param parameters list containing all paramters
+#' @param kpoints indices of kpoints to use
+#' @param constants for use in fitfunction
+#' @export
+bandsdata.fit.dirac.function<-function(parameters,kpoints,constants){
   p<-parameters ## p[[1]] vF
-  ap <- additionalparameters  
+  ap <- constants  
   return(sign(ap$factor)*sqrt((ap$Eg/2)^2+(abs(kpoints-ap$k0)*p[[1]])^2)+ap$EF)
 }
-bandsdata.fit.quadratic.makeparameters<-function(m)
-{
+
+#' Creates startingparamters for quadratic fit
+#' 
+#' \code{bandsdata.fit.quadratic.makeparameters} creates startingparamters for quadratic fit.
+#' used in \code{\link{bandsdata.fit}}.
+#' 
+#' @param m starting mass
+#' @export
+bandsdata.fit.quadratic.makeparameters<-function(m){
   p <- c(m)
   names(p) <- c("m*")
   return (p)
 }
-bandsdata.fit.quadratic.makeconstants<-function(bandsdata,band,k0=0)
-{
+
+#' Creates constants for quadratic fit
+#' 
+#' \code{bandsdata.fit.quadratic.makeconstants} creates constants for quadratic fit.
+#' 
+#' @param bandsdata object of class bandsdata
+#' @param band index of band to use
+#' @param k0 index of high symmetry point to use
+#' @export
+bandsdata.fit.quadratic.makeconstants<-function(bandsdata,band,k0=0){
   ap <- list()
   ap$E<-bandsdata.getenergy(bandsdata,k0,band)
   ap$k0<-k0
   return (ap)
 }
-bandsdata.fit.quadratic.function<- function(parameters,kpoints,additionalparameters)
-{
+
+#' Fit function for quadratic fit
+#' 
+#' \code{bandsdata.fit.quadratic.function} contains fit function for quadratic fit.
+#' used in \code{\link{bandsdata.fit}}.
+#' 
+#' @param parameters list containing all paramters
+#' @param kpoints indices of kpoints to use
+#' @param constants for use in fitfunction
+#' @export
+bandsdata.fit.quadratic.function<- function(parameters,kpoints,constants){
   p<-parameters ## p[[1]] m*
-  ap <- additionalparameters  
+  ap <- constants  
   return(p[[1]]*(kpoints-ap$k0)^2+ap$E)
 }
-predict.bandsfit<-function(o,x)
-{
+
+#' Custom predict for object of class bandsfit
+#' 
+#' \code{predict.bandsfit} custom predict for object of class bandsfit.
+#' 
+#' @param o object
+#' @param x values to use for prediction
+#' @export
+predict.bandsfit<-function(o,x){
   data <- data.frame(x,o$fitfunction(o$par,x,o$ap))
   names(data) <- c("kpoint","energy")
   return(data)
 }
-bandsfit.dirac.getv<-function(bandsfit)
-{
+
+#' Calculation of Fermi velocity
+#' 
+#' \code{bandsfit.dirac.getv} calculation of Fermi velocity.
+#' Will be in 10e6 m/s
+#' 
+#' @param bandsfit object of class bandsfit, generated by dirac fit
+#' @export
+bandsfit.dirac.getv<-function(bandsfit){
   p <- bandsfit$par[[1]]
   hbar <- 6.582119*10^-16 ## eVs
   kfac <- 10^-10
   return(p*kfac/hbar)
 }
-bandsfit.quadratic.getm<-function(bandsfit)
-{
+
+#' Calculation of effectiv mass
+#' 
+#' \code{bandsfit.quadratic.getm} calculation of effectiv mass.
+#' Will be in units of electron mass
+#' 
+#' @param bandsfit object of class bandsfit, generated by quadratic fit
+#' @export
+bandsfit.quadratic.getm<-function(bandsfit){
   p <- bandsfit$par[[1]]
   hbar <- 6.582119*10^-16 ## eVs
   kfac <- 10^-10
@@ -702,8 +935,14 @@ bandsfit.quadratic.getm<-function(bandsfit)
   c <- 3*10^8
   return(hbar^2*c^4/p/2/me)
 } 
-print.bandsfit<-function(bandsfit)
-{
+
+#' Custom print for object of class bandsfit
+#' 
+#' \code{bandsfit.quadratic.getm} custom print for object of class bandsfit.
+#' 
+#' @param bandsfit object of class bandsfit
+#' @export
+print.bandsfit<-function(bandsfit,...){
   switch(bandsfit$fitname,
          "dirac"={
             v <- bandsfit.dirac.getv(bandsfit)
@@ -717,70 +956,40 @@ print.bandsfit<-function(bandsfit)
               print.default(bandsfit)
           })
 }
-# add.bandsfit<-function(bandsfit,kpoints=bandsfit$knumbers,n=201,energyoffset=NULL,...){
-#   if(is.null(energyoffset))
-#   {
-#     if(!is.null(bandsfit$energyoffset))
-#     {
-#       energyoffset <- bandsfit$energyoffset
-#     }
-#     else
-#     {
-#       energyoffset<-0
-#     }
-#   }
-#   print("plotting bandsfit")
-#   x <- bandsfit$kdist[range(kpoints)]
-#   kdist <- seq(x[[1]],x[[2]],length.out=n)
-#   data <- predict(bandsfit,kdist)
-#   if(!is.null(bandsfit$sympath))
-#   {
-#     x <- range(bandsfit$sympath$data[bandsfit$sympath$data[,1]%in%kpoints,2])
-#   }
-#   else
-#   {
-#     x <- bandsfit$korig[range(kpoints)]    
-#   }  
-#   k <- seq(x[[1]],x[[2]],length.out=n)
-#   lines(k,data$energy+energyoffset,col="red",...)
-# }
-# bandsdata <- getbandsdata("vasprun.xml")
-# bandsdata <- plot(bandsdata,fermi=T,symnames=c(1,"L",expression(Gamma),"X"),ylim=c(-10,5),sympointpath=list(c(2,3),c(3,4)),energyoffset=-getenergy.bandsdata(bandsdata,kpoint=113,band=8))
-# sp <- fitmakeparameters.quadratic(m=5)
-# ap <- fitmakeaddparameters.quadratic.bandsdata(bandsdata,k0=113,band=8)
-# addnumbers.bandsdata(bandsdata)
-# o <- fit.bandsdata(bandsdata,8,105:113,"quadratic",sp,ap)
-# add.bandsfit(o)
-# ap <- fitmakeaddparameters.quadratic.bandsdata(bandsdata,k0=113,band=9)
-# o <- fit.bandsdata(bandsdata,9,113:118,"quadratic",sp,ap)
-# add.bandsfit(o)
-####debug
-##fit
-#  bandsdata <- getbandsdata("./d_silicene_simple/d05_bands/a_2.240/vasprun.xml1")
-#  plot(bandsdata)
-#  addnumbers.bandsdata(bandsdata)
-#  sp <- fitmakeparameters.dirac(1000)
-#  ap <- fitmakeaddparameters.dirac(k0=80,factor=-1)
-#  o <- fit.bandsdata(bandsdata,4,kpoints=75:80,"dirac",sp,ap)
-#  add.bandsfit(o)
-# print(o)
-#   o <- fit.bandsdata(bandsdata,4,kpoints=80:86,"dirac",sp,ap)
-#   add.bandsfit(o)
-#   print(o)
-#   sp <- fitmakeparameters.dirac(1000)
-#   ap <- fitmakeaddparameters.dirac(k0=80)
-#   o <- fit.bandsdata(bandsdata,5,kpoints=75:80,"dirac",sp,ap)
-# add.bandsfit(o)
-# print(o)
-# o <- fit.bandsdata(bandsdata,5,kpoints=80:86,"dirac",sp,ap)
-#  add.bandsfit(o)
-#  print(o)
-# ##other stuff
-#banddata <- getbandsdata("./d_argentum_slab/d20_7_bands/kline_0.0000+kline_0.0000/vasprun.xml1")
-#banddata <- getbandsdata("./d_argentum_bulk/d11_bands_111/a_4.030/vasprun.xml1")
-#load.calculationdata("banddata1")
-#plot(bandsdata$"./d_argentum_bulk/d11_bands_111/"$a_4.030$banddata,sympoints=list(c(3,4),c(1,2)),symnames= c("Γ","M","K","Γ"))
-#load.calculationdata("banddata2")
-#plot(bandsdata$"./d_dual_ar_si/d16_8_on_7_bands/"$a_4.030$banddata,col=gray(0.4))
-#asel <- which(bandsdata$"./d_dual_ar_si/d16_8_on_7_bands/"$a_4.030$poscar$atoms[,7]=="Si")
-#addprojected.bandsdata(bandsdata$"./d_dual_ar_si/d16_8_on_7_bands/"$a_4.030$banddata,asel,cpus=4)
+
+#' Adds a bandsfit to an existing plot
+#' 
+#' \code{plot.bandsfit.add} adds a bandsfit to an existing plot
+#' 
+#' @param bandsfit object of class bandsfit
+#' @param kpoints indices of kpoints, where the fit is plotted. All in between points will also be used.
+#' @param n count of points used for drawing
+#' @param energyoffset will be added to energy the fit
+#' @export
+plot.bandsfit.add<-function(bandsfit,kpoints=bandsfit$knumbers,n=201,energyoffset=NULL,...){
+  if(is.null(energyoffset))
+  {
+    if(!is.null(bandsfit$energyoffset))
+    {
+      energyoffset <- bandsfit$energyoffset
+    }
+    else
+    {
+      energyoffset<-0
+    }
+  }
+  print("plotting bandsfit")
+  x <- bandsfit$kdist[range(kpoints)]
+  kdist <- seq(x[[1]],x[[2]],length.out=n)
+  data <- predict(bandsfit,kdist)
+  if(!is.null(bandsfit$sympath))
+  {
+    x <- range(bandsfit$sympath$data[bandsfit$sympath$data[,1]%in%kpoints,2])
+  }
+  else
+  {
+    x <- bandsfit$korig[range(kpoints)]    
+  }  
+  k <- seq(x[[1]],x[[2]],length.out=n)
+  lines(k,data$energy+energyoffset,col="red",...)
+}

@@ -1,6 +1,6 @@
 #' Reads severaly calculations
 #' 
-#' \code{read.calculations} Reads severaly calculations.
+#' \code{read.calculations} reads severaly calculations.
 #' Needed folder structure
 #' /FolderYouProvide/Parameter_Value/POSCAR
 #' For two parameters:
@@ -128,7 +128,7 @@ read.calculations <- function(folders,name="calculations",calculations=list(),ch
 
 #' Custom print for objects of class calculations
 #' 
-#' \code{print.calculations} Custom print for objects of class calculations.
+#' \code{print.calculations} custom print for objects of class calculations.
 #' @param calculations objects of class calculations
 #' @export
 print.calculations<-function(calculations,...){
@@ -146,7 +146,7 @@ print.calculations<-function(calculations,...){
 
 #' Custom print for objects of class calculation
 #' 
-#' \code{print.calculation} Custom print for objects of class calculation.
+#' \code{print.calculation} custom print for objects of class calculation.
 #' @param calculation objects of class calculation
 #' @export
 print.calculation<-function(calculation,...){
@@ -160,7 +160,7 @@ print.calculation<-function(calculation,...){
 
 #' Will give the highest version of provided filename
 #' 
-#' \code{file.gethighestversion} Will give the highest version of provided filename.
+#' \code{file.gethighestversion} will give the highest version of provided filename.
 #' Searches for example for
 #' POSCAR
 #' POSCAR1
@@ -191,7 +191,7 @@ file.gethighestversion <- function(dir,filename)
 
 #' Loads a calculations object in RData format
 #' 
-#' \code{load.calculations} Loads a calculations object in RData format.
+#' \code{load.calculations} loads a calculations object in RData format.
 #' Will search current working directory for \code{name}.RData
 #' 
 #' @param name calculations object to load
@@ -215,7 +215,7 @@ load.calculations<-function(name,update=F)
 
 #' Fits equation of state to a given ea object
 #' 
-#' \code{ea.fitEOS} Fits 3D equation of state to a given ea object.
+#' \code{ea.fitEOS} fits 3D equation of state to a given ea object.
 #' 
 #' @param fitdata ea object
 #' @export
@@ -259,7 +259,7 @@ ea.fitEOS <- function(fitdata)
 
 #' Predicts values based on a equation of state fit
 #' 
-#' \code{predict.EOS} Predicts values based on a equation of state fit.
+#' \code{predict.EOS} predicts values based on a equation of state fit.
 #' 
 #' @param o object of EOS type
 #' @param x values for which a y should be predicted
@@ -282,7 +282,7 @@ predict.EOS<-function(o,x)
 
 #' Will give a vector containing lattice constants and energies
 #' 
-#' \code{calculation.getea} Will give a vector containing lattice constants and energies
+#' \code{calculation.getea} will give a vector containing lattice constants and energies
 #' based on calculation object.
 #' Vector will have class ea.
 #' 
@@ -300,7 +300,7 @@ calculation.getea<-function(calculation)
 
 #' Will plot a e over a curve
 #' 
-#' \code{plot.calculation.ea} Will plot a e over a curve.
+#' \code{plot.calculation.ea} will plot a e over a curve.
 #' 
 #' @param calculation object of type calculation
 #' @param energyfactor will be multiplied with energy
@@ -322,7 +322,7 @@ plot.calculation.ea<-function(calculation,energyfactor=1,energyshift=0,fit=F,typ
 
 #' Adds a curve to an existing e over a curve
 #' 
-#' \code{plot.calculation.ea.addpoints} Adds a curve to an existing e over a curve.
+#' \code{plot.calculation.ea.addpoints} adds a curve to an existing e over a curve.
 #' 
 #' @param calculation object of type calculation
 #' @param afactor will be multiplied with lattice constant
@@ -346,7 +346,7 @@ plot.calculation.ea.addpoints<-function(calculation,afactor=1,energyfactor=1,ene
 
 #' Adds a fit to an existing e over a curve
 #' 
-#' \code{plot.calculation.ea.addfit} Adds a fit to an existing e over a curve.
+#' \code{plot.calculation.ea.addfit} adds a fit to an existing e over a curve.
 #' 
 #' @param calculation object of type calculation
 #' @param afactor will be multiplied with lattice constant
@@ -365,7 +365,7 @@ plot.calculation.ea.addfit<-function(calculation,afactor=1,energyfactor=1,energy
 
 #' Adds a EOS fit to an existing plot
 #' 
-#' \code{plot.EOS.add} Adds a EOS fit to an existing plot.
+#' \code{plot.EOS.add} adds a EOS fit to an existing plot.
 #' fits with \code{\link{ea.fitEOS}}.
 #' 
 #' @param o object of EOS class

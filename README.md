@@ -4,7 +4,7 @@ Tools for loading, manipulating and plotting VASP files within R
 
 ### Workflow
 To be somewhat efficent, even in research, I developed a workflow for scientific computation, which works quite well for me.
-![scientific computation - workflow](../../raw/master/examples/workflow-01.png scientific computation - workflow)
+![scientific computation - workflow](../../raw/master/examples/workflow-01.png "scientific computation - workflow")
 VASPmanager can be found [here](https://github.com/paulpflug/VASPmanager) 
 
 ### Important

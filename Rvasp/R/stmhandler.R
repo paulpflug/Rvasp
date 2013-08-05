@@ -1,3 +1,6 @@
+require(akima)
+require(snowfall)
+require(lattice)
 
 #' Plots a constant-current stm image
 #' 

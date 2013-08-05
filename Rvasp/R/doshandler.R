@@ -1,5 +1,11 @@
+require(XML)
 
-
+#' Read a dosdata object
+#' 
+#' \code{read.dosdata} read a dosdata object form a vasprun.xml file.
+#' 
+#' @param xmlfile vasprun.xml file
+#' @export
 read.dosdata <- function(xmlfile){  
   result <- list()
   class(result)<-"dosdata"
@@ -94,6 +100,12 @@ read.dosdata <- function(xmlfile){
   return (result)
 }
 
+#' Print a dosdata object
+#' 
+#' \code{print.dosdata} print a dosdata object.
+#' 
+#' @param dosdata object of type dosdata
+#' @export
 print.dosdata <- function(dosdata,...){
   for (name in names(dosdata))
   {
@@ -109,6 +121,13 @@ print.dosdata <- function(dosdata,...){
   }
 }
 
+#' Add smearing to a dosdata object
+#' 
+#' \code{dosdata.addsmearing} Add gaussian smearing to a dosdata object.
+#' 
+#' @param dosdata object of type dosdata
+#' @param sigma standard deviation
+#' @export
 dosdata.addsmearing<-function(dosdata,sigma=0.2)
 {  
   dosdata$total[[2]] <-  rowSums(
@@ -140,12 +159,36 @@ dosdata.addsmearing<-function(dosdata,sigma=0.2)
   dosdata$range <- apply(FUN=range,dosdata$partial,MARGIN=2)
   return(dosdata)
 }
+
+#' Add smearing to a dosvector
+#' 
+#' \code{dosvector.calcsmearing} add gaussian smearing to a dosvector.
+#' 
+#' @param energy energy vector
+#' @param dos dos vector
+#' @param sigma standard deviation
+#' @export
 dosvector.calcsmearing<-function(energy,dos,sigma=0.1)
 {
   matrix <- sapply(energy,dnorm,energy,sigma) 
   return (rowSums(sweep(matrix,2,colSums(matrix)/dos,"/")))
 }
-plot.dosdata <- function(dosdata,smearing=0,flip=F,norm=F,fermi=F,xaxs="i",yaxs="i",xlab="Energy [eV]",ylab="Electron density",...)
+
+#' Creates a plot for dosdata
+#' 
+#' \code{plot.dosdata} creates a plot for dosdata.
+#' Will return object of type dosdata where plotting parameters are saved.
+#' For adding curves see \code{\link{plot.dosdata.add}}
+#' 
+#' @param dosdata object of type dosdata
+#' @param smearing if greater zero will add a gaussian smearing with \code{smearing} as standard deviation
+#' @param flip will exchange x and y
+#' @param norm will divide density by atom count
+#' @param fermi will draw fermi level
+#' @param col.fermi color of fermi level
+#' @param ... further plotting parameters
+#' @export
+plot.dosdata <- function(dosdata,smearing=0,flip=F,norm=F,fermi=F,col.fermi="blue",xaxs="i",yaxs="i",xlab="Energy [eV]",ylab="Electron density",...)
 {
   data <- dosdata
   if (smearing>0)
@@ -173,11 +216,26 @@ plot.dosdata <- function(dosdata,smearing=0,flip=F,norm=F,fermi=F,xaxs="i",yaxs=
     plot(energy,density,type="n",xaxs=xaxs,yaxs=yaxs,xlab=xlab,ylab=ylab,...)
   if (fermi)
   {
-    plot.dosdata.addfermi(dosdata,...)
+    plot.dosdata.addfermi(dosdata,col=col.fermi,...)
   }
   dosdata$lastpolygon <- rep(0,length(density))
   return(dosdata)
 }
+
+#' Will add dosdata to existing plot.
+#' 
+#' \code{plot.dosdata.add} will add dosdata to existing plot.
+#' Needs partial dos. Offers two modes.
+#' Will return object of type dosdata where plotting parameters are saved.
+#' 
+#' @param dosdata object of type dosdata
+#' @param factor is multiplyed with density
+#' @param smearing if greater zero will add a gaussian smearing with \code{smearing} as standard deviation
+#' @param orbitals vector of indices of orbitals which are seperatly plotted. Use \code{all} to sum all orbitals
+#' @param atomindices vector of indices of atoms which are summed
+#' @param type \code{line} or \code{polygon} mode
+#' @param ... further plotting parameters
+#' @export
 plot.dosdata.add <-function(dosdata,factor=1,smearing=0,orbitals=NULL,atomindices=NULL,border=c(NA),col=c("grey"),type=c("line","polygon"),...)
 {
   type <- match.arg(type)
@@ -284,7 +342,16 @@ plot.dosdata.add <-function(dosdata,factor=1,smearing=0,orbitals=NULL,atomindice
   }
   return(dosdata)
 }
-plot.dosdata.addfermi <- function(dosdata,fermicol="blue",lty=3,...)
+
+
+#' Will add fermi level to existing plot.
+#' 
+#' \code{plot.dosdata.addfermi } will add fermi level to existing plot.
+#' 
+#' @param dosdata object of type dosdata
+#' @param ... further plotting parameters
+#' @export
+plot.dosdata.addfermi <- function(dosdata,col="blue",lty=3,...)
 {
   flip <- dosdata$flip
   if (is.null(flip))
@@ -292,24 +359,12 @@ plot.dosdata.addfermi <- function(dosdata,fermicol="blue",lty=3,...)
   rng<- par("usr")[3:4]
   if (flip)
   {
-  abline(h=0,col=fermicol,lty=lty,...)
+  abline(h=0,col=col,lty=lty,...)
   text(rng[[2]]-0.1*abs(rng[[2]]-rng[[1]]),0,labels="fermi",col=fermicol,pos=2,...)
   }
   else{
-    abline(v=0,col=fermicol,lty=lty,...)
+    abline(v=0,col=col,lty=lty,...)
     text(0,rng[[2]]-0.1*abs(rng[[2]]-rng[[1]]),labels="fermi",col=fermicol,pos=2,...)
   }
   
 }
-# DEBUG
-# data <- getdosdata("./d_argentum_bulk/d05_nsc/a_4.030+k_16.000/vasprun.xml1")
-# data <- addsmearingtodos(data)
-# plot(data)
-# addtoplot.dosdata(data,orbitals=1:2,col=c("red","blue"),atomindices=1,type="polygon")
-# addtoplot.dosdata(data)
-# data <- dosdata[[folders[[nr]]]][[1]]$dosdata
-# siatoms <- which(data$atoms=="Si")
-# print(siatoms)
-# agatoms <- which(data$atoms=="Ag")
-# plot(data)
-# addtoplot.dosdata(data,orbitals=3,col=c("red"),atomindices=siatoms,type="polygon")

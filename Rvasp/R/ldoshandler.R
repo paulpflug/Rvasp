@@ -149,10 +149,3 @@ plot.positions.addlegend<-function(positions,lty=1,col=rainbow(length(positions)
     s<-paste0(s," distance ",p[,5],"Å")
   legend(x=position,legend=s,col=col,lty=lty,...)
 }
-# load.calculationdata(name="ldosdata1")
-#calculation <- ldosdata[[4]]
-# positions <- getpositions.poscar(calculation[[1]]$poscar,layers=14,layer=14,zdist=c(1,2))
-# plotldos.calculation(calculation,positions)
-#addlegend.calculation(calculation,positions)
-# position <- getposition.poscar(calculation[[1]]$poscar,layers=14,layer=13)
-# plotldos.calculation(calculation,position,ylim=c(0,0.0015))

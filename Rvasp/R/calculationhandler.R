@@ -1,4 +1,22 @@
-
+#' Reads severaly calculations
+#' 
+#' \code{read.calculations} Reads severaly calculations.
+#' Needed folder structure
+#' /FolderYouProvide/Parameter_Value/POSCAR
+#' For two parameters:
+#' /FolderYouProvide/Parameter_Value+Parameter2_Value/POSCAR
+#' Will read CONTCAR / POSCAR / (total) Energy (from OSZICAR)
+#' To read CHGCAR / Bands / Dos
+#' provide CHGCAR-type filename / vasprun.xml / vasprun.xml
+#' 
+#' @param folders list/vector of folders containing a calculation each
+#' @param name name
+#' @param calculations provide an existing calculations object for updating or extending purpose
+#' @param chgcarname if name is provided, calls \code{\link{read.chgcar}}
+#' @param bandsxmlname if name is provided, calls \code{\link{read.bandsdata}}
+#' @param dosxmlname if name is provided, calls \code{\link{read.dosdata}}
+#' @param update if \code{TRUE} will override existing folders in calculations object provided by \code{calculations}
+#' @export
 read.calculations <- function(folders,name="calculations",calculations=list(),chgcarname="",bandsxmlname="",dosxmlname="",update=F){
   class(calculations) <- "calculations"
   if (is.null(calculations[["name"]])) calculations[["name"]]<-name
@@ -108,6 +126,11 @@ read.calculations <- function(folders,name="calculations",calculations=list(),ch
   return (calculations)
 }
 
+#' Custom print for objects of class calculations
+#' 
+#' \code{print.calculations} Custom print for objects of class calculations.
+#' @param calculations objects of class calculations
+#' @export
 print.calculations<-function(calculations,...){
 
   cat(paste("###",calculations$name,"###\n"))
@@ -121,6 +144,11 @@ print.calculations<-function(calculations,...){
   }
 }
 
+#' Custom print for objects of class calculation
+#' 
+#' \code{print.calculation} Custom print for objects of class calculation.
+#' @param calculation objects of class calculation
+#' @export
 print.calculation<-function(calculation,...){
   for (i in 1:length(calculation))
   {
@@ -130,6 +158,20 @@ print.calculation<-function(calculation,...){
   }
 }
 
+#' Will give the highest version of provided filename
+#' 
+#' \code{file.gethighestversion} Will give the highest version of provided filename.
+#' Searches for example for
+#' POSCAR
+#' POSCAR1
+#' POSCAR2
+#' POSCAR3
+#' etc.
+#' and will return the highest found filename
+#' 
+#' @param dir folder to search
+#' @param filename filename
+#' @export
 file.gethighestversion <- function(dir,filename)
 {
   file <- list()
@@ -146,6 +188,15 @@ file.gethighestversion <- function(dir,filename)
   }
   return(file)
 }
+
+#' Loads a calculations object in RData format
+#' 
+#' \code{load.calculations} Loads a calculations object in RData format.
+#' Will search current working directory for \code{name}.RData
+#' 
+#' @param name calculations object to load
+#' @param update if object is already loaded determines, if object will be loaded again
+#' @export
 load.calculations<-function(name,update=F)
 {
   filename <- paste0(name,".RData")
@@ -161,6 +212,13 @@ load.calculations<-function(name,update=F)
     return (F)
   }
 }
+
+#' Fits equation of state to a given ea object
+#' 
+#' \code{ea.fitEOS} Fits 3D equation of state to a given ea object.
+#' 
+#' @param fitdata ea object
+#' @export
 ea.fitEOS <- function(fitdata)
 {
   getstartEOS<-function(data)
@@ -198,6 +256,14 @@ ea.fitEOS <- function(fitdata)
   class(obj)<-"EOS"
   return(obj)
 }
+
+#' Predicts values based on a equation of state fit
+#' 
+#' \code{predict.EOS} Predicts values based on a equation of state fit.
+#' 
+#' @param o object of EOS type
+#' @param x values for which a y should be predicted
+#' @export
 predict.EOS<-function(o,x)
 {
   murnaghan<-function(paras,vol)
@@ -213,14 +279,35 @@ predict.EOS<-function(o,x)
   names(data) <- c("a","E")
   return(data)
 }
+
+#' Will give a vector containing lattice constants and energies
+#' 
+#' \code{calculation.getea} Will give a vector containing lattice constants and energies
+#' based on calculation object.
+#' Vector will have class ea.
+#' 
+#' @param calculation object of type calculation
+#' @export
 calculation.getea<-function(calculation)
 {
   data <- data.frame(do.call(rbind,lapply(calculation,FUN=function(x)
     if(!is.null(x$poscar$a) & !is.null(x$energy))
     cbind(x$poscar$a,x$energy))))
   names(data)<-c("a","E")
+  class(data)<-"ea"
   return(data)
 }
+
+#' Will plot a e over a curve
+#' 
+#' \code{plot.calculation.ea} Will plot a e over a curve.
+#' 
+#' @param calculation object of type calculation
+#' @param energyfactor will be multiplied with energy
+#' @param energyshift will be substracted from energy
+#' @param fit if \code{TRUE} will fit with \code{\link{ea.fitEOS}} plot and return result
+#' @param ... further plotting parameters
+#' @export
 plot.calculation.ea<-function(calculation,energyfactor=1,energyshift=0,fit=F,type="p",...)
 {
   data <- calculation.getea(calculation)
@@ -233,8 +320,18 @@ plot.calculation.ea<-function(calculation,energyfactor=1,energyshift=0,fit=F,typ
   }
 }
 
-plot.calculation.ea.addpoints<-function(calculation,afactor=1,energyfactor=1,energyshift=0,fit=F,...)
-{
+#' Adds a curve to an existing e over a curve
+#' 
+#' \code{plot.calculation.ea.addpoints} Adds a curve to an existing e over a curve.
+#' 
+#' @param calculation object of type calculation
+#' @param afactor will be multiplied with lattice constant
+#' @param energyfactor will be multiplied with energy
+#' @param energyshift will be substracted from energy
+#' @param fit if \code{TRUE} will fit with \code{\link{ea.fitEOS}} plot and return result
+#' @param ... further plotting parameters
+#' @export
+plot.calculation.ea.addpoints<-function(calculation,afactor=1,energyfactor=1,energyshift=0,fit=F,...){
   data <- calculation.getea(calculation)
   data$a <- data$a*afactor
   data$E <- data$E * energyfactor-energyshift
@@ -246,8 +343,18 @@ plot.calculation.ea.addpoints<-function(calculation,afactor=1,energyfactor=1,ene
   }
   
 }
-plot.calculation.ea.addfit<-function(calculation,afactor=1,energyfactor=1,energyshift=0,...)
-{
+
+#' Adds a fit to an existing e over a curve
+#' 
+#' \code{plot.calculation.ea.addfit} Adds a fit to an existing e over a curve.
+#' 
+#' @param calculation object of type calculation
+#' @param afactor will be multiplied with lattice constant
+#' @param energyfactor will be multiplied with energy
+#' @param energyshift will be substracted from energy
+#' @param ... further plotting parameters
+#' @export
+plot.calculation.ea.addfit<-function(calculation,afactor=1,energyfactor=1,energyshift=0,...){
   data <- calculation.getea(calculation)
   data$a <- data$a*afactor
   data$E <- data$E * energyfactor-energyshift
@@ -255,8 +362,16 @@ plot.calculation.ea.addfit<-function(calculation,afactor=1,energyfactor=1,energy
   plot.EOS.add(o,...)
   return(o)
 }
-plot.EOS.add<-function(o,...)
-{
+
+#' Adds a EOS fit to an existing plot
+#' 
+#' \code{plot.EOS.add} Adds a EOS fit to an existing plot.
+#' fits with \code{\link{ea.fitEOS}}.
+#' 
+#' @param o object of EOS class
+#' @param ... further plotting parameters
+#' @export
+plot.EOS.add<-function(o,...){
   x <- seq(o$arange[[1]],o$arange[[2]],length.out=101)
   lines(predict.EOS(o,x),...)
 }

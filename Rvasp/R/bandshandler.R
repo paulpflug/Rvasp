@@ -574,15 +574,24 @@ plot.bulkbands.add<-function(bulkbands,col="grey",...){
 #' 
 #' @param bandsdata object of class bandsdata
 #' @param atomindices indices of atoms over which will be summed
-#' @param bands which will included
+#' @param bands which will be included
+#' @param energyintervall in which bands will be included (overwrites \code{bands})
 #' @export
 bandsdata.getprojecteddata <- function(bandsdata,
                                        atomindices=1:bandsdata$natoms,
                                        bands=1:bandsdata$nbands,
+                                       energyintervall=NULL,
                                        cpus=1){
   print("calculating projecteddata")
   print("sum over atoms")
   nkpoints <- length(bandsdata$kpointsflat)
+  if(!is.null(energyintervall))
+  {
+    energyintervall <- range(energyintervall)
+    bands <- sapply(bandsdata$bands,FUN=function(band){
+      return(any(energyintervall[[1]]<band$simpledata$energy& band$simpledata$energy<energyintervall[[2]]))
+    })
+  }
   d <- list()
   sumoveratoms <- function(band)
   {

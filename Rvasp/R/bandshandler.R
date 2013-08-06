@@ -346,6 +346,7 @@ bandsdata.addsympoint <- function(bandsdata,indices){
 #' 
 #' @param bandsdata object of class bandsdata
 #' @param bands limits plotting to specified bands
+#' @param col.bands color of bands
 #' @param sympointpath calls \code{\link{bandsdata.calcsympointpath}}
 #' @param fermi adds blue line at Fermi level
 #' @param symnames adds labels at high symmetry points
@@ -357,7 +358,7 @@ bandsdata.addsympoint <- function(bandsdata,indices){
 plot.bandsdata <- function(bandsdata
                            ,bands=1:length(bandsdata$bands)
                            ,sympointpath=NULL
-                           ,col="black"
+                           ,col.bands="black"
                            ,type="l"
                            ,fermi=F
                            ,symnames=NULL
@@ -383,7 +384,7 @@ plot.bandsdata <- function(bandsdata
   if (is.null(xlim))
     xlim <- rng[1:2,1]
   plot(rng[,1:2],type="n",xaxt="n",xlim=xlim,xaxs=xaxs,yaxs=yaxs ,...)
-  if (!type=="n") plot.bandsdata.addbands(bandsdata,bands,col=col,...)
+  if (!type=="n") plot.bandsdata.addbands(bandsdata,bands,col=col.bands,...)
   if (fermi)
   {
     plot.bandsdata.addfermi(bandsdata,xlim=xlim,...)
@@ -655,8 +656,8 @@ plot.projectedbands.add <- function(projectedbands
     }
   }
   print("plotting projecteddata")
-  k <- projectedbands$bands$band1[,1]
-  i <- 1:nrow(projectedbands$bands$band1)
+  k <- projectedbands$bands[[1]][,1]
+  i <- 1:nrow(projectedbands$bands[[1]])
   if(!is.null(projectedbands$sympath))
   {
     k <- projectedbands$sympath$data[,2]

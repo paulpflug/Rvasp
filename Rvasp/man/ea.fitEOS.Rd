@@ -8,7 +8,7 @@
   \item{fitdata}{ea object}
 }
 \description{
-  \code{ea.fitEOS} Fits 3D equation of state to a given ea
+  \code{ea.fitEOS} fits 3D equation of state to a given ea
   object.
 }
 

@@ -20,7 +20,7 @@
   \item{...}{further plotting parameters}
 }
 \description{
-  \code{plot.calculation.ea.addpoints} Adds a curve to an
+  \code{plot.calculation.ea.addpoints} adds a curve to an
   existing e over a curve.
 }
 

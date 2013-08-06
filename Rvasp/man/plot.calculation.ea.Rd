@@ -18,6 +18,6 @@
   \item{...}{further plotting parameters}
 }
 \description{
-  \code{plot.calculation.ea} Will plot a e over a curve.
+  \code{plot.calculation.ea} will plot a e over a curve.
 }
 

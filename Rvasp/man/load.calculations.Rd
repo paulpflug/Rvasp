@@ -11,7 +11,7 @@
   object will be loaded again}
 }
 \description{
-  \code{load.calculations} Loads a calculations object in
+  \code{load.calculations} loads a calculations object in
   RData format. Will search current working directory for
   \code{name}.RData
 }

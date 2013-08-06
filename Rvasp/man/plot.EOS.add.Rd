@@ -10,7 +10,7 @@
   \item{...}{further plotting parameters}
 }
 \description{
-  \code{plot.EOS.add} Adds a EOS fit to an existing plot.
+  \code{plot.EOS.add} adds a EOS fit to an existing plot.
   fits with \code{\link{ea.fitEOS}}.
 }
 

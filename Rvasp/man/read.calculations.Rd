@@ -29,7 +29,7 @@
   \code{calculations}}
 }
 \description{
-  \code{read.calculations} Reads severaly calculations.
+  \code{read.calculations} reads severaly calculations.
   Needed folder structure
   /FolderYouProvide/Parameter_Value/POSCAR For two
   parameters:

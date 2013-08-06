@@ -415,7 +415,7 @@ plot.bandsdata.addsymnnames <- function(bandsdata,symnames,symcolor="red",symlty
   select <- !duplicated(sp)
   abline(v=sp[select],col=symcolor,lty=symlty,...)
   axis(1,at=sp[select],labels=symnames[select],...)
-} kpoint
+} 
 
 #' Adds line at Fermi level to existing plot
 #' 

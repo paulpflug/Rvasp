@@ -10,7 +10,7 @@
   \item{filename}{filename}
 }
 \description{
-  \code{file.gethighestversion} Will give the highest
+  \code{file.gethighestversion} will give the highest
   version of provided filename. Searches for example for
   POSCAR POSCAR1 POSCAR2 POSCAR3 etc. and will return the
   highest found filename

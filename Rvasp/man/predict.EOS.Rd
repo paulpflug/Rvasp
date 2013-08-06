@@ -10,7 +10,7 @@
   \item{x}{values for which a y should be predicted}
 }
 \description{
-  \code{predict.EOS} Predicts values based on a equation of
+  \code{predict.EOS} predicts values based on a equation of
   state fit.
 }
 

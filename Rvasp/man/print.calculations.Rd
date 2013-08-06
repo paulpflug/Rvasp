@@ -8,7 +8,7 @@
   \item{calculations}{objects of class calculations}
 }
 \description{
-  \code{print.calculations} Custom print for objects of
+  \code{print.calculations} custom print for objects of
   class calculations.
 }
 

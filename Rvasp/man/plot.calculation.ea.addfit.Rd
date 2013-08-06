@@ -17,7 +17,7 @@
   \item{...}{further plotting parameters}
 }
 \description{
-  \code{plot.calculation.ea.addfit} Adds a fit to an
+  \code{plot.calculation.ea.addfit} adds a fit to an
   existing e over a curve.
 }
 

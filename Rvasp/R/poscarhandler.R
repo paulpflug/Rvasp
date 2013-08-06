@@ -1,3 +1,8 @@
+#' Creates a new object of class poscar
+#' 
+#' \code{create.poscar} creates a new object of class poscar.
+#' 
+#' @export
 create.poscar<-function(){
   poscar <- list()
   poscar$firstline <- "new Poscar"
@@ -12,12 +17,26 @@ create.poscar<-function(){
   return(poscar)
 }
 
+#' Reads file in POSCAR format
+#' 
+#' \code{read.poscar} reads file in POSCAR format.
+#' returns object of class poscar
+#' 
+#' @param file filename of poscar
+#' @export
 read.poscar<-function(file){
   data <- read.table(file,strip.white=T,sep="\n",stringsAsFactors=F)
   poscar <- parse.poscar(data)
   return(poscar)
 }
 
+#' Parses a dataframe into object of class poscar
+#' 
+#' \code{parse.poscar} parses a dataframe into object of class poscar.
+#' The dataframe only consists of one column whereas each row contains a row of the poscar.
+#' 
+#' @param stringdataframe Dataframe of strings
+#' @export
 parse.poscar <- function(stringdataframe){
   poscar <- list()
   poscar$firstline <- stringdataframe[1,1]
@@ -62,6 +81,12 @@ parse.poscar <- function(stringdataframe){
   return(poscar)
 }
 
+#' Turnes object of class poscar into POSCAR format
+#' 
+#' \code{format.poscar} turnes object of class poscar into POSCAR format.
+#' 
+#' @param poscar object of class poscar
+#' @export
 format.poscar<-function(poscar,...){
   poscar$atoms <- format(poscar$atoms,scientific=F,nsmall=10)
   poscar$a <- format(poscar$a,scientific=F)
@@ -105,11 +130,24 @@ format.poscar<-function(poscar,...){
   return(data)
 }
 
+#' Writes object of class poscar into file of POSCAR format
+#' 
+#' \code{write.poscar} writes object of class poscar into file of POSCAR format.
+#' 
+#' @param poscar object of class poscar
+#' @param file name of file
+#' @export
 write.poscar<-function(poscar,file){  
     cat(paste(format.poscar(poscar),collapse="\n"),file=file)
     return(T)
 }
 
+#' Custom print for object of class poscar
+#' 
+#' \code{print.poscar} custom print for object of class poscar.
+#' 
+#' @param poscar object of class poscar
+#' @export
 print.poscar <- function(poscar,...){
   cat("\n###POSCAR###\n")
   for (name in names(poscar))
@@ -127,12 +165,30 @@ print.poscar <- function(poscar,...){
   cat("printraw.poscar(poscar) for copy+paste poscar")
 }
 
+#' Raw print for object of class poscar
+#' 
+#' \code{printraw.poscar} prints object of class poscar in ASCII format.
+#' 
+#' @param poscar object of class poscar
+#' @export
 printraw.poscar <- function(poscar){
   cat("###POSCAR###\n")
   cat(paste(format.poscar(poscar),collapse="\n"))
   cat("\n###END of POSCAR###")
 }
 
+#' Custom plot for object of class poscar
+#' 
+#' \code{plot.poscar} custom plot for object of class poscar.
+#' Creates only the plotbox for 2d projection plot.
+#' 
+#' @param poscar object of class poscar
+#' @param direction of projection
+#' @param basis if activated, draws basis
+#' @param unitcell if activated, draws basis
+#' @param fullcell if activated, draws full cell, rather than only the volume where atoms are
+#' @param ... further plotting parameters
+#' @export
 plot.poscar <- function(poscar,direction=3,xlab="x",ylab="y",basis=F,unitcell=F,fullcell=F,...){
   dir <- (1:3)[-direction]
   atoms <- poscar.getbasisconvertedatoms(poscar)
@@ -148,6 +204,20 @@ plot.poscar <- function(poscar,direction=3,xlab="x",ylab="y",basis=F,unitcell=F,
     plot.poscar.addunitcell(poscar,direction=direction,...)
 }
 
+#' Adds basis to existing plot
+#' 
+#' \code{plot.poscar.addbasis} adds basis to existing plot.
+#' 
+#' @param poscar object of class poscar
+#' @param direction of projection
+#' @param xoffin offset in x direction in inch
+#' @param yoffin offset in y direction in inch
+#' @param basisnames names of basis vectors
+#' @param fullcell if activated, draws full cell, rather than only the volume where atoms are
+#' @param arrowlength length of basis arrows in user coordinates
+#' @param arrowsize size of arrow tip
+#' @param ... further plotting parameters
+#' @export
 plot.poscar.addbasis<-function(poscar
                               ,xoffin=0.1
                               ,yoffin=0.1
@@ -182,6 +252,14 @@ plot.poscar.addbasis<-function(poscar
   text(target2[1],target2[2],basisnames[dir[2]],xpd=T,pos=3,...)
 }
 
+#' Adds unitcell to existing plot
+#' 
+#' \code{plot.poscar.addunitcell} adds unitcell to existing plot.
+#' 
+#' @param poscar object of class poscar
+#' @param direction of projection
+#' @param ... further plotting parameters
+#' @export
 plot.poscar.addunitcell<-function(poscar,direction=3,lty=2,...){
   dir <- (1:3)[-direction]
   basis <- poscar$basis[dir,dir]*poscar$a
@@ -190,7 +268,16 @@ plot.poscar.addunitcell<-function(poscar,direction=3,lty=2,...){
   polygon(x=x,y=y,lty=lty,xpd=T,...)
 }
 
-plot.atoms.addpositions<-function(atoms,basis=NULL,direction=3,col="white",cex=3,lwd=1,lty=1,...){
+#' Adds atoms to existing plot
+#' 
+#' \code{plot.atoms.add} adds atoms to existing plot.
+#' 
+#' @param atoms dataframe of atoms
+#' @param direction of projection
+#' @param basis basis if atoms are in direct coordinates
+#' @param ... further plotting parameters
+#' @export
+plot.atoms.add<-function(atoms,basis=NULL,direction=3,col="white",cex=3,lwd=1,lty=1,...){
   dir <- (1:3)[-direction]
   if (!is.null(basis))
     atoms <- atoms.convertbasis(atoms,basis,forth=F)
@@ -198,13 +285,24 @@ plot.atoms.addpositions<-function(atoms,basis=NULL,direction=3,col="white",cex=3
   points(atoms[,dir],col="black",bg=col,pch=21,cex=cex,lwd=lwd,xpd=T,lty=1,...)
 }
 
+#' Adds layers of atoms to existing plot
+#' 
+#' \code{plot.poscar.addlayers} adds layers of atoms to existing plot.
+#' 
+#' @param poscar object of class poscar
+#' @param direction of projection
+#' @param layer vector of indices of layers to plot
+#' @param layers total layer count in poscar
+#' @param ... further plotting parameters
+#' @export
 plot.poscar.addlayers<-function(poscar
                                 ,layer
                                 ,layers
                                 ,direction=3
                                 ,color=rainbow(length(layer))
                                 ,size=rep(1,length(layer))
-                                ,lwd=rep(1,length(layer))){
+                                ,lwd=rep(1,length(layer))
+                                ,...){
   dir <- (1:3)[-direction]  
   layerindices <- poscar.getatomlayerindices(poscar,layers)
   atoms <- poscar.getbasisconvertedatoms(poscar)
@@ -216,10 +314,21 @@ plot.poscar.addlayers<-function(poscar
   data[,4] <- sapply(data[,4],FUN=function(x)which(x==layer))
   data <- cbind(data,color[data[,4]],size[data[,4]],lwd[data[,4]])
   data <- data[order(data[,direction]),]
-  points(data[,dir],col="black",bg=as.character(data[,5]),pch=21,cex=data[,6],lwd=data[,7],xpd=T)
+  points(data[,dir],col="black",bg=as.character(data[,5]),pch=21,cex=data[,6],lwd=data[,7],xpd=T,...)
 }
 
-plot.poscar.addlayerdistance<-function(poscar,layer,layers,color="black",length=0.05,direction=1,...){
+#' Adds distance between layers to existing plot
+#' 
+#' \code{plot.poscar.addlayers} adds distance between layers of atoms to existing plot.
+#' 
+#' @param poscar object of class poscar
+#' @param direction of projection
+#' @param layer vector of indices of layers to plot
+#' @param layers total layer count in poscar
+#' @param color color of lines
+#' @param ... further plotting parameters
+#' @export
+plot.poscar.addlayerdistance<-function(poscar,layer,layers,color="black",direction=1,...){
   stopifnot(length(layer)>1)
   dir <- (1:3)[-direction]
   atoms <- poscar.getbasisconvertedatoms(poscar) 
@@ -242,6 +351,20 @@ plot.poscar.addlayerdistance<-function(poscar,layer,layers,color="black",length=
   }
 }
 
+#' Adds distance between atoms to existing plot
+#' 
+#' \code{plot.atoms.adddistance} adds distance between atoms to existing plot.
+#' 
+#' @param atoms dataframe of atoms, will only use first two atoms
+#' @param direction of projection
+#' @param basis basis if atoms are in direct coordinates
+#' @param length arrow tip length
+#' @param lwd arrow line width
+#' @param col arrow col
+#' @param selectedalpha transparency level of highlighted point over selected atom
+#' @param selectedsize if larger than 0 will draw white transparent point over selected atom for highlighting purpose
+#' @param ... further plotting parameters
+#' @export
 plot.atoms.adddistance<-function(atoms
                                  ,basis=NULL
                                  ,direction=3
@@ -264,6 +387,17 @@ plot.atoms.adddistance<-function(atoms
   legend(r[1],r[2],legend=paste(dist,"Å"),bg="white",xjust=0.5,yjust=0.5,x.intersp=-0.4,y.intersp=0.3 ,...)
 }
 
+#' Adds numbers on atoms to existing plot
+#' 
+#' \code{plot.poscar.addnumbers} adds numbers on atoms, based on layers, to existing plot.
+#' 
+#' @param poscar object of class poscar
+#' @param direction of projection
+#' @param layer vector of indices of layers to plot
+#' @param layers total layer count in poscar
+#' @param absolutenumber determines if index of atom in poscar(absolute) or index of atom in layer is printed
+#' @param ... further plotting parameters
+#' @export
 plot.poscar.addnumbers<-function(poscar,layers=1,layer=1,direction=3,absolutenumber=T,...){
   atomselector=NULL
   indices <- poscar.getatomlayerindices(poscar,layers=layers)
@@ -277,6 +411,16 @@ plot.poscar.addnumbers<-function(poscar,layers=1,layer=1,direction=3,absolutenum
   plot.atoms.addnumbers(atoms,basis=poscar$a*poscar$basis,direction=direction,atomselector=atomselector,...)
 }
 
+#' Adds numbers on atoms to existing plot
+#' 
+#' \code{plot.atoms.addnumbers} adds numbers on atoms to existing plot.
+#' 
+#' @param atoms dataframe of atoms
+#' @param direction of projection
+#' @param basis basis if atoms are in direct coordinates
+#' @param atomselector vector of atom indices which should be used
+#' @param ... further plotting parameters
+#' @export
 plot.atoms.addnumbers<-function(atoms,basis=NULL,direction=3,atomselector=NULL,...){
   dir <- (1:3)[-direction]
   if (!is.null(basis))
@@ -287,6 +431,19 @@ plot.atoms.addnumbers<-function(atoms,basis=NULL,direction=3,atomselector=NULL,.
   text(atoms[atomselector,1],atoms[atomselector,2],labels=(1:nrow(atoms))[atomselector],xpd=T,...)
 }
 
+#' Adds arrows from specific atoms to other atoms to existing plot
+#' 
+#' \code{plot.atoms.addarrows} adds arrows from specific atoms to other atoms to existing plot.
+#' Arrows will be drawn pairwise.
+#' 
+#' @param atomsold dataframe of atoms, used for arrow start
+#' @param atomsnew dataframe of atoms, used for arrow end
+#' @param direction of projection
+#' @param basisold basis if atomsold are in direct coordinates
+#' @param basisnew basis if atomsold are in direct coordinates
+#' @param length size of arrow tips
+#' @param ... further plotting parameters
+#' @export
 plot.atoms.addarrows<-function(atomsold,atomsnew,basisold=NULL,basisnew=NULL,direction=3,length=0.1,...){
   dir <- (1:3)[-direction]
   if (!is.null(basisold))
@@ -301,6 +458,14 @@ poscar.getbasisconvertedatoms<-function(poscar,forth=F){
   return(atoms.convertbasis(poscar$atoms, poscar$basis*poscar$a,forth))
 }
 
+#' Calculates basis converted atoms
+#' 
+#' \code{atoms.convertbasis} calculates basis converted atoms.
+#' 
+#' @param atoms dataframe of atoms
+#' @param basis to use
+#' @param forth from cartesian to direct
+#' @export
 atoms.convertbasis<-function(atoms,basis,forth=T){
   if (forth)
     basis <- solve(basis)
@@ -309,6 +474,14 @@ atoms.convertbasis<-function(atoms,basis,forth=T){
   else
     return (cbind(as.matrix(atoms[,1:3])%*%basis,atoms[,4]))
 }
+
+#' Gives the vacuum
+#' 
+#' \code{poscar.getvacuum} calculates the vacuum.
+#' Vacuum is defined by the distance between atoms across unitcell borders.
+#' 
+#' @param poscar object of class poscar
+#' @export
 poscar.getvacuum <- function(poscar){
   # get data
   basis <- data.matrix(poscar$basis*poscar$a)
@@ -326,6 +499,15 @@ poscar.getvacuum <- function(poscar){
   return(vacuumold)
 }
 
+#' Sets the vacuum
+#' 
+#' \code{poscar.setvacuum} changes the vacuum.
+#' Vacuum is defined by the distance between atoms across unitcell borders.
+#' 
+#' @param poscar object of class poscar
+#' @param vacuum vector of new vacuum in all three directions. \code{c(0,0,10)} will change the vacuum in third direction to 10 (and leave the others).
+#' @param center \code{TRUE} will center the cell after change
+#' @export
 poscar.setvacuum<- function(poscar,vacuum=c(0,0,0),center=T){
   if(center)
     poscar <- poscar.centeratoms(poscar)
@@ -361,6 +543,14 @@ poscar.setvacuum<- function(poscar,vacuum=c(0,0,0),center=T){
   return(poscar)
 }
 
+#' Centers atoms
+#' 
+#' \code{atoms.centeratoms} centers the atoms relativ to a specific position.
+#' 
+#' @param atomsdirect atoms in direct coordinates
+#' @param directions subset of 1,2,3 determines which directions should be centered
+#' @param position relativ to which the atoms should be aranged (3d vector)
+#' @export
 atoms.centeratoms <- function(atomsdirect,directions=1:3,position=rep(0,3)){
   directions <- round(directions)
   if(any(directions<1|directions>3))
@@ -376,16 +566,37 @@ atoms.centeratoms <- function(atomsdirect,directions=1:3,position=rep(0,3)){
   return(atomsdirect)
 }
 
+#' Centers atoms in object of class poscar
+#' 
+#' \code{poscar.centeratoms} centers the atoms relativ to a specific position in object of class poscar.
+#' 
+#' @param poscar object of class poscar
+#' @param directions subset of 1,2,3 determines which directions should be centered
+#' @param position relativ to which the atoms should be aranged (3d vector)
+#' @export
 poscar.centeratoms <- function(poscar,directions=1:3,position=rep(0.5,3)){
   poscar$atoms <- atoms.centeratoms(atomsdirect=poscar$atoms,directions=directions,position=position)
   return(poscar)
 }
 
+#' Sorts atoms
+#' 
+#' \code{atoms.sort} sorts atoms.
+#' 
+#' @param atoms dataframe of atoms 
+#' @param sortindices vector of indices after which to sort. \code{c(1,3)} will sort by rx then by rz
+#' @export
 atoms.sort<-function(atoms,sortindices=c(7,3,1,2)){
   return(atoms[do.call(order,lapply(sortindices,FUN=function(x)atoms[,x])),])  
 }
 
-
+#' Sorts atoms in object of class poscar
+#' 
+#' \code{poscar.sortatoms} sorts atoms in object of class poscar
+#' 
+#' @param poscar object of class poscar
+#' @param sortindices vector of indices after which to sort. \code{c(1,3)} will sort by rx then by rz
+#' @export
 poscar.sortatoms <- function(poscar,sortindices=c(7,3,1,2))
 {
   poscar$atoms <- atoms.sort(atoms=poscar$atoms,sortindices=sortindices)

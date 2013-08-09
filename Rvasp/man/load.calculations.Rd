@@ -2,12 +2,12 @@
 \alias{load.calculations}
 \title{Loads a calculations object in RData format}
 \usage{
-  load.calculations(name, folder = "", update = F)
+  load.calculations(file, objectname = NULL, update = F)
 }
 \arguments{
-  \item{name}{calculations object to load}
+  \item{file}{with calculations object to load}
 
-  \item{folder}{optional subfolder of working directory}
+  \item{objectname}{will check if already loaded}
 
   \item{update}{if object is already loaded determines, if
   object will be loaded again}

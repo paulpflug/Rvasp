@@ -1,19 +1,11 @@
 #' Plots brillouinzone
 #' 
-#' \code{plot.brillouinzone} plots brillouinzone based on poscar.
+#' \code{plot.brillouinzone} plots brillouinzone.
 #' 
-#' @param poscar object of class poscar
-#' @param type of brillouinzone (currently only hexagonal)
-#' @param rotate rotates brillouinzone (in degrees)
-#' @param extend creates supercell of brillouinzone 
-#' @param strain applied to brillouinzone
+#' @param brillouinzone object of class brillouinzone
 #' @param ... further plotting parameters
 #' @export
-plot.brillouinzone<- function(poscar,
-                              type="hexagonal",
-                              rotate=0,
-                              extend=1,
-                              strain=0,
+plot.brillouinzone<- function(brillouinzone,
                               xlab=NA,
                               ylab=NA,
                               xaxt="n",
@@ -21,11 +13,9 @@ plot.brillouinzone<- function(poscar,
                               col="blue",
                               typ="l",
                               ...){
-  stopifnot(type=="hexagonal")
-  vec2d<-brillouinzone.gethexagonalvector(poscar,rotate,extend,strain)  
-  plot(apply(do.call(rbind,vec2d),2,range),asp=1,typ="n",xlab=xlab,ylab=ylab,xaxt=xaxt,yaxt=yaxt,...)
+  plot(apply(do.call(rbind,brillouinzone),2,range),asp=1,typ="n",xlab=xlab,ylab=ylab,xaxt=xaxt,yaxt=yaxt,...)
   if(typ!="n")
-    plot.brillouinzone.addvector(vec2d,col=col,...)
+    plot.brillouinzone.add(brillouinzone,col=col,...)
 }
 
 #' Gets hexagonal brilloinzone vector
@@ -37,10 +27,8 @@ plot.brillouinzone<- function(poscar,
 #' @param extend creates supercell of brillouinzone 
 #' @param strain applied to brillouinzone
 #' @export
-brillouinzone.gethexagonalvector<-function(poscar,rotate=0,extend=1,strain=0){  
+poscar.getbrillouinzone.hexagonal<-function(poscar,rotate=0,extend=1,strain=0){  
   basicpattern <- list(c(1,1,0),c(0,1,1))
-  
-  #poscar <- rotate2d.poscar(poscar)
   poscar$a <- poscar$a*(1-strain)
   rbase <- reciprocal.poscar(poscar)[1:2,1:2]%*%get2droationmatrix.deg(rotate)
   vec2d <- rbind(rbase,(rbase[1,]+rbase[2,]),-rbase,-(rbase[1,]+rbase[2,]))
@@ -68,57 +56,33 @@ brillouinzone.gethexagonalvector<-function(poscar,rotate=0,extend=1,strain=0){
                            
                            )
   }
+  class(vec2d)<-"brillouinzone"
   return(vec2d)
-}
-
-#' Adds brilloinzone to existing plot
-#' 
-#' \code{plot.brillouinzone.add} adds hexagonal brilloinzone to existing plot based on poscar.
-#' 
-#' @param poscar object of class poscar
-#' @param type of brillouinzone (currently only hexagonal)
-#' @param rotate rotates brillouinzone (in degrees)
-#' @param extend creates supercell of brillouinzone 
-#' @param strain applied to brillouinzone
-#' @param ... further plotting parameters
-#' @export
-plot.brillouinzone.add<-function(poscar,type="hexagonal",rotate=0,extend=1,strain=0,col="blue",...){
-  stopifnot(type=="hexagonal")
-  vec2d<-brillouinzone.gethexagonalvector(poscar,rotate,extend,strain)  
-  plot.brillouinzone.addvector(vec2d,col=col,...)
 }
 
 #' Adds brilloinzonevector to existing plot
 #' 
 #' \code{plot.brillouinzone.addvector} adds brilloinzonevector to existing plot based on poscar.
 #' 
-#' @param poscar object of class poscar
+#' @param brillouinzone object of class brillouinzone
 #' @param ... further plotting parameters
 #' @export
-plot.brillouinzone.addvector<-function(brilloinzonevector,col="blue",...){  
-  lapply(hexvector,FUN=function(x)polygon(x,border=col,...))
+plot.brillouinzone.add<-function(brillouinzone,col="blue",...){  
+  lapply(brillouinzone,FUN=function(x)polygon(x,border=col,...))
 }
 
 #' Adds high symmetry points to existing plot
 #' 
 #' \code{plot.brillouinzone.addsympoints} adds high symmetry points to existing plot based on poscar.
 #' 
-#' @param poscar object of class poscar
-#' @param type of brillouinzone (currently only hexagonal)
-#' @param rotate rotates brillouinzone (in degrees)
-#' @param extend creates supercell of brillouinzone 
-#' @param strain applied to brillouinzone
+#' @param brillouinzone object of class brillouinzone
 #' @param directcoordinates positions of highsymmetry points in direct coordinates
 #' @param labels labels of highsymmetry points in order given by \code{directcoordinates}
 #' @param vectors indices of two vectors from brilloinzone, which will be used as basis for calculation
-#' @param textpos position of labels, see \link{\code{text}} for futher information
+#' @param textpos position of labels, see \code{\link{text}} for futher information
 #' @param ... further plotting parameters
 #' @export
-plot.brillouinzone.addsympoints<-function(poscar,
-                                          type="hexagonal"
-                                                 ,rotate=0
-                                                 ,extend=1
-                                                 ,strain=0
+plot.brillouinzone.addsympoints<-function(brillouinzone
                                                  ,directcoordinates=list(c(0,0))
                                                  ,labels=1:length(directcoordinates)
                                                  ,vectors=1:2
@@ -129,16 +93,14 @@ plot.brillouinzone.addsympoints<-function(poscar,
                                                  ,xoffset=0
                                                  ,yoffset=0
                                                  ,...){  
-  stopifnot(type=="hexagonal")
-  vec2d<-brillouinzone.gethexagonalvector(poscar,rotate,extend,strain) 
   if (length(xoffset)<length(directcoordinates))
     xoffset <- rep(xoffset,ceiling(length(directcoordinates)/length(xoffset)))
   if (length(yoffset)<length(directcoordinates))
     yoffset <- rep(yoffset,ceiling(length(directcoordinates)/length(yoffset)))
   library(grid)
-  vec2d<-do.call(rbind,vec2d)
+  brillouinzone<-do.call(rbind,brillouinzone)
   lapply(1:length(directcoordinates),FUN=function(i){
-    vec <- directcoordinates[[i]]%*%vec2d[vectors,]  
+    vec <- directcoordinates[[i]]%*%brillouinzone[vectors,]  
     #legend(vec[[1]],vec[[2]],legend=labels[i],seg.len=0.1,text.col=col,xjust=0.5,yjust=0.5,x.intersp=-0.4,y.intersp=0.3)
     text(vec[[1]]+xoffset[i],vec[[2]]+yoffset[i],labels=labels[i],pos=textpos,col=col,...)
     #grid.text(labels[i],vec[[1]],vec[[2]],default.units="native",...)

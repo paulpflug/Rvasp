@@ -288,11 +288,18 @@ plot.atoms.add<-function(atoms,basis=NULL,direction=3,col="white",cex=3,lwd=1,lt
 #' Adds layers of atoms to existing plot
 #' 
 #' \code{plot.poscar.addlayers} adds layers of atoms to existing plot.
+#' All styleinformation will be the same in one layer. However, to highligt specific atom types you
+#' can use \code{overwritestyle} parameter. For example \code{list(H=list(col="black"),He=list(size=5))}
+#' will color all H atoms in black and all He atoms in size 5, regardless of layer.
 #' 
 #' @param poscar object of class poscar
 #' @param direction of projection
 #' @param layer vector of indices of layers to plot
 #' @param layers total layer count in poscar
+#' @param color vector of colors, will be recycled along \code{layer}
+#' @param size vector of sizes, will be recycled along \code{layer}
+#' @param lwd vector of linewides, will be recycled along \code{layer}
+#' @param overwritestyle list of elements which style will be overwritten (see description)
 #' @param ... further plotting parameters
 #' @export
 plot.poscar.addlayers<-function(poscar
@@ -302,7 +309,14 @@ plot.poscar.addlayers<-function(poscar
                                 ,color=rainbow(length(layer))
                                 ,size=rep(1,length(layer))
                                 ,lwd=rep(1,length(layer))
+                                ,overwritestyle=list()
                                 ,...){
+  decreasing<-F
+  if(direction<0)
+  {
+    direction <- abs(direction)
+    decreasing <- T
+  }
   dir <- (1:3)[-direction]  
   layerindices <- poscar.getatomlayerindices(poscar,layers)
   atoms <- poscar.getbasisconvertedatoms(poscar)
@@ -310,11 +324,27 @@ plot.poscar.addlayers<-function(poscar
   size <- rep(size,length.out=length(layer))
   lwd <- rep(lwd,length.out=length(layer))
   
-  data <- cbind(atoms[layerindices%in%layer,1:3],layerindices[layerindices%in%layer])
+  data <- cbind(atoms[layerindices%in%layer,1:3],layerindices[layerindices%in%layer],atoms$type[layerindices%in%layer])
   data[,4] <- sapply(data[,4],FUN=function(x)which(x==layer))
-  data <- cbind(data,color[data[,4]],size[data[,4]],lwd[data[,4]])
-  data <- data[order(data[,direction]),]
-  points(data[,dir],col="black",bg=as.character(data[,5]),pch=21,cex=data[,6],lwd=data[,7],xpd=T,...)
+  data <- cbind(data,color[data[,4]],size[data[,4]],lwd[data[,4]],stringsAsFactors=F)
+  if(!is.null(names(overwritestyle))){
+    for(type in names(overwritestyle))
+    {
+      li <- overwritestyle[[type]]
+      selector <- data[,5]==type
+      if(!is.null(li$col)){
+        data[selector,6] <- li$col
+      }
+      if(!is.null(li$size)){
+        data[selector,7] <- li$size
+      }
+      if(!is.null(li$lwd)){
+        data[selector,8] <- li$lwd
+      }
+    }
+  }
+  data <- data[order(data[,direction],decreasing=decreasing),]
+  points(data[,dir],col="black",bg=data[,6],pch=21,cex=data[,7],lwd=data[,8],xpd=T,...)
 }
 
 #' Adds distance between layers to existing plot

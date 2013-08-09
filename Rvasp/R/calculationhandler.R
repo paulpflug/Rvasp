@@ -195,10 +195,13 @@ file.gethighestversion <- function(dir,filename)
 #' Will search current working directory for \code{name}.RData
 #' 
 #' @param name calculations object to load
+#' @param folder optional subfolder of working directory
 #' @param update if object is already loaded determines, if object will be loaded again
 #' @export
-load.calculations<-function(name,update=F)
+load.calculations<-function(name,folder="",update=F)
 {
+  if(folder!="")
+    name <- paste0("./",folder,"/",name)
   filename <- paste0(name,".RData")
   print(paste("loading",filename))
   if (file.exists(filename))

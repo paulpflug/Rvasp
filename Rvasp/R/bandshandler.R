@@ -431,7 +431,7 @@ plot.bandsdata.addsymnnames <- function(bandsdata,symnames,symcolor="red",symlty
 #' @export
 plot.bandsdata.addfermi<-function(bandsdata,fermicolor="blue",lty=3,xlim=NULL,...){
   e <- 0
-  if(is.null(bandsdata$energyoffset))
+  if(!is.null(bandsdata$energyoffset))
     e <- bandsdata$energyoffset
   rng <- bandsdata$range
   if (is.null(xlim))

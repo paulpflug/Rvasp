@@ -321,7 +321,8 @@ plot.calculation.ea<-function(calculation,energyfactor=1,energyshift=0,fit=F,typ
 {
   data <- calculation.getea(calculation)
   data$E <- data$E * energyfactor-energyshift
-  plot(data,type=type,...)
+  rdata <- data.frame(a=data$a, E=data$E)
+  plot(rdata, type=type, ...)
   if(fit){
     o <- ea.fitEOS(data)
     plot.EOS.add(o,...)
@@ -344,7 +345,8 @@ plot.calculation.ea.addpoints<-function(calculation,afactor=1,energyfactor=1,ene
   data <- calculation.getea(calculation)
   data$a <- data$a*afactor
   data$E <- data$E * energyfactor-energyshift
-  points(data,...)
+  rdata <- data.frame(a=data$a, E=data$E)
+  points(rdata,...)
   if(fit){
     o <- ea.fitEOS(data)
     plot.EOS.add(o,...)

@@ -367,6 +367,8 @@ plot.bandsdata <- function(bandsdata
                            ,xlim=NULL
                            ,xaxs="i"
                            ,yaxs="i"
+                           ,xlab="Wave vector"
+                           ,ylab="Energy (eV)"
                            ,energyoffset=0
                            ,...){
   print("plotting bandsdata")
@@ -383,7 +385,7 @@ plot.bandsdata <- function(bandsdata
   }
   if (is.null(xlim))
     xlim <- rng[1:2,1]
-  plot(rng[,1:2],type="n",xaxt="n",xlim=xlim,xaxs=xaxs,yaxs=yaxs ,...)
+  plot(rng[,1:2],type="n",xaxt="n",xlim=xlim,xaxs=xaxs,yaxs=yaxs, xlab=xlab, ylab=ylab,...)
   if (!type=="n") plot.bandsdata.addbands(bandsdata,bands,col=col.bands,...)
   if (fermi)
   {

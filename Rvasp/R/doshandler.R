@@ -168,8 +168,7 @@ dosdata.addsmearing<-function(dosdata,sigma=0.2)
 #' @param dos dos vector
 #' @param sigma standard deviation
 #' @export
-dosvector.calcsmearing<-function(energy,dos,sigma=0.1)
-{
+dosvector.calcsmearing<-function(energy,dos,sigma=0.1){
   matrix <- sapply(energy,dnorm,energy,sigma) 
   return (rowSums(sweep(matrix,2,colSums(matrix)/dos,"/")))
 }
@@ -188,8 +187,7 @@ dosvector.calcsmearing<-function(energy,dos,sigma=0.1)
 #' @param col.fermi color of fermi level
 #' @param ... further plotting parameters
 #' @export
-plot.dosdata <- function(dosdata,smearing=0,flip=F,norm=F,fermi=F,col.fermi="blue",xaxs="i",yaxs="i",xlab="Energy [eV]",ylab="Electron density",...)
-{
+plot.dosdata <- function(dosdata,smearing=0,flip=F,norm=F,fermi=F,col.fermi="blue",xaxs="i",yaxs="i",xlab="Energy [eV]",ylab="Electron density",...){
   data <- dosdata
   if (smearing>0)
     data$total[,2] <- dosvector.calcsmearing(data$total[,1],data$total[,2],sigma=smearing)
@@ -203,7 +201,6 @@ plot.dosdata <- function(dosdata,smearing=0,flip=F,norm=F,fermi=F,col.fermi="blu
     if(ylab == "Electron density")
       ylab <- paste(ylab,"per atom")
   }
-  
   if (flip)
   {
     oldmar <- par("mar")
@@ -236,8 +233,7 @@ plot.dosdata <- function(dosdata,smearing=0,flip=F,norm=F,fermi=F,col.fermi="blu
 #' @param type \code{line} or \code{polygon} mode
 #' @param ... further plotting parameters
 #' @export
-plot.dosdata.add <-function(dosdata,factor=1,smearing=0,orbitals=NULL,atomindices=NULL,border=c(NA),col=c("grey"),type=c("line","polygon"),...)
-{
+plot.dosdata.add <-function(dosdata,factor=1,smearing=0,orbitals=NULL,atomindices=NULL,border=c(NA),col=c("grey"),type=c("line","polygon"),...){
   type <- match.arg(type)
   flip <- dosdata$flip
   if (is.null(flip))
@@ -351,8 +347,7 @@ plot.dosdata.add <-function(dosdata,factor=1,smearing=0,orbitals=NULL,atomindice
 #' @param dosdata object of type dosdata
 #' @param ... further plotting parameters
 #' @export
-plot.dosdata.addfermi <- function(dosdata,col="blue",lty=3,...)
-{
+plot.dosdata.addfermi <- function(dosdata,col="blue",col.text="blue",lty=3,...){
   flip <- dosdata$flip
   if (is.null(flip))
     flip<-F
@@ -360,11 +355,11 @@ plot.dosdata.addfermi <- function(dosdata,col="blue",lty=3,...)
   if (flip)
   {
   abline(h=0,col=col,lty=lty,...)
-  text(rng[[2]]-0.1*abs(rng[[2]]-rng[[1]]),0,labels="fermi",col=fermicol,pos=2,...)
+  text(rng[[2]]-0.1*abs(rng[[2]]-rng[[1]]),0,labels="fermi",col=col.text,pos=2,...)
   }
   else{
     abline(v=0,col=col,lty=lty,...)
-    text(0,rng[[2]]-0.1*abs(rng[[2]]-rng[[1]]),labels="fermi",col=fermicol,pos=2,...)
+    text(0,rng[[2]]-0.1*abs(rng[[2]]-rng[[1]]),labels="fermi",col=col.text,pos=2,...)
   }
   
 }

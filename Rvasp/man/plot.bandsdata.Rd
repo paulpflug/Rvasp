@@ -6,8 +6,9 @@
     bands = 1:length(bandsdata$bands), sympointpath = NULL,
     col.bands = "black", type = "l", fermi = F,
     symnames = NULL, symcolor = "red", symlty = 3,
-    xlim = NULL, xaxs = "i", yaxs = "i", energyoffset = 0,
-    ...)
+    xlim = NULL, xaxs = "i", yaxs = "i",
+    xlab = "Wave vector", ylab = "Energy (eV)",
+    energyoffset = 0, ...)
 }
 \arguments{
   \item{bandsdata}{object of class bandsdata}

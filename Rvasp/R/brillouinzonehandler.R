@@ -30,12 +30,12 @@ plot.brillouinzone<- function(brillouinzone,
 poscar.getbrillouinzone.hexagonal<-function(poscar,rotate=0,extend=1,strain=0){  
   basicpattern <- list(c(1,1,0),c(0,1,1))
   poscar$a <- poscar$a*(1-strain)
-  rbase <- reciprocal.poscar(poscar)[1:2,1:2]%*%get2droationmatrix.deg(rotate)
+  rotate <- rotate/180*pi
+  poscar$basis[1:2,1:2] <- poscar$basis[1:2,1:2]%*%rbind(c(cos(rotate),-sin(rotate)),c(sin(rotate),cos(rotate)))
+  rbase <- poscar.getreciprocalbasis(poscar)[1:2,1:2]
   vec2d <- rbind(rbase,(rbase[1,]+rbase[2,]),-rbase,-(rbase[1,]+rbase[2,]))
-  vec2d <- vec2d[c(5,6,4,2,3,1),]
-  if (extend==1)
-  vec2d<- list(vec2d)
-  else
+  vec2d <-  list(vec2d[c(5,6,4,2,3,1),])
+  if (extend>1)
   {
     patterns <- unlist(sapply(1:(extend),FUN=function(e){
       e1 <- 1:e
@@ -51,10 +51,8 @@ poscar.getbrillouinzone.hexagonal<-function(poscar,rotate=0,extend=1,strain=0){
       {    
         z <- rep(0,6)
         z[((y:(y+length(pattern)-1))%%6)+1]<-pattern
-        add.vectomatrix(vec2d,apply(vec2d*z,2,sum)) 
-      })})
-                           
-                           )
+        return(sweep(vec2d[[1]],2,apply(vec2d[[1]]*z,2,sum),"+")) 
+      })}))
   }
   class(vec2d)<-"brillouinzone"
   return(vec2d)
@@ -68,7 +66,7 @@ poscar.getbrillouinzone.hexagonal<-function(poscar,rotate=0,extend=1,strain=0){
 #' @param ... further plotting parameters
 #' @export
 plot.brillouinzone.add<-function(brillouinzone,col="blue",...){  
-  lapply(brillouinzone,FUN=function(x)polygon(x,border=col,...))
+  invisible(lapply(brillouinzone,FUN=function(x)polygon(x,border=col,...)))
 }
 
 #' Adds high symmetry points to existing plot
@@ -99,14 +97,14 @@ plot.brillouinzone.addsympoints<-function(brillouinzone
     yoffset <- rep(yoffset,ceiling(length(directcoordinates)/length(yoffset)))
   library(grid)
   brillouinzone<-do.call(rbind,brillouinzone)
-  lapply(1:length(directcoordinates),FUN=function(i){
+  invisible(lapply(1:length(directcoordinates),FUN=function(i){
     vec <- directcoordinates[[i]]%*%brillouinzone[vectors,]  
     #legend(vec[[1]],vec[[2]],legend=labels[i],seg.len=0.1,text.col=col,xjust=0.5,yjust=0.5,x.intersp=-0.4,y.intersp=0.3)
     text(vec[[1]]+xoffset[i],vec[[2]]+yoffset[i],labels=labels[i],pos=textpos,col=col,...)
     #grid.text(labels[i],vec[[1]],vec[[2]],default.units="native",...)
     if(typ=="p")
       points(vec[[1]],vec[[2]],col=col,pch=pch)
-  })
+  }))
   
 }
 

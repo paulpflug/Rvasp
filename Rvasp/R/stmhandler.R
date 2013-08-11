@@ -12,34 +12,32 @@ require(lattice)
 #' @param ... further plotting parameters
 #' @export
 plot.stm<- function(stm,super=1,xlim=NULL,ylim=NULL                       
-                       ,...){ 
+                    ,...){ 
   base <- stm$poscar$basis*stm$poscar$a
   ##supercell
   if (super>1)
   {
-    print("calculating supercell")
-  
-  
-  tmpx <- lapply(1:(super-1),FUN=function(x){stm$x+x*base[1,1]})
-  stm$x <- do.call(c,c(stm$x,tmpx))
-  tmpy <- lapply(1:(super-1),FUN=function(x){stm$y+x*base[2,2]})
-  stm$y <- do.call(c,c(stm$y,tmpy))
-  stm$z <- do.call(rbind,rep(list(stm$z),super))  
-  stm$z <- do.call(cbind,lapply(0:(super-1),FUN=function(x)
-  {
-    index <- which.min(abs(stm$x-x*base[2,1]))
-    i <- 1:nrow(stm$z)
-    if (x>0)
-      i<- i[c((index):length(i),1:(index-1))]
-    stm$z[i,]
-  }))
+    print("calculating supercell")    
+    tmpx <- lapply(1:(super-1),FUN=function(x){stm$x+x*base[1,1]})
+    stm$x <- do.call(c,c(stm$x,tmpx))
+    tmpy <- lapply(1:(super-1),FUN=function(x){stm$y+x*base[2,2]})
+    stm$y <- do.call(c,c(stm$y,tmpy))
+    stm$z <- do.call(rbind,rep(list(stm$z),super))  
+    stm$z <- do.call(cbind,lapply(0:(super-1),FUN=function(x)
+    {
+      index <- nrow(stm$z)-which.min(abs(stm$x-x*base[2,1]))
+      i <- 1:nrow(stm$z)
+      if (x>0)
+        i<- i[c((index):length(i),1:(index-1))]
+      stm$z[i,]
+    }))
   }
   ############
   if(is.null(xlim)) xlim <- range(stm$x)/10
   if(is.null(ylim)) ylim <- range(stm$y)/10
   xlim[2] <- stm$x[which.min(abs(stm$x-xlim[2]))]
   ylim[2] <- stm$y[which.min(abs(stm$y-ylim[2]))]
-
+  
   grid <- expand.grid(x=stm$x/10, y=stm$y/10)
   grid$z <- as.vector(stm$z)
   zrange <- range(stm$z)
@@ -50,8 +48,7 @@ plot.stm<- function(stm,super=1,xlim=NULL,ylim=NULL
                    aspect="iso",contour=F,col.regions=colorRampPalette(c("orangered3","yellow"))(400),
                    xlim=xlim,ylim=ylim,...)
   print(fig)
-  
-  }
+}
 
 #' Adds atoms
 #' 
@@ -191,7 +188,7 @@ stm<- function(chgcar,emax,cpus=4){
     data[,1:2]<-data.matrix(data[,1:2])%*%matr    
   }
   ## preparing quadratic area
-  pairs <- rbind(c(1,0),c(0,1),c(0,0),c(-1,0),c(0,-1),c(-1,-1),c(1,1))
+  pairs <- rbind(c(1,0),c(0,1),c(0,0),c(-1,0),c(0,-1),c(-1,-1),c(1,1),c(-1,1),c(1,-1))
   addfunc <- function(x)
   {
     addvec <- x%*%base[1:2,1:2]

@@ -2,7 +2,7 @@
 \alias{load.calculations}
 \title{Loads a calculations object in RData format}
 \usage{
-  load.calculations(file, objectname = NULL, update = F)
+  load.calculations(file, update = F, objectname = NULL)
 }
 \arguments{
   \item{file}{with calculations object to load}

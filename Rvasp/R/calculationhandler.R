@@ -198,34 +198,29 @@ file.gethighestversion <- function(dir,filename)
 #' @param objectname will check if already loaded
 #' @param update if object is already loaded determines, if object will be loaded again
 #' @export
-load.calculations<-function(file,objectname=NULL,update=F)
-{
+load.calculations<-function(file,update=F,objectname=NULL){
+  if(length(grep(".RData",file))==0)
+  {
+    file <- paste0(file,".RData")
+  }
   print(paste("loading",file))
   if (file.exists(file))
   {
-    if (is.null(objectname)|!exists(objectname)|update)
+    if (!is.null(objectname)){
+      if(update|!exists(objectname)){
+        load(file=filename,globalenv())
+      }
+    }      
+    else{
       load(file=filename,globalenv())
+    }
     return (T)
   }
-  else
-  {
-    print(paste("didn't find",file))
-    file <- paste0(file,".RData")
-    print(paste("loading",file))
-    if (file.exists(file))
-    {
-      if (is.null(objectname)|!exists(objectname)|update)
-        load(file=filename,globalenv())
-      return (T)
-    }
-    else
-    {
-      print(paste("didn't find",file))
-      print("abort")
-      return (F)
-    }
-  }
+  print(paste("didn't find",file))
+  print("abort")
+  return (F)
 }
+
 
 #' Fits equation of state to a given ea object
 #' 

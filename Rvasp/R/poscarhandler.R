@@ -861,12 +861,15 @@ poscar.mirrorlayers<-function(poscar,layers,baselayer,mirrorlayers){
   return(poscar)
 }
 
-#' gives you a poscar with atoms in area of given size and shape
+#' Gives you a poscar in a given area
 #' 
-#' \code{poscar.getshapedposcar} test
+#' \code{poscar.getshapedposcar} gives you a poscar with atoms in area of given size and shape.
+#' Creates atoms beyond the border of the unitcell.
 #' 
-#' @param poscar the input poscar.
+#' @param poscar object of type poscar
 #' @param x max x (range will be c(0,x))
+#' @param y max y (range will be c(0,y))
+#' @param shape of the area in which atoms are selected
 #' @export
 poscar.getshapedposcar <- function(poscar  # Input poscar
                                   ,x  # Max x (range will be c(0,x))
@@ -889,9 +892,56 @@ poscar.getshapedposcar <- function(poscar  # Input poscar
   atomcoords<-data.frame(do.call(rbind,lapply(atomcoords,FUN=function(x)x[[1]])))  
   names(atomcoords) <- c("x","y","z","movex","movey","movez","type")
   selector <- rep(T,nrow(atomcoords))
-  selector <- selector & atomcoords$x<=x & atomcoords$x>0& atomcoords$y<=y & atomcoords$y>0
+  selector <- selector & atomcoords$x<=x & atomcoords$x>=0& atomcoords$y<=y & atomcoords$y>=0
   print(sum(selector))
   
   poscar$atoms <- atoms.convertbasis(atoms=atomcoords[selector,],basis=basis,forth=T)
+  return(poscar)
+}
+
+#' aligns the atoms by a certain position
+#' 
+#' \code{poscar.alignbylayer} aligns the atoms by a certain position.
+#' The position will be searched by a atom in a given layer.
+#' Will make a 2d translation
+#' 
+#' @param poscar object of type poscar
+#' @param layer the layer in which the atom will be searched
+#' @param layers total layer count
+#' @param atominlayer index of atom in given layer
+#' @param alignto will move all atoms, so that given atom will be positioned at \code{alignto}
+#' @param direction will determine in which plane the translation will be performed
+#' @export
+poscar.alignbylayer <- function(poscar,layer,layers,atominlayer=1,alignto=c(0,0),direction=3){
+  layerindices <- poscar.getatomlayerindices(poscar=poscar,layers=layers)
+  indices <- which(layerindices %in% layer)
+  index <- 1
+  if(length(indices)>0){
+    if(length(indices)>=atominlayer){
+      index <- indices[[atominlayer]]
+    }else{
+      warning(paste(atominlayer," is a invalid value for atominlayer, using 1 instead"))
+      index <- indices[[1]]
+    }
+  }
+  return(poscar.alignbyatom(poscar=poscar,atomindex=index,alignto=alignto,direction=direction))
+}
+
+#' aligns the atoms by a certain position
+#' 
+#' \code{poscar.alignbyatom} aligns the atoms by a certain position.
+#' The position will be searched by the index of a atom.
+#' Will make a 2d translation
+#' 
+#' @param poscar object of type poscar
+#' @param atomindex index of atom which will be used
+#' @param alignto will move all atoms, so that given atom will be positioned at \code{alignto}
+#' @param direction will determine in which plane the translation will be performed
+#' @export
+poscar.alignbyatom <- function(poscar,atomindex,alignto=c(0,0),direction=3){
+  indices <- (1:3)[-direction]
+  atomindex <- atomindex[[1]]
+  position <- as.numeric(poscar$atoms[atomindex,indices]-alignto)
+  poscar$atoms[,indices]<- sweep(data.matrix(poscar$atoms[,indices]),2,position)%%1
   return(poscar)
 }

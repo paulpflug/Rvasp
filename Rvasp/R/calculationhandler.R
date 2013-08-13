@@ -208,11 +208,11 @@ load.calculations<-function(file,update=F,objectname=NULL){
   {
     if (!is.null(objectname)){
       if(update|!exists(objectname)){
-        load(file=filename,globalenv())
+        load(file=file,globalenv())
       }
     }      
     else{
-      load(file=filename,globalenv())
+      load(file=file,globalenv())
     }
     return (T)
   }

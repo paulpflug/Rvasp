@@ -300,6 +300,8 @@ plot.atoms.add<-function(atoms,basis=NULL,direction=3,col="white",cex=3,lwd=1,lt
 #' @param size vector of sizes, will be recycled along \code{layer}
 #' @param lwd vector of linewides, will be recycled along \code{layer}
 #' @param overwritestyle list of elements which style will be overwritten (see description)
+#' @param darkenlayer indices of layers which will be additionaly darkend
+#' @param darkenalpha transparancy which will be used to darken layers in \code{darkenlayer}
 #' @param ... further plotting parameters
 #' @export
 plot.poscar.addlayers<-function(poscar
@@ -310,6 +312,8 @@ plot.poscar.addlayers<-function(poscar
                                 ,size=rep(1,length(layer))
                                 ,lwd=rep(1,length(layer))
                                 ,overwritestyle=list()
+                                ,darkenlayer=NA
+                                ,darkenalpha=0.33
                                 ,...){
   decreasing<-F
   if(direction<0)
@@ -324,27 +328,40 @@ plot.poscar.addlayers<-function(poscar
   size <- rep(size,length.out=length(layer))
   lwd <- rep(lwd,length.out=length(layer))
   
-  data <- cbind(atoms[layerindices%in%layer,1:3],layerindices[layerindices%in%layer],atoms$type[layerindices%in%layer])
-  data[,4] <- sapply(data[,4],FUN=function(x)which(x==layer))
-  data <- cbind(data,color[data[,4]],size[data[,4]],lwd[data[,4]],stringsAsFactors=F)
+  data <- cbind(atoms[layerindices%in%layer,1:3],layerindices[layerindices%in%layer],layerindices[layerindices%in%layer],atoms$type[layerindices%in%layer])
+  data[,5] <- sapply(data[,4],FUN=function(x)which(x==layer))
+  data <- cbind(data,color[data[,5]],size[data[,5]],lwd[data[,5]],stringsAsFactors=F)
   if(!is.null(names(overwritestyle))){
     for(type in names(overwritestyle))
     {
       li <- overwritestyle[[type]]
-      selector <- data[,5]==type
+      selector <- data[,6]==type
       if(!is.null(li$col)){
-        data[selector,6] <- li$col
+        data[selector,7] <- li$col
       }
       if(!is.null(li$size)){
-        data[selector,7] <- li$size
+        data[selector,8] <- li$size
       }
       if(!is.null(li$lwd)){
-        data[selector,8] <- li$lwd
+        data[selector,9] <- li$lwd
       }
     }
   }
+  if(!all(is.null(darkenlayer)) &!all(is.na(darkenlayer))& all(is.numeric(darkenlayer))){
+    newdata <- data[data[,5]%in%darkenlayer,]
+    if(nrow(newdata)>0){
+      newdata[,7] <- rgb(0,0,0,darkenalpha)
+      offset <- 0.01
+      if(decreasing)
+      {
+        offset <- -offset
+      }
+      newdata[,direction] <- newdata[,direction]+offset
+      data <- rbind(data,newdata)
+    }
+  }
   data <- data[order(data[,direction],decreasing=decreasing),]
-  points(data[,dir],col="black",bg=data[,6],pch=21,cex=data[,7],lwd=data[,8],xpd=T,...)
+  points(data[,dir],col="black",bg=data[,7],pch=21,cex=data[,8],lwd=data[,9],xpd=T,...)
 }
 
 #' Adds distance between layers to existing plot
@@ -892,7 +909,8 @@ poscar.getshapedposcar <- function(poscar  # Input poscar
   atomcoords<-data.frame(do.call(rbind,lapply(atomcoords,FUN=function(x)x[[1]])))  
   names(atomcoords) <- c("x","y","z","movex","movey","movez","type")
   selector <- rep(T,nrow(atomcoords))
-  selector <- selector & atomcoords$x<=x & atomcoords$x>=0& atomcoords$y<=y & atomcoords$y>=0
+  fuzzy <- 0.005
+  selector <- selector & atomcoords$x<=x+fuzzy & atomcoords$x>=-fuzzy& atomcoords$y<=y+fuzzy & atomcoords$y>=-fuzzy
   print(sum(selector))
   
   poscar$atoms <- atoms.convertbasis(atoms=atomcoords[selector,],basis=basis,forth=T)

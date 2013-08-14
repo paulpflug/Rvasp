@@ -6,7 +6,7 @@
     direction = 3, color = rainbow(length(layer)),
     size = rep(1, length(layer)),
     lwd = rep(1, length(layer)), overwritestyle = list(),
-    ...)
+    darkenlayer = NA, darkenalpha = 0.33, ...)
 }
 \arguments{
   \item{poscar}{object of class poscar}
@@ -28,6 +28,12 @@
 
   \item{overwritestyle}{list of elements which style will
   be overwritten (see description)}
+
+  \item{darkenlayer}{indices of layers which will be
+  additionaly darkend}
+
+  \item{darkenalpha}{transparancy which will be used to
+  darken layers in \code{darkenlayer}}
 
   \item{...}{further plotting parameters}
 }

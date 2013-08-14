@@ -122,32 +122,52 @@ plot.stm.addunitcell<-function(stm,atomnumber=NULL,col="black",...){
 #' 
 #' \code{stm} Calculates a constant-current stm by a given chgcar.
 #' preferred orientation: z-direction 
-#' searches bottom-up (Will give the bottom side of a slab)
-#' 
+#'  
 #' @param chgcar object of class chgcar
 #' @param emax cut-off electron density
+#' @param direction direction of stm creation (negativ will go from small values to big, positiv vice versa)
 #' @param cpus uses snowfall package to parallelize calculation
+#' @param interpolation only linear implemented
 #' @export
-stm<- function(chgcar,emax,cpus=4){
+stm<- function(chgcar,emax,direction=3,cpus=4,interpolation=c("linear")){  
+  topdown <- sign(direction)==1
+  direction <- abs(round(direction))  
+  dir <- (1:3)[-direction]
+  if(chgcar$poscar$basis[dir[[1]],]%*%chgcar$poscar$basis[direction,]>=1e-6|chgcar$poscar$basis[dir[[2]],]%*%chgcar$poscar$basis[direction,]>=1e-6){
+    stop("chosen direction is not perpendicular on other two directions")
+  }
   print ("calculating stm")
-  width <- 4
-  step <- chgcar$n[1]*chgcar$n[2]*c(-width:width)
-  xy <- chgcar$xy
+  interpolation<-match.arg(interpolation)
+  width <- switch(interpolation,linear=1)
+  formula <- switch(interpolation,linear=formula(e~z))
+  step <- c(-width:width)
+  if(direction>1){
+    step <- step*chgcar$n[1]
+    if(direction>2){
+      step <- step*chgcar$n[2]
+    }
+  }
+  xy <- unique(chgcar$data[,dir])
+  z <- unique(chgcar$data[,direction])
+  if(topdown){
+    xy <- xy[nrow(xy):1,]
+    z <- rev(z)
+  }
   fac <- ceiling(log10(max(xy[,2])))
-  nd <- chgcar$data[chgcar$data[,4]>=emax,]
+  nd <- chgcar$data[chgcar$data[,4]>=emax,]  
   print("searching xy for given z")
-  i <-match(xy[,1]+10^fac*xy[,2],nd[,1]+10^fac*nd[,2])
+  i <-match(xy[,1]+10^fac*xy[,2],nd[,dir[[1]]]+10^fac*nd[,dir[[2]]])
   nd<-nd[i,]
   fitfunc <- function(x)
   {
     x <- as.numeric(x)
     s <- step+x
-    xy <- chgcar$data[x,1:2]
-    z <-  chgcar$data[x,3]
-    data <- chgcar$data[s,3:4]
+    xy <- chgcar$data[x,dir]
+    z <-  chgcar$data[x,direction]
+    data <- chgcar$data[s,c(direction,4)]
     names(data)<-c("z","e")
-    data[,2] <- data[,2]-emax
-    o <- lm(e~z+I(z^2)+I(z^3)+I(z^4),data)
+    data[,2] <- data[,2]-emax    
+    o <- lm(formula,data)
     zeros <- polyroot(o$coefficients)
     zeros <- zeros[abs(Im(zeros))<1e-4]
     index <- which.min(abs(Re(zeros)-z))        
@@ -171,11 +191,11 @@ stm<- function(chgcar,emax,cpus=4){
   data <- do.call(rbind,data)
   print("interpolating z finished")
   # ranges of z to find corresponding atoms for plotting purpose
-  atomrange<- range(data[,3])
+  atomrange<- range(data[,direction])
   # lowest to zero
-  data[,3]<-data[,3]-atomrange[[1]]
+  data[,direction]<-data[,direction]-atomrange[[1]]
   # reverse in z direction
-  data[,3]<-abs(data[,3]-max(data[,3]))
+  data[,direction]<-abs(data[,direction]-max(data[,direction]))
   print("interpolating quadratic area")
   base <- chgcar$poscar$basis*chgcar$poscar$a  
   ### rotate
@@ -184,29 +204,29 @@ stm<- function(chgcar,emax,cpus=4){
   {
     print("rotating")
     matr <- rbind(c(cos(angle),-sin(angle)),c(sin(angle),cos(angle)))
-    base[,1:2]<-base[,1:2]%*%matr
-    data[,1:2]<-data.matrix(data[,1:2])%*%matr    
+    base[dir,dir]<-base[dir,dir]%*%matr
+    data[,dir]<-data.matrix(data[,dir])%*%matr    
   }
   ## preparing quadratic area
   pairs <- rbind(c(1,0),c(0,1),c(0,0),c(-1,0),c(0,-1),c(-1,-1),c(1,1),c(-1,1),c(1,-1))
   addfunc <- function(x)
   {
-    addvec <- x%*%base[1:2,1:2]
+    addvec <- x%*%base[dir,dir]
     d2 <- data
-    d2[,1] <- data[,1]+addvec[1]
-    d2[,2] <- data[,2]+addvec[2]
+    d2[,dir[[1]]] <- data[,dir[[1]]]+addvec[1]
+    d2[,dir[[2]]] <- data[,dir[[2]]]+addvec[2]
     return (d2)
   }
   dtmp <- apply(pairs,1,FUN=addfunc)  
   dtmp <- do.call(rbind,dtmp)
   xmin <- 0#min(data[,1])
   ymin <- 0#min(data[,2])
-  xmax <- xmin+abs(base[1,1])
-  ymax <- ymin+abs(base[2,2])
+  xmax <- xmin+abs(base[1,dir[[1]]])
+  ymax <- ymin+abs(base[2,dir[[2]]])
   xo=seq(xmin,xmax,length=201)[1:200]
   yo=seq(ymin,ymax,length=201)[1:200] 
   ## calculation of quadratic area
-  o<-interp(dtmp[,1],dtmp[,2],dtmp[,3],xo=xo,yo=yo)
+  o<-interp(dtmp[,dir[[1]]],dtmp[,dir[[2]]],dtmp[,direction],xo=xo,yo=yo)
   print("calculating stm successfull")
   stm <- list()
   stm$poscar <- chgcar$poscar

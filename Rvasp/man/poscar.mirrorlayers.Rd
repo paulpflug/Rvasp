@@ -1,23 +1,24 @@
 \name{poscar.mirrorlayers}
 \alias{poscar.mirrorlayers}
-\title{gives you a poscar with all atoms in mirrorlayer
-mirrored by the diagonal going trough a atom of the baselayer}
+\title{mirrores a layer}
 \usage{
   poscar.mirrorlayers(poscar, layers, baselayer,
     mirrorlayers)
 }
 \arguments{
-  \item{poscar}{the input poscar.}
+  \item{poscar}{object of class poscar}
 
-  \item{layers}{layercount of poscar}
+  \item{layers}{total layer count}
 
-  \item{baselayer}{layer in which the mirror-diagonal will
-  be layed}
+  \item{baselayer}{index of layer in which the
+  mirror-diagonal will be based}
 
-  \item{mirrorlayers}{layers which will be mirrored by the
-  diagonal}
+  \item{mirrorlayers}{index of layers which will be
+  mirrored by the diagonal}
 }
 \description{
-  \code{poscar.mirrorlayers} test
+  \code{poscar.mirrorlayers} gives you a poscar with all
+  atoms in mirrorlayer mirrored by the diagonal going
+  trough a atom of the baselayer
 }
 

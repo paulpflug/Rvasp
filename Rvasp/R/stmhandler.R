@@ -130,6 +130,8 @@ plot.stm.addunitcell<-function(stm,atomnumber=NULL,col="black",...){
 #' @param interpolation only linear implemented
 #' @export
 stm<- function(chgcar,emax,direction=3,cpus=4,interpolation=c("linear")){  
+  stm <- list()
+  stm$direction <- direction
   topdown <- sign(direction)==1
   direction <- abs(round(direction))  
   dir <- (1:3)[-direction]
@@ -228,7 +230,7 @@ stm<- function(chgcar,emax,direction=3,cpus=4,interpolation=c("linear")){
   ## calculation of quadratic area
   o<-interp(dtmp[,dir[[1]]],dtmp[,dir[[2]]],dtmp[,direction],xo=xo,yo=yo)
   print("calculating stm successfull")
-  stm <- list()
+  
   stm$poscar <- chgcar$poscar
   stm$poscar$basis <- base/chgcar$poscar$a
   stm$x <- o$x

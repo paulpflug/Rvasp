@@ -650,7 +650,17 @@ poscar.sortatoms <- function(poscar,sortindices=c(7,3,1,2))
   return(poscar)
 }
 
-poscar.extractatoms <- function(poscar,atomindices,vacuum=c(0,0,0),center=T)
+#' Extracts atoms of object of class poscar
+#' 
+#' \code{poscar.extractatoms} extracts atoms, based on atomindices, of object of class poscar.
+#' Will give object of class poscar
+#' 
+#' @param poscar object of class poscar
+#' @param atomindices indices of atoms which will be selected
+#' @param vacuum sets vacuum, see \code{poscar.setvacuum} for futher informations
+#' @param center centers new poscar,see \code{poscar.setvacuum} for futher informations
+#' @export
+poscar.extractatoms <- function(poscar,atomindices,vacuum=c(0,0,0),center=F)
 {
   stopifnot(all(atomindices <= nrow(poscar$atoms)))
   poscar$atoms <- poscar$atoms[atomindices,]
@@ -659,11 +669,38 @@ poscar.extractatoms <- function(poscar,atomindices,vacuum=c(0,0,0),center=T)
   return(poscar)
 }
 
+#' Extracts atoms of object of class poscar
+#' 
+#' \code{poscar.extractlayers} extracts atoms, based on layers, of object of class poscar.
+#' Will give object of class poscar.
+#' Will not change position of atoms.
+#' 
+#' @param poscar object of class poscar
+#' @param layer indices of layers which will be extracted
+#' @param layers total layer count
+#' @param vacuum sets vacuum, see \code{poscar.setvacuum} for futher informations
+#' @param center centers new poscar,see \code{poscar.setvacuum} for futher informations
+#' @export
 poscar.extractlayers <- function(poscar,layer,layers,vacuum=c(0,0,0),center=T){
   layerindices <- poscar.getatomlayerindices(poscar,layers)
   return(poscar.extractatoms(poscar,which(layerindices %in% layer),vacuum,center=center))
 }
 
+#' Removes atoms of object of class poscar
+#' 
+#' \code{poscar.removelayers} removes atoms, based on layers, of object of class poscar.
+#' Will give object of class poscar.
+#' Remaining layers will be moved. The distance between two layers next to the removed 
+#' layer is set to the mean of the two distances of the removed layer.
+#' For top / bottom layer, the distance to zero / zmax is used.
+#' Works best for centered cells.
+#' 
+#' @param poscar object of class poscar
+#' @param layer indices of layers which will be removed
+#' @param layers total layer count
+#' @param vacuum sets vacuum, see \code{poscar.setvacuum} for futher informations
+#' @param center centers new poscar,see \code{poscar.setvacuum} for futher informations
+#' @export
 poscar.removelayers <- function(poscar,layer,layers,vacuum=c(0,0,0),center=T){
   oldvacuum <- poscar.getvacuum(poscar)
   vacuum <- ifelse(vacuum==0,oldvacuum,vacuum)
@@ -688,6 +725,17 @@ poscar.removelayers <- function(poscar,layer,layers,vacuum=c(0,0,0),center=T){
   return(poscar)
 }
 
+#' Gives the 2d translation of two layers
+#' 
+#' \code{poscar.getlayertranslation} gives the 2d translation of two layers.
+#' Only useful for equivalent layers. Searches for next neighbor, only works if next neighbor can be found easily (e.g. supercell):
+#' Will give 2d vector, which could be used to move \code{fromlayer} to \code{tolayer}
+#' 
+#' @param poscar object of class poscar
+#' @param fromlayer index of base layer 
+#' @param tolayer index of layer which will be used to calculate translation
+#' @param layers total layer count
+#' @export
 poscar.getlayertranslation<-function(poscar,fromlayer,tolayer,layers){
   layerindices <- poscar.getatomlayerindices(poscar,layers)
   fatom <- poscar$atoms[(layerindices==fromlayer),1:2]  
@@ -699,20 +747,61 @@ poscar.getlayertranslation<-function(poscar,fromlayer,tolayer,layers){
   return(as.numeric(tatom-fatom))
 }
 
+#' Translates layer by given 2d translation
+#' 
+#' \code{poscar.translatelayers} translates layer by given 2d translation.
+#' Will translate in x-y plain
+#' 
+#' @param poscar object of class poscar
+#' @param layer indices of layers which will be moved
+#' @param layers total layer count
+#' @param directtranslation 2d translational vector
+#' @export
 poscar.translatelayers <- function(poscar,layer,layers,directtranslation){
   layerindices <- poscar.getatomlayerindices(poscar,layers)
   poscar$atoms[layerindices%in%layer,1:2] <- sweep(poscar$atoms[layerindices%in%layer,1:2],2,directtranslation,"+")%%1
   return(poscar)
 }
 
+#' Gives layerindices for all atoms
+#' 
+#' \code{poscar.getatomlayerindices} will give a vector containig indices for all atoms,
+#' correspondig to the related layer.
+#' Will only work in z-direction.
+#' 
+#' @param poscar object of class poscar
+#' @param layers total layer count
+#' @export
 poscar.getatomlayerindices<-function(poscar,layers){
   return (atoms.getlayerindices(poscar$atoms,poscar$basis*poscar$a,layers))
 }
 
+#' Rotates layers (2d)
+#' 
+#' \code{poscar.rotatelayer.deg} rotates layers around point (2d).
+#' Will rotate in x-y plane
+#' 
+#' @param poscar object of class poscar
+#' @param layer indices of layers which will be rotated
+#' @param layers total layer count
+#' @param angle in degree
+#' @param offset point around which is rotated. If not provied will use atom nearest to zero (x-y projected)
+#' @export
 poscar.rotatelayer.deg<-function(poscar,layer,layers,angle,offset=NULL){
   return(poscar.rotatelayer.rad(poscar=poscar,layer=layer,layers=layers,angle=angle/180*pi,offset=offset))
 }
 
+#' Rotates layers (2d)
+#' 
+#' \code{poscar.rotatelayer.deg} rotates layers around point (2d).
+#' Will rotate in x-y plane
+#' 
+#' @param poscar object of class poscar
+#' @param layer indices of layers which will be rotated
+#' @param layers total layer count
+#' @param angle in radians
+#' @param offset point around which is rotated. If not provied will use atom nearest to zero (x-y projected)
+#' @export
 poscar.rotatelayer.rad<-function(poscar,layer,layers,angle,offset=NULL){
   layerindices <- poscar.getatomlayerindices(poscar,layers)
   basis <- poscar$basis*poscar$a
@@ -742,7 +831,16 @@ poscar.rotatelayer.rad<-function(poscar,layer,layers,angle,offset=NULL){
   return(poscar)
 }
 
-
+#' Gives layerindices for all atoms
+#' 
+#' \code{atoms.getlayerindices} will give a vector containig indices for all atoms,
+#' correspondig to the related layer.
+#' Will only work in z-direction.
+#' 
+#' @param atoms dataframe of atoms
+#' @param basis needed if atoms are in direct coordinates
+#' @param layers total layer count
+#' @export
 atoms.getlayerindices<-function(atoms,basis=NULL,layers){
   if(layers==1)
     return(rep(1,nrow(atoms)))
@@ -766,6 +864,16 @@ atoms.getlayerindices<-function(atoms,basis=NULL,layers){
   return (k$cluster)  
 }
 
+#' Rotates basis (2d)
+#' 
+#' \code{basis.rotate2d} rotates basis (2d).
+#' Will rotate in x-y plane.
+#' If no angle is provided. First vector of basis is rotated to face in x-direction.
+#' Will give 3x3 matrix.
+#' 
+#' @param basis 3x3 matrix
+#' @param angle in radians
+#' @export
 basis.rotate2d <- function(basis,angle=NULL){
   ### rotate
   if (is.null(angle))
@@ -779,11 +887,32 @@ basis.rotate2d <- function(basis,angle=NULL){
   return(basis)
 }
 
+#' Rotates basis (2d)
+#' 
+#' \code{poscar.rotate2d} rotates basis (2d).
+#' Will rotate in x-y plane
+#' If no angle is provided. First vector of basis is rotated to face in x-direction.
+#' Will give object of class poscar
+#' 
+#' @param poscar object of class poscar
+#' @param angle in radians
+#' @export
 poscar.rotate2d <- function(poscar,angle=NULL){
   poscar$basis <- basis.rotate2d(poscar$basis,angle)
   return(poscar)
 }
 
+#' Creates simple supercell
+#' 
+#' \code{atoms.createsupercell} creates simple supercell.
+#' Only whole-number supercells.
+#' 
+#' @param atomsdirect atoms in direct coordinates
+#' @param super 3d whole-number vector which defines, size of supercell in 3 directions 
+#' @param center determines if new cell should be centered
+#' @param center.directions subset of 1,2,3 determines which directions should be centered (see \code{atoms.centeratoms})
+#' @param center.position relativ to which the atoms should be aranged (3d vector) (see \code{atoms.centeratoms})
+#' @export
 atoms.createsupercell <- function(atomsdirect,super=c(1,1,1),center=T,center.directions=1:3,center.position=rep(0,3)){
   super <- round(super-1)
   super <- rep(super,length.out=3)
@@ -800,6 +929,17 @@ atoms.createsupercell <- function(atomsdirect,super=c(1,1,1),center=T,center.dir
   return(atoms)
 }
 
+#' Creates simple supercell
+#' 
+#' \code{poscar.createsupercell} creates simple supercell.
+#' Only whole-number supercells.
+#' 
+#' @param poscar object of class poscar
+#' @param super 3d whole-number vector which defines, size of supercell in 3 directions 
+#' @param center determines if new cell should be centered
+#' @param center.directions subset of 1,2,3 determines which directions should be centered (see \code{atoms.centeratoms})
+#' @param center.position relativ to which the atoms should be aranged (3d vector) (see \code{atoms.centeratoms})
+#' @export
 poscar.createsupercell<-function(poscar,super=c(1,1,1),center=T,center.directions=1:3,center.position=rep(0.5,3)){
   poscar$atoms <- atoms.createsupercell(atomsdirect=poscar$atoms,super=super,center=F)
   atomsreal <- poscar.getbasisconvertedatoms(poscar)
@@ -810,6 +950,16 @@ poscar.createsupercell<-function(poscar,super=c(1,1,1),center=T,center.direction
   return(poscar)
 }
 
+#' Gives positions object based on atoms
+#' 
+#' \code{poscar.getpositionbyatom} calculates positions based on atom positions.
+#' Will give object of class positions, which is used for LDOS calculations.
+#' 
+#' @param poscar object of class poscar
+#' @param atomselector indices of atoms which will be used for position calculation
+#' @param zdist distance of position to atom in z-direction
+#' @param layername name for automated legend creation
+#' @export
 poscar.getpositionbyatom<-function(poscar,atomselector,zdist=c(1),layername=-1){
   positions <- list()
   atoms <- poscar.getbasisconvertedatoms(poscar)
@@ -825,6 +975,16 @@ poscar.getpositionbyatom<-function(poscar,atomselector,zdist=c(1),layername=-1){
   return(positions)
 }
 
+#' Gives positions object based on atoms
+#' 
+#' \code{poscar.getpositionbylayer} calculates positions based on atom positions.
+#' Will give object of class positions, which is used for LDOS calculations.
+#' 
+#' @param poscar object of class poscar
+#' @param layer indices of layers which will be used to search atom positions
+#' @param layers total layer count
+#' @param zdist distance of position to atom in z-direction
+#' @export
 poscar.getpositionbylayer<-function(poscar,layers,zdist=c(1),layer=layers){
   positions <- list()
   indices<-poscar.getatomlayerindices(poscar,layers=layers)  
@@ -836,11 +996,24 @@ poscar.getpositionbylayer<-function(poscar,layers,zdist=c(1),layer=layers){
   return (positions)
 }
 
+#' Gives reciprocal basis
+#' 
+#' \code{poscar.getreciprocalbasis} calculates reciprocal basis.
+#' 
+#' @param poscar object of class poscar
+#' @export
 poscar.getreciprocalbasis<-function(poscar){
   return(basis.getreciprocal(poscar$basis,poscar$a))
 }
 
-basis.getreciprocal<-function(basis,a){
+#' Gives reciprocal basis
+#' 
+#' \code{poscar.getreciprocalbasis} calculates reciprocal basis.
+#' 
+#' @param basis 3x3 matrix
+#' @param a (optional) lattice constant which will be multiplied with basis
+#' @export
+basis.getreciprocal<-function(basis,a=1){
   basis <- basis*a
   volume <- c(crossprod.vec(basis[1,],basis[2,])%*%basis[3,])
   rbasis <- rbind(crossprod.vec(basis[2,],basis[3,]),
@@ -851,15 +1024,15 @@ basis.getreciprocal<-function(basis,a){
   return(rbasis)
 }
 
-#' gives you a poscar with all atoms in mirrorlayer
+#' mirrores a layer
+#' 
+#' \code{poscar.mirrorlayers} gives you a poscar with all atoms in mirrorlayer
 #' mirrored by the diagonal going trough a atom of the baselayer
 #' 
-#' \code{poscar.mirrorlayers} test
-#' 
-#' @param poscar the input poscar.
-#' @param layers layercount of poscar
-#' @param baselayer layer in which the mirror-diagonal will be layed
-#' @param mirrorlayers layers which will be mirrored by the diagonal
+#' @param poscar object of class poscar
+#' @param layers total layer count
+#' @param baselayer index of layer in which the mirror-diagonal will be based
+#' @param mirrorlayers index of layers which will be mirrored by the diagonal
 #' @export
 poscar.mirrorlayers<-function(poscar,layers,baselayer,mirrorlayers){
   indices <- poscar.getatomlayerindices(poscar,layers)

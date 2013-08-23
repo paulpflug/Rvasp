@@ -1136,3 +1136,77 @@ poscar.alignbyatom <- function(poscar,atomindex,alignto=c(0,0),direction=3){
   poscar$atoms[,indices]<- sweep(data.matrix(poscar$atoms[,indices]),2,position)%%1
   return(poscar)
 }
+
+#' Gives you the wood notation
+#' 
+#' \code{poscar.calculatewoodnotation} calculates the woodnotation for a slab system
+#' 
+#' @param poscar1 object of type poscar of the substrate
+#' @param poscar2 object of type poscar of the overlayer
+#' @param transmatrix1 2x2 matrix which will transform the basis of the substrate into the basis of the supercell 
+#' @param transmatrix2 2x2 matrix which will transform the basis of the overlayer into the basis of the supercell 
+#' @param latex if \code{TRUE} will give the output in latex format
+#' @export
+poscar.calculatewoodnotation<-function(poscar1,poscar2,transmatrix1,transmatrix2,round=1,latex=F){
+  calcbasisangle <- function(basis){
+    return(acos(sum(basis[1,]*basis[2,])/(sqrt(sum(basis[1,]^2))*sqrt(sum(basis[2,]^2))))/pi*180)
+  }
+  calcrotatedangle <- function(poscar,transmatrix,round=1){
+    basis <- poscar$basis[1:2,1:2]
+    x <- (transmatrix %*%basis)[1,]    
+    angle <- atan2(x=x[[1]],y=x[[2]])/pi*180
+    angle <- angle-atan2(x=basis[1,1],y=basis[1,2])/pi*180
+    basisangle <- calcbasisangle(basis)
+    angle <- angle %%basisangle
+    if(is.numeric(round)){
+      angle <- round(angle,round)
+    }
+    return(angle)
+  }
+  get2drotationmatrix<-function(angle){
+    angle<-angle/180*pi
+    return(rbind(c(cos(angle),-sin(angle)),c(sin(angle),cos(angle))))
+  }
+  calcsupercell <- function(poscar,transmatrix,latex=F){
+    basis <- poscar$basis[1:2,1:2]
+    basisnew <- transmatrix %*%basis
+    super1 <- round(sum(basisnew[1,]^2)/sum(basis[1,]^2),6)
+    super2 <- round(sum(basisnew[2,]^2)/sum(basis[2,]^2),6)
+    sqrt <- "√"
+    sqrtclose <- ""
+    times <- " x "
+    enclosure <- ""
+    if(latex){
+      sqrt <- "\\sqrt{"
+      sqrtclose <- "}"
+      times <- "\\times"
+      enclosure <- "$"
+    }
+    if(round(sqrt(super1))==round(sqrt(super1),6)){
+      s <- round(sqrt(super1))
+    }else{
+      s <- paste0(sqrt,super1,sqrtclose)
+    }
+    
+    if(round(sqrt(super2))==round(sqrt(super2),6)){
+      s2 <- round(sqrt(super2))
+    }else{
+      s2 <- paste0(sqrt,super2,sqrtclose)
+    }
+    return(paste0(enclosure,s,times,s2,enclosure))
+  }
+  a1 <- calcrotatedangle(poscar1,transmatrix1,round=round)
+  a2 <- calcrotatedangle(poscar2,transmatrix2,round=round)
+  s1<-calcsupercell(poscar1,transmatrix1,latex=latex)
+  s2 <- calcsupercell(poscar2,transmatrix2,latex=latex)
+  degree <- "°"
+  if(latex)
+    degree <- "$^\\circ$"
+  if (a1>0){
+    s1 <- paste0("(",s1,")R",a1,degree)
+  }
+  if (a2>0){
+    s2 <- paste0("(",s2,")R",a2,degree)
+  }
+  cat(paste0(s2," on ",s1,"\n"))
+}

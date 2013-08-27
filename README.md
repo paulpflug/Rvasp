@@ -16,7 +16,7 @@ All functions are implemented in pure R and are mostly easy to understand. Feel 
 * install in R
 
 ```R
-install.packages(pkgs="Rvasp_0.1.tar.gz")
+install.packages(pkgs="Rvasp_0.1.tar.gz",repos=NULL, type="source")
 ```
 
 * load in R

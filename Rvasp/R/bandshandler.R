@@ -794,7 +794,7 @@ bandsdata.fit <- function(bandsdata,
     err <- sum((data$energy-fitfunction(parameters,data$kpoint,constants))^2)
     return (err)
   }
-  fitfunction<-get(paste("fitfunction",fitname,sep="."))
+  fitfunction<-get(paste("bandsdata.fit",fitname,"function",sep="."))
   data <- bandsdata$bands[[bandnr]]$simpledata[kpoints,]
   data$kpoint <- bandsdata$kpointdistances[kpoints]
   if(is.null(constants))

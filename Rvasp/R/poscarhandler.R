@@ -501,6 +501,13 @@ plot.atoms.addarrows<-function(atomsold,atomsnew,basisold=NULL,basisnew=NULL,dir
   arrows(atomsold[,dir[1]],atomsold[,dir[2]],atomsnew[,dir[1]],atomsnew[,dir[2]],length=length,...)
 }
 
+#' Calculates basis converted atoms
+#' 
+#' \code{poscar.getbasisconvertedatoms} calculates basis converted atoms.
+#' 
+#' @param poscar object of class poscar
+#' @param forth from cartesian to direct
+#' @export
 poscar.getbasisconvertedatoms<-function(poscar,forth=F){
   return(atoms.convertbasis(poscar$atoms, poscar$basis*poscar$a,forth))
 }
@@ -725,6 +732,80 @@ poscar.removelayers <- function(poscar,layer,layers,vacuum=c(0,0,0),center=T){
   return(poscar)
 }
 
+#' Insert atoms in object of class poscar
+#' 
+#' \code{poscar.addlayers} adds atoms in object of class poscar.
+#' @param poscar object of class poscar
+#' @param layer index of layer which will be used for positioning
+#' @param layers total layer count
+#' @param atomcart atoms in cartesian coordinates
+#' @param type either above or below
+#' @param distabove (optional) custom distance to layer above
+#' @param distbelow (optional) custom distance to layer below
+#' @export
+poscar.addlayers <-function(poscar,layer,layers,atomcart,type=c("above","below"),distabove=NULL,distbelow=NULL){
+  stopifnot(layers>1)
+  
+  type <- match.arg(type)
+  layer <- layer[[1]]%%layers
+  layerindices <- poscar.getatomlayerindices(poscar,layers)
+  atoms <- poscar.getbasisconvertedatoms(poscar)
+  cellsize <- poscar$basis[3,3]*poscar$a
+  ##layer2 will be above
+  if (type=="below")
+    layer <- (layer-1)%%layers
+  layer2 <- (layer+1)%%layers
+  rng2 <- range(atoms[layer2==layerindices,3])
+  rng1 <- range(atoms[layer==layerindices,3])
+  dist <- abs(rng2[[1]]-rng1[[2]])
+  print(dist)
+  if(layer2==1)
+    dist <- rng2[[1]]+cellsize-rng1[[2]]
+  if(dist>5)
+    warning(paste0("very huge distance of the two used layers ("),dist,")")
+  atomcart[,3]<-atomcart[,3]-min(atomcart[,3])
+  zsize <- max(atomcart[,3])
+  if(is.null(distabove))  {
+    distabove<-dist
+  }
+  if(is.null(distbelow)){
+    distbelow <- dist
+  }
+  zsize <- zsize+distabove+distbelow
+  vacuum <- poscar.getvacuum(poscar)
+  vacuum[[3]] <- vacuum[[3]]+zsize-dist
+  poscar <- poscar.setvacuum(poscar=poscar,vacuum=vacuum,center=F)
+  atoms <- poscar.getbasisconvertedatoms(poscar)
+  rng2 <- range(atoms[layer2==layerindices,3])
+  rng1 <- range(atoms[layer==layerindices,3])
+  dist <- abs(rng2[[1]]-rng1[[2]])
+  if(layer2==1)
+    dist <- rng2[[1]]+cellsize-rng1[[2]]
+  zpos <- rng1[[2]]
+  if (type=="below"&layer==layers&dist>zsize){
+    zpos <- rng1[[1]]-zsize    
+  }
+  atoms[atoms[,3]>zpos,3]<- atoms[atoms[,3]>zpos,3]+zsize-distabove
+  atomcart[,3] <- atomcart[,3]+zpos+distbelow
+  poscar$atoms <- atoms.convertbasis(rbind(atoms,atomcart),basis=poscar$basis*poscar$a)
+  poscar <- poscar.sortatoms(poscar,c(3,7,1,2))
+  return(poscar)  
+}
+
+#' Changes the basis of a poscar
+#' 
+#' \code{poscar.changebasis} changes the basis of a poscar.
+#' @param poscar object of class poscar
+#' @param newbasis 3x3 matrix containing new basis vectors as rows
+#' @export
+poscar.changebasis <- function(poscar,newbasis){
+  atoms <- poscar.getbasisconvertedatoms(poscar)
+  poscar$atoms <- atoms.convertbasis(atoms,basis=newbasis*poscar$a)
+  poscar$basis <- newbasis
+  poscar$atoms[,1:3]<-poscar$atoms[,1:3]%%1
+  return(poscar)
+}
+
 #' Gives the 2d translation of two layers
 #' 
 #' \code{poscar.getlayertranslation} gives the 2d translation of two layers.
@@ -864,6 +945,17 @@ atoms.getlayerindices<-function(atoms,basis=NULL,layers){
   return (k$cluster)  
 }
 
+#' Gives angle of basis (2d)
+#' 
+#' \code{basis.getangle} gives angle of basis (2d) in radians.
+#' relative to x axis.
+#' 
+#' @param basis 3x3 matrix
+#' @export
+basis.getangle<-function(basis){
+  return(atan2(basis[1,2],basis[1,1]))
+}
+
 #' Rotates basis (2d)
 #' 
 #' \code{basis.rotate2d} rotates basis (2d).
@@ -877,7 +969,7 @@ atoms.getlayerindices<-function(atoms,basis=NULL,layers){
 basis.rotate2d <- function(basis,angle=NULL){
   ### rotate
   if (is.null(angle))
-    angle <- atan2(basis[1,2],basis[1,1])
+    angle <- basis.getangle(basis)
   if (abs(angle) >1e-6)
   {
     print("rotating")
@@ -1015,11 +1107,7 @@ poscar.getreciprocalbasis<-function(poscar){
 #' @export
 basis.getreciprocal<-function(basis,a=1){
   basis <- basis*a
-  volume <- c(crossprod.vec(basis[1,],basis[2,])%*%basis[3,])
-  rbasis <- rbind(crossprod.vec(basis[2,],basis[3,]),
-                 crossprod.vec(basis[3,],basis[1,]),
-                 crossprod.vec(basis[1,],basis[2,]))
-  rbasis <- rbasis/volume*2*pi
+  rbasis <- 2*pi*t(solve(basis))
   
   return(rbasis)
 }

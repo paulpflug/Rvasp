@@ -20,7 +20,7 @@ plot.brillouinzone<- function(brillouinzone,
 
 #' Gets hexagonal brilloinzone vector
 #' 
-#' \code{brillouinzone.gethexagonalvector} gets hexagonal brilloinzone vector.
+#' \code{poscar.getbrillouinzone.hexagonal} gets hexagonal brilloinzone vector.
 #' 
 #' @param poscar object of class poscar
 #' @param rotate rotates brillouinzone (in degrees)
@@ -30,9 +30,9 @@ plot.brillouinzone<- function(brillouinzone,
 poscar.getbrillouinzone.hexagonal<-function(poscar,rotate=0,extend=1,strain=0){  
   basicpattern <- list(c(1,1,0),c(0,1,1))
   poscar$a <- poscar$a*(1-strain)
-  rotate <- rotate/180*pi
+  rotate <- -(rotate)/180*pi
   poscar$basis[1:2,1:2] <- poscar$basis[1:2,1:2]%*%rbind(c(cos(rotate),-sin(rotate)),c(sin(rotate),cos(rotate)))
-  rbase <- poscar.getreciprocalbasis(poscar)[1:2,1:2]
+  rbase <- poscar.getreciprocalbasis(poscar)[1:2,1:2]/4
   vec2d <- rbind(rbase,(rbase[1,]+rbase[2,]),-rbase,-(rbase[1,]+rbase[2,]))
   vec2d <-  list(vec2d[c(5,6,4,2,3,1),])
   if (extend>1)
@@ -53,6 +53,49 @@ poscar.getbrillouinzone.hexagonal<-function(poscar,rotate=0,extend=1,strain=0){
         z[((y:(y+length(pattern)-1))%%6)+1]<-pattern
         return(sweep(vec2d[[1]],2,apply(vec2d[[1]]*z,2,sum),"+")) 
       })}))
+  }
+  class(vec2d)<-"brillouinzone"
+  return(vec2d)
+}
+
+#' Gets rectangular brilloinzone vector
+#' 
+#' \code{poscar.getbrillouinzone.rectangular} gets rectangular brilloinzone vector.
+#' 
+#' @param poscar object of class poscar
+#' @param rotate rotates brillouinzone (in degrees)
+#' @param extend creates supercell of brillouinzone 
+#' @param strain applied to brillouinzone
+#' @export
+poscar.getbrillouinzone.rectangular<-function(poscar,rotate=0,extend=1,strain=0){  
+  angle <- basis.getangle(poscar$basis)
+  poscar <- poscar.rotate2d(poscar)  
+  poscar$a <- poscar$a*(1-strain)
+  rotate <- (-rotate+angle)/180*pi
+  rbase <- poscar.getreciprocalbasis(poscar)[1:2,1:2]/2
+  alpha <- atan(rbase[2,2]/rbase[1,1])
+  rotate <- rotate-(pi-alpha)
+  mirror <- rbind(c(cos(2*alpha),sin(2*alpha)),c(sin(2*alpha),-cos(2*alpha)))
+  vec2d <- rbind(rbase,rbase%*%mirror)%*%rbind(c(cos(rotate),-sin(rotate)),c(sin(rotate),cos(rotate)))
+  vec2d <- scale(vec2d,scale=F)
+  vec2d <- list(vec2d[c(1,3,2,4),])  
+  if (extend>1)
+  {
+    ex <- seq(0,(2*extend-1),by=2)
+    p <- -(ex[extend]):(ex[extend])
+    patterns <- unlist(apply(expand.grid(p,p),1,function(x){
+      if(sum(abs(x))%in%ex){
+        return(list(as.numeric(x)))
+      }else{
+        return(NULL)      
+      }
+    }),recursive=F)
+    vec2d<- lapply(patterns,FUN=function(pattern){
+      m <-vec2d[[1]]
+      p <- as.numeric(pattern%*%m[c(1,2),])
+      m <- sweep(m,2,p)
+      return(m)
+      })
   }
   class(vec2d)<-"brillouinzone"
   return(vec2d)

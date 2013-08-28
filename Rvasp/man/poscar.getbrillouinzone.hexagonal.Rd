@@ -15,7 +15,7 @@
   \item{strain}{applied to brillouinzone}
 }
 \description{
-  \code{brillouinzone.gethexagonalvector} gets hexagonal
+  \code{poscar.getbrillouinzone.hexagonal} gets hexagonal
   brilloinzone vector.
 }
 

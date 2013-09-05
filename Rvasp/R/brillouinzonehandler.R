@@ -27,14 +27,21 @@ plot.brillouinzone<- function(brillouinzone,
 #' @param extend creates supercell of brillouinzone 
 #' @param strain applied to brillouinzone
 #' @export
-poscar.getbrillouinzone.hexagonal<-function(poscar,rotate=0,extend=1,strain=0){  
+poscar.getbrillouinzone.hexagonal<-function(poscar,rotate=0,extend=1,strain=0){ 
   basicpattern <- list(c(1,1,0),c(0,1,1))
   poscar$a <- poscar$a*(1-strain)
   rotate <- -(rotate)/180*pi
   poscar$basis[1:2,1:2] <- poscar$basis[1:2,1:2]%*%rbind(c(cos(rotate),-sin(rotate)),c(sin(rotate),cos(rotate)))
-  rbase <- poscar.getreciprocalbasis(poscar)[1:2,1:2]/4
-  vec2d <- rbind(rbase,(rbase[1,]+rbase[2,]),-rbase,-(rbase[1,]+rbase[2,]))
-  vec2d <-  list(vec2d[c(5,6,4,2,3,1),])
+  rbase <- poscar.getreciprocalbasis(poscar)[1:2,1:2]/2/cos(30/180*pi)
+  baseangle <- acos( sum(rbase[1,]*rbase[2,]) / ( sqrt(sum(rbase[1,]^2)) * sqrt(sum(rbase[2,]^2)) ) )
+  if(abs(abs(baseangle)>90/180*pi)){ # if >90°
+    rbase <- rbind(rbase[1,],rbase[1,]+rbase[2,],rbase[2,])
+  }
+  else{ # if <90°
+    rbase <- rbind(rbase[1,],rbase[2,],rbase[1,]-rbase[2,])
+  }
+  vec2d <- rbind(rbase,-rbase[,])
+  vec2d <- list(vec2d)
   if (extend>1)
   {
     patterns <- unlist(sapply(1:(extend),FUN=function(e){
@@ -68,17 +75,19 @@ poscar.getbrillouinzone.hexagonal<-function(poscar,rotate=0,extend=1,strain=0){
 #' @param strain applied to brillouinzone
 #' @export
 poscar.getbrillouinzone.rectangular<-function(poscar,rotate=0,extend=1,strain=0){  
-  angle <- basis.getangle(poscar$basis)
-  poscar <- poscar.rotate2d(poscar)  
+  #angle <- basis.getangle(poscar$basis)
+  #poscar <- poscar.rotate2d(poscar)  
   poscar$a <- poscar$a*(1-strain)
-  rotate <- (-rotate+angle)/180*pi
-  rbase <- poscar.getreciprocalbasis(poscar)[1:2,1:2]/2
-  alpha <- atan(rbase[2,2]/rbase[1,1])
-  rotate <- rotate-(pi-alpha)
-  mirror <- rbind(c(cos(2*alpha),sin(2*alpha)),c(sin(2*alpha),-cos(2*alpha)))
-  vec2d <- rbind(rbase,rbase%*%mirror)%*%rbind(c(cos(rotate),-sin(rotate)),c(sin(rotate),cos(rotate)))
+  rotate <- (-rotate)/180*pi
+  poscar$basis[1:2,1:2] <- poscar$basis[1:2,1:2]%*%rbind(c(cos(rotate),-sin(rotate)),c(sin(rotate),cos(rotate)))  
+  rbase <- poscar.getreciprocalbasis(poscar)[1:2,1:2]
+  #alpha <- atan(rbase[2,2]/rbase[1,1])
+  #rotate <- rotate-(pi-alpha)
+  #mirror <- rbind(c(cos(2*alpha),sin(2*alpha)),c(sin(2*alpha),-cos(2*alpha)))
+  vec2d <- rbind(c(0,0),rbase,rbase[1,]+rbase[2,])#rbase%*%mirror)%*%
+  #vec2d <- vec2d %*%rbind(c(cos(rotate),-sin(rotate)),c(sin(rotate),cos(rotate)))
   vec2d <- scale(vec2d,scale=F)
-  vec2d <- list(vec2d[c(1,3,2,4),])  
+  vec2d <- list(vec2d[c(1,3,4,2),])  
   if (extend>1)
   {
     ex <- seq(0,(2*extend-1),by=2)
@@ -150,4 +159,4 @@ plot.brillouinzone.addsympoints<-function(brillouinzone
   }))
   
 }
-
+source("../../d_dual_metals/CaBrillouinzone.R")

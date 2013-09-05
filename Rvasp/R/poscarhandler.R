@@ -1107,8 +1107,7 @@ poscar.getreciprocalbasis<-function(poscar){
 #' @export
 basis.getreciprocal<-function(basis,a=1){
   basis <- basis*a
-  rbasis <- 2*pi*t(solve(basis))
-  
+  rbasis <- t(solve(basis))  
   return(rbasis)
 }
 

@@ -1021,22 +1021,36 @@ atoms.createsupercell <- function(atomsdirect,super=c(1,1,1),center=T,center.dir
   return(atoms)
 }
 
-#' Creates simple supercell
+#' Creates supercell
 #' 
-#' \code{poscar.createsupercell} creates simple supercell.
-#' Only whole-number supercells.
+#' \code{poscar.createsupercell} creates supercell.
 #' 
 #' @param poscar object of class poscar
-#' @param super 3d whole-number vector which defines, size of supercell in 3 directions 
+#' @param A 3x3 matrix which will connect new with old basis B_new = A %*% B_old
 #' @param center determines if new cell should be centered
 #' @param center.directions subset of 1,2,3 determines which directions should be centered (see \code{atoms.centeratoms})
 #' @param center.position relativ to which the atoms should be aranged (3d vector) (see \code{atoms.centeratoms})
+#' @param rotate will rotate atoms 
 #' @export
-poscar.createsupercell<-function(poscar,super=c(1,1,1),center=T,center.directions=1:3,center.position=rep(0.5,3)){
-  poscar$atoms <- atoms.createsupercell(atomsdirect=poscar$atoms,super=super,center=F)
-  atomsreal <- poscar.getbasisconvertedatoms(poscar)
-  poscar$basis <- diag(super)%*%poscar$basis
-  poscar$atoms <- atoms.convertbasis(atoms=atomsreal,basis=poscar$basis*poscar$a,forth=T)
+poscar.createsupercell<-function(poscar,A=diag(3),center=T,center.directions=1:3,center.position=rep(0.5,3)){  
+  stopifnot(is.matrix(A))
+  stopifnot(length(A)==9)
+  oldbasis <- poscar$basis  
+  volold <- det(oldbasis)
+  atomspervolold <- nrow(poscar$atoms)/volold
+  newbasis <- A%*%oldbasis
+  super <- c(sqrt(sum(newbasis[1,]^2)/sum(oldbasis[1,]^2)),
+            sqrt(sum(newbasis[1,]^2)/sum(oldbasis[1,]^2)),     
+            sqrt(sum(newbasis[3,]^2)/sum(oldbasis[3,]^2)))
+  super <- super*4
+  vol <- det(newbasis)
+  print(paste("theoretical new atom count:",atomspervolold*vol))
+  oldatoms <- atoms.createsupercell(atomsdirect=poscar$atoms,super=super,center=T,center.position=rep(0.5,3))  
+  newatoms <- atoms.convertbasis(atoms=oldatoms,basis=oldbasis,forth=F)
+  poscar$atoms <- atoms.convertbasis(atoms=newatoms,basis=newbasis,forth=T)
+  poscar$atoms <- poscar$atoms[apply(0<=poscar$atoms[,1:3] & poscar$atoms[,1:3]<1,1,all),]
+  poscar$basis <- newbasis
+  print(paste("found",nrow(poscar$atoms),"atoms in new cell"))
   if(center)
     poscar <- poscar.centeratoms(poscar,directions=center.directions,position=center.position)
   return(poscar)

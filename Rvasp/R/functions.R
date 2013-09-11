@@ -39,20 +39,102 @@ plot.addlabel<-function(label,top=0.5,left=0){
             just=c("left", "top")) 
 }
 
-#' calculated the crossproduct of two given 3d vectors
+#' Calculated the crossproduct of two given 3d vectors
 #'  
 #' \code{crossprod.vec} calculated the crossproduct
 #' 
-#' @param vec1 Vector 1
-#' @param vec2 Vector 2
+#' @param vector1 first vector
+#' @param vector2 second vector
 #' @export
-crossprod.vec<-function(vec1,vec2){
-  vec3 <- c(vec1[2]*vec2[3]-vec1[3]*vec2[2],
-            vec1[3]*vec2[1]-vec1[1]*vec2[3],
-            vec1[1]*vec2[2]-vec1[2]*vec2[1]
+vectors.crossproduct<-function(vector1,vector2){
+  vec3 <- c(vector1[2]*vector2[3]-vector1[3]*vector2[2],
+            vector1[3]*vector2[1]-vector1[1]*vector2[3],
+            vector1[1]*vector2[2]-vector1[2]*vector2[1]
   )
   return(vec3)
 }
+
+#' Gets the euclidean length of a vector
+#' 
+#' \code{vector.length} gets the euclidean length of a vector.
+#' @param vector the vector
+#' @export
+vector.length <- function(vector){   
+  return(sqrt(sum(vector*vector)))
+}
+
+#' Gets the angle between two vectors
+#' 
+#' \code{vectors.calcangle} calcultes the angle between two vectors.
+#' Gives angle in radians.
+#' 
+#' @param vector1 first vector
+#' @param vector2 second vector
+#' @param period (optional) if provided folds the angle back to its period. Period in radians.
+#' @export
+vectors.calcangle <- function(vector1,vector2,period=NA){
+  a <- acos( sum(vector1*vector2) / ( vector.length(vector1) * vector.length(vector2)) ) 
+  if(!is.na(period))
+    while(a<0|a>period){
+      if(a<0)
+        a <- a+period
+      if(a>period)
+        a <- a+period
+    }    
+  return(a)
+}
+
+#' Gets the angle between two vectors
+#' 
+#' \code{vectors.calcangle.degree} calcultes the angle between two vectors.
+#' Gives angle in degrees.
+#' 
+#' @param vector1 first vector
+#' @param vector2 second vector
+#' @param period (optional) if provided folds the angle back to its period. Period in degrees.
+#' @export
+vectors.calcangle.degree <- function(vector1,vector2,period=NA){
+  return(vectors.calcangle(vector1,vector2,period/180*pi)/pi*180 )
+}
+
+#' Gets 2d rotation matrix
+#' 
+#' \code{matrix.rotation2d} gets 2d rotation matrix for given angle.
+#' 
+#' @param angle angle in radians
+#' @export
+matrix.rotation2d<-function(angle)
+  return(rbind(c(cos(angle),-sin(angle)),c(sin(angle),cos(angle))))
+
+#' Gets 2d rotation matrix
+#' 
+#' \code{matrix.rotation2d.degree} gets 2d rotation matrix for given angle.
+#' 
+#' @param angle angle in degrees
+#' @export
+matrix.rotation2d.degree<-function(angle)
+  return(matrix.rotation2d(angle/180*pi))
+
+#' Gets matrix for reflection across a line
+#' 
+#' \code{matrix.reflection2d} gets matrix for reflection across a line which goes through zero.
+#' 
+#' @param slope given in degrees
+#' @export
+matrix.reflection2d.degree<-function(slope){
+  return(matrix.reflection2d(slope/180*pi))
+}
+
+#' Gets matrix for reflection across a line
+#' 
+#' \code{matrix.reflection2d} gets matrix for reflection across a line which goes through zero.
+#' 
+#' @param slope given in radians
+#' @export
+matrix.reflection2d<-function(slope){
+  return(cbind(c(cos(2*slope),sin(2*slope)),c(sin(2*slope),-cos(2*slope))))
+}
+
 
 #' makes a vector of colors transparent
 #' snippet from stackoverflow.com

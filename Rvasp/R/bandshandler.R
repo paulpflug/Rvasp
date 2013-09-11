@@ -2,7 +2,7 @@ require(XML)
 require(lattice)
 require(grid)
 require(snowfall)
-
+require(akima)
 #' Reads bandsdata
 #' 
 #' \code{read.bandsdata} Reads bandsdata from vasprun.xml.
@@ -16,8 +16,8 @@ read.bandsdata <- function(xmlfile){
   ### parsing xml tree 
   xmlobj <- xmlTreeParse(xmlfile, getDTD=FALSE, useInternalNodes=TRUE)
   # find k basis in xml
-  result$kbasis <- xpathSApply(xmlobj, "/modeling/structure[@name='initialpos']/crystal/varray[@name='rec_basis']/*",
-                               function(x) as.numeric(strsplit(xmlValue(x)," +")[[1]][-1]))
+  result$kbasis <- t(xpathSApply(xmlobj, "/modeling/structure[@name='initialpos']/crystal/varray[@name='rec_basis']/*",
+                               function(x) as.numeric(strsplit(xmlValue(x)," +")[[1]][-1])))
   # find k points in xml
   result$kpoints <- t(xpathSApply(xmlobj, "/modeling/kpoints/varray[@name='kpointlist']/*",
                                   function(x) as.numeric(strsplit(xmlValue(x)," +")[[1]][-1])))
@@ -1005,3 +1005,143 @@ plot.bandsfit.add<-function(bandsfit,kpoints=bandsfit$knumbers,n=201,energyoffse
   k <- seq(x[[1]],x[[2]],length.out=n)
   lines(k,data$energy+energyoffset,col="red",...)
 }
+
+#' Plots the 2d grid used in bandsdata
+#' 
+#' \code{plot.bandsdata.grid} plots the 2d grid used in bandsdata.
+#' Main purpose is to test sym operations, to come to a statisfying grid.
+#' 
+#' @param bandsdata object of class bandsdata
+#' @param projecttobz (optional) projects kpoints to the first brillouinzone
+#' @param sym See \code{\link{dataframe.applysymoperations}} for usage.
+#' @param ... further plotting parameters
+#' @export
+plot.bandsdata.grid <- function(bandsdata,projecttobz=F,sym=NA,...){
+  rbase <- bandsdata$kbasis[1:2,1:2]
+  vec2d <- reciprocalbasis.getbrillouinzone(bandsdata$kbasis)
+  kpoints <- (bandsdata$kpoints[,1:2]%*%rbase)
+  colnames(kpoints)<-c("kx","ky")
+  if(projecttobz){
+    kpoints <-  brillouinzone.projectkpoints(vec2d,kpoints)
+  }
+  if(length(sym)>1 || !is.na(sym)){
+    kpoints <- dataframe.applysymoperations(kpoints,sym)
+  }
+  plot(kpoints,asp=1,xlim=range(vec2d[,1]),ylim=range(vec2d[,2]),...)
+  polygon(vec2d)
+}
+
+#' Plots the 3d bandsdata
+#' 
+#' \code{plot.bandsdata3d} plots the 3d bandsdata.
+#' Projected states can be added as additional datalayer.
+#' First make sure, you have a statisfying grid. See \code{\link{plot.bandsdata.grid}}.
+#' 
+#' @param bandsdata object of class bandsdata
+#' @param band index of band to plot
+#' @param projecttobz (optional) projects kpoints to the first brillouinzone
+#' @param n resolution of datalayers
+#' @param sym See \code{\link{dataframe.applysymoperations}} for usage and \code{\link{plot.bandsdata.grid}} for testing.
+#' @param projected activate for additional datalayer with projected states.
+#' @param projected.atoms indices of atoms over which will be summed
+#' @param projected.energyintervall in which bands will be included (overwrites \code{projected.bands})
+#' @param projected.bands used for normating of color. searches for maximum projected value in these bands
+#' @param projected.orbitals list of orbitals to plot. To sum over orbitals 2 and 3 use \code{list(1,c(2,3),4)}
+#' @param projected.colorpalette color palette for orbitals
+#' @param ... further plotting parameters
+
+#' @param energyintervall 
+#' @export
+plot.bandsdata3d<-function(bandsdata,band,projecttobz=T,sym=NA,n=201
+                           ,projected=F,projected.atoms=1:bandsdata$natoms,projected.energyintervall=NULL,projected.bands=1:bandsdata$nbands
+                           ,projected.orbitals=list(1,2,3,4)
+                           ,projected.colorpalette=colorRampPalette(c("red","blue","green"))
+                           ,xlab=expression(k[x]),ylab=expression(k[y]),...
+                           ){  
+  rbase <- bandsdata$kbasis[1:2,1:2]
+  vec2d <- reciprocalbasis.getbrillouinzone(bandsdata$kbasis)
+  kpoints <- (bandsdata$kpoints[,1:2]%*%rbase)
+  if(projecttobz){
+    kpoints <-  brillouinzone.projectkpoints(vec2d,kpoints)
+  }
+  data <- cbind(kpoints,1:nrow(kpoints))
+  data <- data[order(data[,1],data[,2],data[,3]),]
+  data<- as.data.frame(data)
+  colnames(data) <-c("kx","ky","index")
+  if(length(sym)>1 || !is.na(sym)){
+    data <- dataframe.applysymoperations(data,sym)
+  }
+  
+  xo <- seq(min(data[,1]),max(data[,1]),length=n)
+  yo <- seq(min(data[,2]),max(data[,2]),length=n)
+  e<-interp(data$kx,data$ky,bandsdata$bands[[band]]$simpledata[data$index,2],linear=F,xo=xo,yo=yo)
+  plot(1,xlim=range(vec2d[,1]),ylim=range(vec2d[,2]),type="n",asp=1,xlab=xlab,ylab=ylab)
+  if(projected){
+    proj<- bandsdata.getprojecteddata(bandsdata,bands=projected.bands,atomindices=projected.atoms,energyintervall=projected.energyintervall)
+    projbands <- lapply(proj$bands,FUN=function(band){
+      band <-apply(band[,-(1:2)],MARGIN=2,FUN=as.numeric)
+      do.call(cbind,lapply(projected.orbitals,FUN=function(orb){      
+        if(length(orb)>1)
+          b <- rowSums(band[,(orb)])
+        else
+          b <- as.numeric(band[,(orb)])
+        return (b)
+      }))
+    })
+    maxis <- apply(do.call(rbind,projbands),2,max)
+    colors <- projected.colorpalette(length(projected.orbitals))
+    lapply(1:length(projected.orbitals),FUN=function(orb){
+      da <- projbands[[paste0("band",band)]][,orb]
+      p<-interp(data$kx,data$ky,da[data$index],linear=F,xo=xo,yo=yo)
+
+      color <- colors[[orb]]
+      image(p$x,p$y,p$z,breaks=seq(0,maxis[orb],length.out=257),col=makeTransparent(color,0:255),add=T)
+    })
+
+
+  }else{
+    image(e$x,e$y,e$z,col=makeTransparent("black",0:255),add=T)
+  }
+  contour(e$x,e$y,e$z,add=T)
+  polygon(vec2d)
+}
+
+#' Applies chain of symmetric operation on a dataframe
+#' 
+#' \code{dataframe.applysymoperations} applied a chain of 2d symmetric operations on the first two columns of the dataframe
+#' 
+#' @param dataframe dataframe with at least two columns
+#' @param symoperations list of symmetric operations. \code{list(c("reflection",-30),c("rotation",120,60))} 
+#' for example will first reflect across a line with the slope of -30°, afterwards the new dataset (old+reflected) will be rotated by 120° and 60°
+#' the resulting dataset will consist of 6 combined datasets. The old, the reflected and the old+reflected, rotated by 120° and by 60°.
+#' @export
+dataframe.applysymoperations<-function(dataframe,symoperations){
+  stopifnot(ncol(dataframe)>=2)
+  names <- colnames(dataframe)
+  for(sym in symoperations){
+    if(length(sym)>1){
+      for(i in 2:length(sym)){
+        rmatrix <- switch(sym[[1]],
+                          "reflection" = matrix.reflection2d.degree(as.numeric(sym[[i]])),
+                          "rotation" = matrix.rotation2d.degree(as.numeric(sym[[i]])),
+                          default = NA)
+        d2 <-data.matrix(dataframe[,1:2])%*%t(rmatrix)
+        if(ncol(dataframe)>2){
+          d2 <- cbind(d2,dataframe[,3:ncol(dataframe)])
+        }
+        if(i==2)
+          d <- d2
+        else
+          d <- rbind(d,d2)        
+      }
+      if(ncol(d)==ncol(dataframe)){
+        colnames(d)<-names
+        dataframe <- rbind(dataframe,d)
+      }
+    }
+  }
+  dataframe <- dataframe[order(dataframe[,1],dataframe[,2]),]
+  dataframe<-unique(dataframe)  
+  return(dataframe)
+}
+

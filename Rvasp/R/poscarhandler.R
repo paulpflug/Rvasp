@@ -1026,11 +1026,10 @@ atoms.createsupercell <- function(atomsdirect,super=c(1,1,1),center=T,center.dir
 #' \code{poscar.createsupercell} creates supercell.
 #' 
 #' @param poscar object of class poscar
-#' @param A 3x3 matrix which will connect new with old basis B_new = A %*% B_old
+#' @param A a 3x3 matrix which will connect new with old basis \code{B_new = A x B_old}
 #' @param center determines if new cell should be centered
-#' @param center.directions subset of 1,2,3 determines which directions should be centered (see \code{atoms.centeratoms})
+#' @param center.directions subset of 1,2,3, determines which directions should be centered (see \code{atoms.centeratoms})
 #' @param center.position relativ to which the atoms should be aranged (3d vector) (see \code{atoms.centeratoms})
-#' @param rotate will rotate atoms 
 #' @export
 poscar.createsupercell<-function(poscar,A=diag(3),center=T,center.directions=1:3,center.position=rep(0.5,3)){  
   stopifnot(is.matrix(A))

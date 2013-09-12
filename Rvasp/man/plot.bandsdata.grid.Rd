@@ -3,7 +3,7 @@
 \title{Plots the 2d grid used in bandsdata}
 \usage{
   plot.bandsdata.grid(bandsdata, maxdistancetobz = 1e-04,
-    sym = NA, ...)
+    sym = NA, xlim = NA, ylim = NA, ...)
 }
 \arguments{
   \item{bandsdata}{object of class bandsdata}

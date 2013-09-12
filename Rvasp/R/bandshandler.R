@@ -3,6 +3,7 @@ require(lattice)
 require(grid)
 require(snowfall)
 require(akima)
+require(rgl)
 #' Reads bandsdata
 #' 
 #' \code{read.bandsdata} Reads bandsdata from vasprun.xml.
@@ -1032,9 +1033,9 @@ plot.bandsdata.grid <- function(bandsdata,maxdistancetobz=1e-4,sym=NA,xlim=NA,yl
   polygon(vec2d)
 }
 
-#' Plots the 3d bandsdata
+#' Plots the contour bandsdata
 #' 
-#' \code{plot.bandsdata3d} plots the 3d bandsdata.
+#' \code{plot.bandsdata.contour} plots the contour bandsdata of a single band.
 #' Projected states can be added as additional datalayer.
 #' First make sure, you have a statisfying grid. See \code{\link{plot.bandsdata.grid}}.
 #' 
@@ -1050,13 +1051,11 @@ plot.bandsdata.grid <- function(bandsdata,maxdistancetobz=1e-4,sym=NA,xlim=NA,yl
 #' @param projected.orbitals list of orbitals to plot. To sum over orbitals 2 and 3 use \code{list(1,c(2,3),4)}
 #' @param projected.colorpalette color palette for orbitals
 #' @param ... further plotting parameters
-
-#' @param energyintervall 
 #' @export
-plot.bandsdata3d<-function(bandsdata,band,maxdistancetobz=1e-4,sym=NA,n=201
+plot.bandsdata.contour<-function(bandsdata,band,maxdistancetobz=1e-4,sym=NA,n=201,breaks=12,colorpalette=colorRampPalette(c("red","blue","green"))
                            ,projected=F,projected.atoms=1:bandsdata$natoms,projected.energyintervall=NULL,projected.bands=1:bandsdata$nbands
                            ,projected.orbitals=list(1,2,3,4)
-                           ,projected.colorpalette=colorRampPalette(c("red","blue","green"))
+                           ,projected.colors=colorRampPalette(c("red","blue","green"))(length(projected.orbitals))
                            ,xlab=expression(k[x]),ylab=expression(k[y]),...
                            ){  
   rbase <- bandsdata$kbasis[1:2,1:2]
@@ -1075,7 +1074,9 @@ plot.bandsdata3d<-function(bandsdata,band,maxdistancetobz=1e-4,sym=NA,n=201
   yo <- seq(min(data[,2]),max(data[,2]),length=n)
   e<-interp(data$kx,data$ky,bandsdata$bands[[band]]$simpledata[data$index,2],linear=F,xo=xo,yo=yo)
   plot(1,xlim=range(vec2d[,1]),ylim=range(vec2d[,2]),type="n",asp=1,xlab=xlab,ylab=ylab)
+  levels <- pretty(range(e$z,finite=T),breaks)
   if(projected){
+    colors <- lapply(projected.colors,FUN=function(x)colorRampPalette(c("white",x))(breaks))
     proj<- bandsdata.getprojecteddata(bandsdata,bands=projected.bands,atomindices=projected.atoms,energyintervall=projected.energyintervall)
     projbands <- lapply(proj$bands,FUN=function(band){
       band <-apply(band[,-(1:2)],MARGIN=2,FUN=as.numeric)
@@ -1087,22 +1088,132 @@ plot.bandsdata3d<-function(bandsdata,band,maxdistancetobz=1e-4,sym=NA,n=201
         return (b)
       }))
     })
-    maxis <- apply(do.call(rbind,projbands),2,max)
-    colors <- projected.colorpalette(length(projected.orbitals))
-    lapply(1:length(projected.orbitals),FUN=function(orb){
+    maxis <- max(do.call(rbind,projbands))
+    pbreaks <- pretty(c(0,maxis),breaks)
+    cols <- lapply(1:length(projected.orbitals),FUN=function(orb){
       da <- projbands[[paste0("band",band)]][,orb]
-      p<-interp(data$kx,data$ky,da[data$index],linear=F,xo=xo,yo=yo)
-
-      color <- colors[[orb]]
-      image(p$x,p$y,p$z,breaks=seq(0,maxis[orb],length.out=257),col=makeTransparent(color,0:255),add=T)
+      p<-interp(data$kx,data$ky,da[data$index],linear=F,xo=xo,yo=yo)   
+      
+      
+      zcol <- cut(p$z,pbreaks)
+      rgbcol <- col2rgb(colors[[orb]][zcol])
+      return(rbind(rgbcol,as.numeric(zcol)/length(pbreaks)))
+    })
+    rgb <- lapply(1:3,FUN=function(rgb){
+      rgbcol <- lapply(1:length(cols),FUN=function(x)cols[[x]][c(rgb,4),])        
+      rgbcol <- do.call(rbind,rgbcol)
+      rgbcol <- apply(rgbcol,2,FUN=function(column){
+        value <-sum(column[c(1,3,5)]*column[c(2,4,6)], na.rm = T)/sum(column[c(2,4,6)], na.rm = T)
+        if(is.na(value)) return(255)
+        else return(value)
+      })
+      return(rgbcol)
     })
 
-
+    col <- rgb(rgb[[1]],rgb[[2]],rgb[[3]],maxColorValue=255)
+    ucol <- unique(col)
+    m <- matrix(match(col,ucol),nrow=length(e$y),ncol=length(e$x))
+    image(e$x,e$y,m,col=ucol,breaks=(0:(length(ucol))),useRaster=T,add=T)
+    
   }else{
-    image(e$x,e$y,e$z,add=T)
+    image(e$x,e$y,e$z,add=T,breaks=levels,col=colorpalette(length(levels)-1),useRaster=T)
   }
-  contour(e$x,e$y,e$z,add=T)
+  contour(e$x,e$y,e$z,add=T,levels=levels)
   polygon(vec2d)
+}
+
+#' Plots the perspective bandsdata
+#' 
+#' \code{plot.bandsdata.persp} plots the perspective bandsdata.
+#' Projected states can be added as additional datalayer.
+#' First make sure, you have a statisfying grid. See \code{\link{plot.bandsdata.grid}}.
+#' 
+#' @param bandsdata object of class bandsdata
+#' @param bands indices of bands to plot
+#' @param maxdistancetobz (optional) allowed kpoint distance to the first brillouinzone
+#' @param n resolution of datalayers
+#' @param sym See \code{\link{dataframe.applysymoperations}} for usage and \code{\link{plot.bandsdata.grid}} for testing.
+#' @param colorpalette colors which are used if \code{projected} is \code{False}
+#' @param asp aspect ration between energy and k-space
+#' @param breaks number of steps in color coding
+#' @param projected activate for additional datalayer with projected states.
+#' @param projected.atoms indices of atoms over which will be summed
+#' @param projected.bands (optional) used for normating of color. searches for maximum projected value in these bands. Make sure your desired bands are included.
+#' @param projected.energyintervall (optional) in which bands will be included for norming projected. Make sure your desired bands are in this intervall.
+#' @param projected.orbitals list of orbitals to plot. To sum over orbitals 2 and 3 use \code{list(1,c(2,3),4)}
+#' @param projected.colorpalette color palette for orbitals
+#' @param ... further plotting parameters
+#' @seealso \code{\link{rgl}}
+#' @export
+plot.bandsdata.3d<-function(bandsdata,bands,maxdistancetobz=1e-4,sym=NA,n=201,colorpalette=colorRampPalette(c("red","white","blue")),asp=1
+                            ,breaks=256,projected=F,projected.atoms=1:bandsdata$natoms,projected.orbitals=list(1,2,3,4)
+                            ,projected.bands=1:bandsdata$nbands,projected.energyintervall=NULL
+                            ,projected.colors= colorRampPalette(c("red","blue","green"))(length(projected.orbitals))
+                                 ,xlab=expression(k[x]),ylab=expression(k[y]),zlab="energy (eV)",back="filled",front="filled",box=F,...
+){  
+  rbase <- bandsdata$kbasis[1:2,1:2]
+  vec2d <- reciprocalbasis.getbrillouinzone(bandsdata$kbasis)
+  kpoints <- (bandsdata$kpoints[,1:2]%*%rbase)
+  data <- cbind(kpoints,1:nrow(kpoints))
+  data<-brillouinzone.extendkpoints(vec2d,data)
+  data <- brillouinzone.selectkpoints(vec2d,data,maxdistance=maxdistancetobz)
+  data <- data[order(data[,1],data[,2],data[,3]),]
+  data<- as.data.frame(data)
+  colnames(data) <-c("kx","ky","index")
+  if(length(sym)>1 || !is.na(sym)){
+    data <- dataframe.applysymoperations(data,sym)
+  }
+  zrange <- range(sapply(bandsdata$bands[bands],FUN=function(band){
+    return (band$simpledata[,2])
+  }))
+  pbreaks <- pretty(zrange,breaks)
+  xo <- seq(min(data[,1]),max(data[,1]),length=n)
+  yo <- seq(min(data[,2]),max(data[,2]),length=n)
+  m <- cbind(vec2d[,1],vec2d[,2],rep(0,nrow(vec2d)))
+  m <- rbind(m,m[1,])
+  plot3d(m,lwd=3,xlab=xlab,ylab=ylab,zlab=zlab,type="l",aspect=c(1,1,asp),box=box)  
+  if(projected){
+    colors <- lapply(projected.colors,FUN=function(x)colorRampPalette(c("white",x))(breaks))
+    proj<- bandsdata.getprojecteddata(bandsdata,bands=projected.bands,atomindices=projected.atoms,energyintervall=projected.energyintervall)
+    projbands <- lapply(proj$bands,FUN=function(band){
+      band <-apply(band[,-(1:2)],MARGIN=2,FUN=as.numeric)
+      do.call(cbind,lapply(projected.orbitals,FUN=function(orb){      
+        if(length(orb)>1)
+          b <- rowSums(band[,(orb)])
+        else
+          b <- as.numeric(band[,(orb)])
+        return (b)
+      }))
+    })
+    maxis <- max(do.call(rbind,projbands))
+    pbreaks <- pretty(c(0,maxis),breaks)
+  } 
+  for(iband in 1:length(bands)){
+    e<-interp(data$kx,data$ky,bandsdata$bands[[bands[[iband]]]]$simpledata[data$index,2],linear=F,xo=xo,yo=yo)
+    zcol <- cut(e$z,pbreaks)
+    col <- colorpalette(length(pbreaks))[zcol]    
+    if(projected){      
+      cols <- lapply(1:length(projected.orbitals),FUN=function(orb){
+        da <- projbands[[paste0("band",bands[[iband]])]][,orb]
+        p<-interp(data$kx,data$ky,da[data$index],linear=F,xo=xo,yo=yo)       
+        zcol <- cut(p$z,pbreaks)
+        rgbcol <- col2rgb(colors[[orb]][zcol])
+        return(rbind(rgbcol,as.numeric(zcol)/length(pbreaks)))
+      })
+      rgb <- lapply(1:3,FUN=function(rgb){
+        rgbcol <- lapply(1:length(cols),FUN=function(x)cols[[x]][c(rgb,4),])        
+        rgbcol <- do.call(rbind,rgbcol)
+        rgbcol <- apply(rgbcol,2,FUN=function(column){
+          value <-sum(column[c(1,3,5)]*column[c(2,4,6)], na.rm = T)/sum(column[c(2,4,6)], na.rm = T)
+          if(is.na(value)) return(255)
+          else return(value)
+          })
+        return(rgbcol)
+      })
+      col <- rgb(rgb[[1]],rgb[[2]],rgb[[3]],maxColorValue=255)
+    }  
+    persp3d(e$x,e$y,e$z,lit=T,col=col,back=back,add=T,front=front,...)
+  }  
 }
 
 #' Applies chain of symmetric operation on a dataframe

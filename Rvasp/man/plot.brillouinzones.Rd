@@ -2,7 +2,7 @@
 \alias{plot.brillouinzones}
 \title{Plots brillouinzones}
 \usage{
-  plot.brillouinzones(brillouinzone, xlab = NA, ylab = NA,
+  plot.brillouinzones(brillouinzones, xlab = NA, ylab = NA,
     xaxt = "n", yaxt = "n", col = "blue", typ = "l", ...)
 }
 \arguments{

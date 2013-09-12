@@ -74,13 +74,14 @@ vector.length <- function(vector){
 #' @export
 vectors.calcangle <- function(vector1,vector2,period=NA){
   a <- acos( sum(vector1*vector2) / ( vector.length(vector1) * vector.length(vector2)) ) 
-  if(!is.na(period))
-    while(a<0|a>period){
+  if(!is.na(period)&&!is.na(a)){
+    while(a<0||a>period){
       if(a<0)
         a <- a+period
       if(a>period)
-        a <- a+period
-    }    
+        a <- a-period
+    }   
+  }
   return(a)
 }
 
@@ -95,6 +96,19 @@ vectors.calcangle <- function(vector1,vector2,period=NA){
 #' @export
 vectors.calcangle.degree <- function(vector1,vector2,period=NA){
   return(vectors.calcangle(vector1,vector2,period/180*pi)/pi*180 )
+}
+
+#' Checks two vectors for collinearity
+#' 
+#' \code{vectors.arecollinear} checks two vectors for collinearity.
+#' 
+#' @param vector1 first vector
+#' @param vector2 second vector
+#' @param prec (optional) precission
+#' @export
+vectors.arecollinear <- function(vector1,vector2,prec=1e-6){
+  facs <- vector1/vector2
+  return(all(abs(1-facs/facs[[1]])<prec))
 }
 
 #' Gets 2d rotation matrix

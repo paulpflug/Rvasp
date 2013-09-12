@@ -1012,22 +1012,23 @@ plot.bandsfit.add<-function(bandsfit,kpoints=bandsfit$knumbers,n=201,energyoffse
 #' Main purpose is to test sym operations, to come to a statisfying grid.
 #' 
 #' @param bandsdata object of class bandsdata
-#' @param projecttobz (optional) projects kpoints to the first brillouinzone
+#' @param maxdistancetobz (optional) allowed kpoint distance to the first brillouinzone
 #' @param sym See \code{\link{dataframe.applysymoperations}} for usage.
 #' @param ... further plotting parameters
 #' @export
-plot.bandsdata.grid <- function(bandsdata,projecttobz=F,sym=NA,...){
+plot.bandsdata.grid <- function(bandsdata,maxdistancetobz=1e-4,sym=NA,xlim=NA,ylim=NA,...){
   rbase <- bandsdata$kbasis[1:2,1:2]
   vec2d <- reciprocalbasis.getbrillouinzone(bandsdata$kbasis)
   kpoints <- (bandsdata$kpoints[,1:2]%*%rbase)
   colnames(kpoints)<-c("kx","ky")
-  if(projecttobz){
-    kpoints <-  brillouinzone.projectkpoints(vec2d,kpoints)
-  }
+  kpoints<-brillouinzone.extendkpoints(vec2d,kpoints)
+  kpoints <- brillouinzone.selectkpoints(vec2d,kpoints,maxdistance=maxdistancetobz)
   if(length(sym)>1 || !is.na(sym)){
     kpoints <- dataframe.applysymoperations(kpoints,sym)
   }
-  plot(kpoints,asp=1,xlim=range(vec2d[,1]),ylim=range(vec2d[,2]),...)
+  if(any(is.na(xlim))) xlim <- range(vec2d[,1])
+  if(any(is.na(ylim))) ylim <- range(vec2d[,2])
+  plot(kpoints,asp=1,xlim=xlim,ylim=ylim,...)
   polygon(vec2d)
 }
 
@@ -1039,7 +1040,7 @@ plot.bandsdata.grid <- function(bandsdata,projecttobz=F,sym=NA,...){
 #' 
 #' @param bandsdata object of class bandsdata
 #' @param band index of band to plot
-#' @param projecttobz (optional) projects kpoints to the first brillouinzone
+#' @param maxdistancetobz (optional) allowed kpoint distance to the first brillouinzone
 #' @param n resolution of datalayers
 #' @param sym See \code{\link{dataframe.applysymoperations}} for usage and \code{\link{plot.bandsdata.grid}} for testing.
 #' @param projected activate for additional datalayer with projected states.
@@ -1052,7 +1053,7 @@ plot.bandsdata.grid <- function(bandsdata,projecttobz=F,sym=NA,...){
 
 #' @param energyintervall 
 #' @export
-plot.bandsdata3d<-function(bandsdata,band,projecttobz=T,sym=NA,n=201
+plot.bandsdata3d<-function(bandsdata,band,maxdistancetobz=1e-4,sym=NA,n=201
                            ,projected=F,projected.atoms=1:bandsdata$natoms,projected.energyintervall=NULL,projected.bands=1:bandsdata$nbands
                            ,projected.orbitals=list(1,2,3,4)
                            ,projected.colorpalette=colorRampPalette(c("red","blue","green"))
@@ -1061,17 +1062,15 @@ plot.bandsdata3d<-function(bandsdata,band,projecttobz=T,sym=NA,n=201
   rbase <- bandsdata$kbasis[1:2,1:2]
   vec2d <- reciprocalbasis.getbrillouinzone(bandsdata$kbasis)
   kpoints <- (bandsdata$kpoints[,1:2]%*%rbase)
-  if(projecttobz){
-    kpoints <-  brillouinzone.projectkpoints(vec2d,kpoints)
-  }
   data <- cbind(kpoints,1:nrow(kpoints))
+  data<-brillouinzone.extendkpoints(vec2d,data)
+  data <- brillouinzone.selectkpoints(vec2d,data,maxdistance=maxdistancetobz)
   data <- data[order(data[,1],data[,2],data[,3]),]
   data<- as.data.frame(data)
   colnames(data) <-c("kx","ky","index")
   if(length(sym)>1 || !is.na(sym)){
     data <- dataframe.applysymoperations(data,sym)
   }
-  
   xo <- seq(min(data[,1]),max(data[,1]),length=n)
   yo <- seq(min(data[,2]),max(data[,2]),length=n)
   e<-interp(data$kx,data$ky,bandsdata$bands[[band]]$simpledata[data$index,2],linear=F,xo=xo,yo=yo)
@@ -1100,7 +1099,7 @@ plot.bandsdata3d<-function(bandsdata,band,projecttobz=T,sym=NA,n=201
 
 
   }else{
-    image(e$x,e$y,e$z,col=makeTransparent("black",0:255),add=T)
+    image(e$x,e$y,e$z,add=T)
   }
   contour(e$x,e$y,e$z,add=T)
   polygon(vec2d)

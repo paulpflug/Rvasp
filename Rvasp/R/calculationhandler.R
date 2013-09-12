@@ -55,8 +55,11 @@ read.calculations <- function(folders,name="calculations",calculations=list(),ch
           class(calcdata) <- "calculationdata"
           calcdata[["paralist"]] <- sapply(parassplitted,FUN=function(x){
             para <- strsplit(x,"_")[[1]]
-            return(cbind(para[[1]],para[[2]]))
-                                                                         })
+            if(length(para)>1)
+              return(cbind(para[[1]],para[[2]]))
+            else
+              return(para[[1]])
+          })
           for (ps in parassplitted)
           {
             para <- strsplit(ps,"_")[[1]]

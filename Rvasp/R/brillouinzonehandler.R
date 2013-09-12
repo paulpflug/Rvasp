@@ -5,7 +5,7 @@
 #' @param brillouinzones object of class brillouinzones
 #' @param ... further plotting parameters
 #' @export
-plot.brillouinzones<- function(brillouinzone,
+plot.brillouinzones<- function(brillouinzones,
                               xlab=NA,
                               ylab=NA,
                               xaxt="n",
@@ -13,9 +13,9 @@ plot.brillouinzones<- function(brillouinzone,
                               col="blue",
                               typ="l",
                               ...){
-  plot(apply(do.call(rbind,brillouinzone),2,range),asp=1,typ="n",xlab=xlab,ylab=ylab,xaxt=xaxt,yaxt=yaxt,...)
+  plot(apply(do.call(rbind,brillouinzones),2,range),asp=1,typ="n",xlab=xlab,ylab=ylab,xaxt=xaxt,yaxt=yaxt,...)
   if(typ!="n")
-    plot.brillouinzones.add(brillouinzone,col=col,...)
+    plot.brillouinzones.add(brillouinzones,col=col,...)
 }
 
 #' Adds brilloinzonevector to existing plot
@@ -26,7 +26,7 @@ plot.brillouinzones<- function(brillouinzone,
 #' @param ... further plotting parameters
 #' @export
 plot.brillouinzones.add<-function(brillouinzones,col="blue",...){  
-  invisible(lapply(brillouinzone,FUN=function(x)polygon(x,border=col,...)))
+  invisible(lapply(brillouinzones,FUN=function(x)polygon(x,border=col,...)))
 }
 
 #' Adds high symmetry points to existing plot
@@ -56,9 +56,9 @@ plot.brillouinzones.addsympoints<-function(brillouinzones
   if (length(yoffset)<length(directcoordinates))
     yoffset <- rep(yoffset,ceiling(length(directcoordinates)/length(yoffset)))
   library(grid)
-  brillouinzone<-do.call(rbind,brillouinzone)
+  brillouinzones<-do.call(rbind,brillouinzones)
   invisible(lapply(1:length(directcoordinates),FUN=function(i){
-    vec <- directcoordinates[[i]]%*%brillouinzone[vectors,]  
+    vec <- directcoordinates[[i]]%*%brillouinzones[vectors,]  
     #legend(vec[[1]],vec[[2]],legend=labels[i],seg.len=0.1,text.col=col,xjust=0.5,yjust=0.5,x.intersp=-0.4,y.intersp=0.3)
     text(vec[[1]]+xoffset[i],vec[[2]]+yoffset[i],labels=labels[i],pos=textpos,col=col,...)
     #grid.text(labels[i],vec[[1]],vec[[2]],default.units="native",...)
@@ -85,7 +85,7 @@ basis.getbrillouinzone<-function(basis){
 #' @param recbasis basis in reciprocal space
 #' @export
 reciprocalbasis.getbrillouinzone<-function(recbasis){
-  baseanglexy <- round(vectors.calcangle.degree(recbasis[1,],recbasis[2,],period=180),2)
+  baseanglexy <- round(vectors.calcangle.degree(recbasis[1,],recbasis[2,],period=180),1)
   type <- reciprocalbasis.getbrillouinzonetype(recbasis)
   if(!is.na(type)){
     rbasis <- recbasis[1:2,1:2]
@@ -104,7 +104,7 @@ reciprocalbasis.getbrillouinzone<-function(recbasis){
         rbasis <- rbind(rbasis[1,],rbasis[2,],rbasis[1,]-rbasis[2,])
       }
       rbasis <- (rbasis/2/cos(30/180*pi))%*%matrix.rotation2d.degree(30)
-      vec2d <- rbind(rbasis,-rbasis)
+      vec2d <- rbind(rbasis,rbasis%*%matrix.rotation2d.degree(180))
       class(vec2d)<-"brillouinzone"
       return(vec2d)
     }
@@ -120,9 +120,9 @@ reciprocalbasis.getbrillouinzone<-function(recbasis){
 #' @param recbasis basis in reciprocal space
 #' @export
 reciprocalbasis.getbrillouinzonetype<-function(recbasis){
-  baseanglexy <- round(vectors.calcangle.degree(recbasis[1,],recbasis[2,],period=180),2)
-  baseanglexz <- round(vectors.calcangle.degree(recbasis[1,],recbasis[3,],period=180),2)
-  baseangleyz <- round(vectors.calcangle.degree(recbasis[2,],recbasis[3,],period=180),2)
+  baseanglexy <- round(vectors.calcangle.degree(recbasis[1,],recbasis[2,],period=180),1)
+  baseanglexz <- round(vectors.calcangle.degree(recbasis[1,],recbasis[3,],period=180),1)
+  baseangleyz <- round(vectors.calcangle.degree(recbasis[2,],recbasis[3,],period=180),1)
   print(paste0("found following angles: xy=",baseanglexy,"° xz=",baseanglexz,"° yz=",baseangleyz,"°"))
   if(baseanglexz==90 & baseangleyz==90){
     rbasis <- recbasis[1:2,1:2]
@@ -230,22 +230,67 @@ brillouinzone.projectkpoints <- function(brillouinzone,kpoints){
 #' @param maxdistance (optional) allowed distance to first brillouinzone (shape-conserving)
 #' @export
 brillouinzone.selectkpoints <- function(brillouinzone,kpoints,maxdistance=0){
-  newpoints <- apply(kpoints,1,FUN=function(p){
+  newpoints <- apply(kpoints,1,FUN=function(point){
+    p <- as.numeric(point[1:2])
     distances <- order(sqrt((p[[1]] - brillouinzone[,1])^2 + (p[[2]] - brillouinzone[,2])^2)) # vertex distances from point
     v1 <- brillouinzone[distances[[1]],] # vertex 1
     v2 <- brillouinzone[distances[[2]],] # vertex 2
+    if(vectors.arecollinear(v1-v2,p-v2)){
+      a<-((p-v1)/(v2-v1))[[1]]
+      if(0<=a&a<=1){
+        return(point)
+      }else{
+        return(NULL)
+      }
+    }else{
+      a1 <- vectors.calcangle.degree(v1-v2,p-v2,period=180)
+      if(a1-90>1e-6){
+        v1 <- v2
+        v2 <- brillouinzone[distances[[3]],]
+      }else{
+        a2 <- vectors.calcangle.degree(v2-v1,p-v1,period=180)
+        if(a2-90>1e-6)
+          v2 <- brillouinzone[distances[[3]],]
+      }
+    }
+    
     dp <- vector.length(p) # distance 0P
     v3 <- v1+sum((p-v1)*(v2-v1))/vector.length(v2-v1)*(v2-v1)/vector.length(v2-v1) # vertex of the height of the triangle of v1,v2 and p 
+    
     d3 <- vector.length(v3)
     if(dp>d3){   
       if(vector.length(v3-p)<maxdistance)
-        return(p)
+        return(point)
       else
         return(NULL)
     }else{
-      return(p)
+      return(point)
     }    
   })
-  return(t(newpoints))
+  newpoints <- do.call(rbind,newpoints)
+  return(newpoints)
 }
 
+#' Extends kpoints two all second brillouinzones.
+#' 
+#' \code{brillouinzone.extendkpoints} translates kpoints two all second brillouinzones.
+#' 
+#' @param brillouinzone object of class brillouinzone
+#' @param kpoints object with arbitrary kpoints
+#' @export
+brillouinzone.extendkpoints <- function(brillouinzone,kpoints){
+  names <- colnames(kpoints)
+  len <- nrow(brillouinzone)
+  permutations <- outer(1:2,(1:len)-1,FUN="+")%%len+1
+  newkpoints <- lapply(1:len,FUN=function(i){
+    vecindices <- permutations[,i]
+    vec <- colSums(brillouinzone[vecindices,])
+    np <- sweep(kpoints[,1:2],2,vec,FUN="+")
+    if(ncol(kpoints)>2)
+      np <- cbind(np,kpoints[,3:ncol(kpoints)])
+    return(np)
+  })
+  newkpoints <- do.call(rbind,newkpoints)
+  colnames(newkpoints)<-names
+  return(rbind(kpoints,newkpoints))
+}

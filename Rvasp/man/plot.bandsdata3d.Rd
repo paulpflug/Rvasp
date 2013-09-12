@@ -2,9 +2,9 @@
 \alias{plot.bandsdata3d}
 \title{Plots the 3d bandsdata}
 \usage{
-  plot.bandsdata3d(bandsdata, band, projecttobz = T,
-    sym = NA, n = 201, projected = F,
-    projected.atoms = 1:bandsdata$natoms,
+  plot.bandsdata3d(bandsdata, band,
+    maxdistancetobz = 1e-04, sym = NA, n = 201,
+    projected = F, projected.atoms = 1:bandsdata$natoms,
     projected.energyintervall = NULL,
     projected.bands = 1:bandsdata$nbands,
     projected.orbitals = list(1, 2, 3, 4),
@@ -16,8 +16,8 @@
 
   \item{band}{index of band to plot}
 
-  \item{projecttobz}{(optional) projects kpoints to the
-  first brillouinzone}
+  \item{maxdistancetobz}{(optional) allowed kpoint distance
+  to the first brillouinzone}
 
   \item{n}{resolution of datalayers}
 

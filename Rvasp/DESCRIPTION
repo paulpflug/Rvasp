@@ -1,8 +1,8 @@
 Package: Rvasp
 Title: Tools for loading, manipulating and plotting VASP files
 Description: 
-Version: 0.1
+Version: 0.2
 Author: Paul Pflugradt <paulpflugradt@googlemail.com>
 Maintainer: Paul Pflugradt <paulpflugradt@googlemail.com>
 License: MIT
-Depends: snowfall,lattice,akima,XML,grid,graphics,stats,utils,grDevices
+Depends: snowfall,lattice,akima,XML,rgl,grid,graphics,stats,utils,grDevices

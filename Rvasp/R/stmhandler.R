@@ -150,13 +150,10 @@ stm<- function(chgcar,emax,direction=3,cpus=4,interpolation=c("linear")){
     }
   }
   xy <- unique(chgcar$data[,dir])
-  z <- unique(chgcar$data[,direction])
-  if(topdown){
-    xy <- xy[nrow(xy):1,]
-    z <- rev(z)
-  }
   fac <- ceiling(log10(max(xy[,2])))
   nd <- chgcar$data[chgcar$data[,4]>=emax,]  
+  nd <- nd[order(nd[,direction],decreasing=!topdown),]
+ 
   print("searching xy for given z")
   i <-match(xy[,1]+10^fac*xy[,2],nd[,dir[[1]]]+10^fac*nd[,dir[[2]]])
   nd<-nd[i,]
@@ -197,7 +194,10 @@ stm<- function(chgcar,emax,direction=3,cpus=4,interpolation=c("linear")){
   # lowest to zero
   data[,direction]<-data[,direction]-atomrange[[1]]
   # reverse in z direction
-  data[,direction]<-abs(data[,direction]-max(data[,direction]))
+  if(topdown){
+    data[,direction]<-abs(data[,direction]-max(data[,direction]))
+  }
+  
   print("interpolating quadratic area")
   base <- chgcar$poscar$basis*chgcar$poscar$a  
   ### rotate

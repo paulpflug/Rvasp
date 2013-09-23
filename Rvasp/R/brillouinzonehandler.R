@@ -119,7 +119,7 @@ reciprocalbasis.getbrillouinzone<-function(recbasis){
       }
       i1 <- lineintercept2d(rbasis[1,],rbasis[1,2:1]*c(1,-1),rbasis[2,],rbasis[2,2:1]*c(1,-1))
       i2 <- lineintercept2d(rbasis[3,],rbasis[3,2:1]*c(-1,1),rbasis[2,],rbasis[2,2:1]*c(-1,1))
-      i3 <- lineintercept2d(-rbasis[1,],-rbasis[1,2:1]*c(1,-1),rbasis[2,],rbasis[2,2:1]*c(1,-1))
+      i3 <- lineintercept2d(-rbasis[1,],-rbasis[1,2:1]*c(1,-1),rbasis[3,],rbasis[3,2:1]*c(1,-1))
       is <- rbind(i1,i2,i3)
       is <- unique(round(is,7))
       vec2d <- rbind(is,(is%*%matrix.rotation2d.degree(180))[,])
@@ -172,8 +172,7 @@ poscar.getbrillouinzones<-function(poscar,rotate=0,extend=1,strain=0){
   rbase <- poscar.getreciprocalbasis(poscar)
   vec2d <- list(reciprocalbasis.getbrillouinzone(rbase))
   if (extend>1){
-    type <- reciprocalbasis.getbrillouinzonetype(rbase)
-    if(type=="hexagonal"){
+    if(nrow(vec2d[[1]])==6){      
       basicpattern <- list(c(1,1,0),c(0,1,1))    
       patterns <- unlist(sapply(1:(extend),FUN=function(e){
         e1 <- 1:e
@@ -192,7 +191,7 @@ poscar.getbrillouinzones<-function(poscar,rotate=0,extend=1,strain=0){
           return(sweep(vec2d[[1]],2,apply(vec2d[[1]]*z,2,sum),"+")) 
         })}))
     }
-    if(type=="rectangular"){
+    if(nrow(vec2d[[1]])==4){
       ex <- seq(0,(2*extend-1),by=2)
       p <- -(ex[extend]):(ex[extend])
       patterns <- unlist(apply(expand.grid(p,p),1,function(x){

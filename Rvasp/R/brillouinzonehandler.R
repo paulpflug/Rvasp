@@ -103,8 +103,26 @@ reciprocalbasis.getbrillouinzone<-function(recbasis){
       else{
         rbasis <- rbind(rbasis[1,],rbasis[2,],rbasis[1,]-rbasis[2,])
       }
-      rbasis <- (rbasis/2/cos(30/180*pi))%*%matrix.rotation2d.degree(30)
-      vec2d <- rbind(rbasis,rbasis%*%matrix.rotation2d.degree(180))
+      rbasis <- rbasis/2
+      lineintercept2d <- function(p1,d1,p2,d2){
+        if(d1[[2]]==0){
+          p3 <- p2
+          p2 <- p1
+          p1 <- p3
+          d3 <- d2
+          d2 <- d1
+          d1 <- d3          
+        }
+        h <- d1[[1]]/d1[[2]]
+        s <- (h*(p1[[2]]-p2[[2]])+p2[[1]]-p1[[1]])/(h*d2[[2]]-d2[[1]])
+        return(p2+s*d2)
+      }
+      i1 <- lineintercept2d(rbasis[1,],rbasis[1,2:1]*c(1,-1),rbasis[2,],rbasis[2,2:1]*c(1,-1))
+      i2 <- lineintercept2d(rbasis[3,],rbasis[3,2:1]*c(-1,1),rbasis[2,],rbasis[2,2:1]*c(-1,1))
+      i3 <- lineintercept2d(-rbasis[1,],-rbasis[1,2:1]*c(1,-1),rbasis[2,],rbasis[2,2:1]*c(1,-1))
+      is <- rbind(i1,i2,i3)
+      is <- unique(round(is,7))
+      vec2d <- rbind(is,(is%*%matrix.rotation2d.degree(180))[,])
       class(vec2d)<-"brillouinzone"
       return(vec2d)
     }
@@ -230,42 +248,33 @@ brillouinzone.projectkpoints <- function(brillouinzone,kpoints){
 #' @param maxdistance (optional) allowed distance to first brillouinzone (shape-conserving)
 #' @export
 brillouinzone.selectkpoints <- function(brillouinzone,kpoints,maxdistance=0){
+  lengths <- apply(brillouinzone,1,vector.length)
+  bz <- brillouinzone+brillouinzone*maxdistance/cbind(lengths,lengths)
   newpoints <- apply(kpoints,1,FUN=function(point){
     p <- as.numeric(point[1:2])
-    distances <- order(sqrt((p[[1]] - brillouinzone[,1])^2 + (p[[2]] - brillouinzone[,2])^2)) # vertex distances from point
-    v1 <- brillouinzone[distances[[1]],] # vertex 1
-    v2 <- brillouinzone[distances[[2]],] # vertex 2
-    if(vectors.arecollinear(v1-v2,p-v2)){
-      a<-((p-v1)/(v2-v1))[[1]]
-      if(0<=a&a<=1){
+    anglesum <-0
+    for(i in 1:nrow(bz)){
+      i2 <- (i+1)
+      if(i==nrow(bz)) i2 <- 1
+      v1 <- bz[i,] # vertex 1
+      v2 <- bz[i2,] # vertex 2
+      if(all(v1==p)|all(v2==p)){
         return(point)
-      }else{
-        return(NULL)
       }
-    }else{
-      a1 <- vectors.calcangle.degree(v1-v2,p-v2,period=180)
-      if(a1-90>1e-6){
-        v1 <- v2
-        v2 <- brillouinzone[distances[[3]],]
-      }else{
-        a2 <- vectors.calcangle.degree(v2-v1,p-v1,period=180)
-        if(a2-90>1e-6)
-          v2 <- brillouinzone[distances[[3]],]
-      }
+      angle <- vectors.calcangle.degree(p-v1,p-v2,period=180)
+      if(is.nan(angle)) return(point)
+      if(abs(angle-180)<1e-6){ ## v1 v2 and p on one line
+        a <- ((p-v1)/(v2-v1))[[1]]
+        if(0<=a&a<=1)
+          return(point)
+      } 
+      anglesum <- anglesum+angle
     }
-    
-    dp <- vector.length(p) # distance 0P
-    v3 <- v1+sum((p-v1)*(v2-v1))/vector.length(v2-v1)*(v2-v1)/vector.length(v2-v1) # vertex of the height of the triangle of v1,v2 and p 
-    
-    d3 <- vector.length(v3)
-    if(dp>d3){   
-      if(vector.length(v3-p)<maxdistance)
-        return(point)
-      else
-        return(NULL)
-    }else{
+    if(abs(anglesum-360)<1e-6){
       return(point)
-    }    
+    }else{
+      return(NULL)
+    }
   })
   newpoints <- do.call(rbind,newpoints)
   return(newpoints)

@@ -1013,17 +1013,20 @@ plot.bandsfit.add<-function(bandsfit,kpoints=bandsfit$knumbers,n=201,energyoffse
 #' Main purpose is to test sym operations, to come to a statisfying grid.
 #' 
 #' @param bandsdata object of class bandsdata
-#' @param maxdistancetobz (optional) allowed kpoint distance to the first brillouinzone
 #' @param sym See \code{\link{dataframe.applysymoperations}} for usage.
+#' @param foldback folding of points back in the BZ can be disabled
+#' @param maxdistancetobz (optional) allowed kpoint distance to the first brillouinzone (only if foldback is \code{True})
 #' @param ... further plotting parameters
 #' @export
-plot.bandsdata.grid <- function(bandsdata,maxdistancetobz=1e-4,sym=NA,xlim=NA,ylim=NA,...){
+plot.bandsdata.grid <- function(bandsdata,sym=NA,foldback=T,maxdistancetobz=1e-4,xlim=NA,ylim=NA,...){
   rbase <- bandsdata$kbasis[1:2,1:2]
   vec2d <- reciprocalbasis.getbrillouinzone(bandsdata$kbasis)
   kpoints <- (bandsdata$kpoints[,1:2]%*%rbase)
   colnames(kpoints)<-c("kx","ky")
-  kpoints<-brillouinzone.extendkpoints(vec2d,kpoints)
-  kpoints <- brillouinzone.selectkpoints(vec2d,kpoints,maxdistance=maxdistancetobz)
+  if(foldback){    
+    kpoints<-brillouinzone.extendkpoints(vec2d,kpoints)
+    kpoints <- brillouinzone.selectkpoints(vec2d,kpoints,maxdistance=maxdistancetobz)    
+  }
   if(length(sym)>1 || !is.na(sym)){
     kpoints <- dataframe.applysymoperations(kpoints,sym)
   }

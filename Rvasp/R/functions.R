@@ -73,7 +73,12 @@ vector.length <- function(vector){
 #' @param period (optional) if provided folds the angle back to its period. Period in radians.
 #' @export
 vectors.calcangle <- function(vector1,vector2,period=NA){
-  a <- acos( sum(vector1*vector2) / ( vector.length(vector1) * vector.length(vector2)) ) 
+  b <- sum(vector1*vector2) / ( vector.length(vector1) * vector.length(vector2))
+  if(abs(b-1)<1e-6) {
+    a <- pi
+  }else{
+    a <- acos(b) 
+  }
   if(!is.na(period)&&!is.na(a)){
     while(a<0||a>period){
       if(a<0)

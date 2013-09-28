@@ -2,7 +2,8 @@
 \alias{dataframe.applysymoperations}
 \title{Applies chain of symmetric operation on a dataframe}
 \usage{
-  dataframe.applysymoperations(dataframe, symoperations)
+  dataframe.applysymoperations(dataframe, symoperations,
+    center = NULL)
 }
 \arguments{
   \item{dataframe}{dataframe with at least two columns}
@@ -14,6 +15,9 @@
   be rotated by 120° and 60° the resulting dataset will
   consist of 6 combined datasets. The old, the reflected
   and the old+reflected, rotated by 120° and by 60°.}
+
+  \item{center}{(optional) 2d point, which will be used as
+  center for all symoperations}
 }
 \description{
   \code{dataframe.applysymoperations} applied a chain of 2d

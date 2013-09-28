@@ -1,6 +1,6 @@
 \name{plot.bandsdata.3d}
 \alias{plot.bandsdata.3d}
-\title{Plots the perspective bandsdata}
+\title{Plots 3d bandsdata}
 \usage{
   plot.bandsdata.3d(bandsdata, bands, sym = NA, n = 201,
     colorpalette = colorRampPalette(c("red", "white", "blue")),
@@ -61,10 +61,10 @@
   \item{...}{further plotting parameters}
 }
 \description{
-  \code{plot.bandsdata.persp} plots the perspective
-  bandsdata. Projected states can be added as additional
-  datalayer. First make sure, you have a statisfying grid.
-  See \code{\link{plot.bandsdata.grid}}.
+  \code{plot.bandsdata.3d} plots 3d bandsdata. Projected
+  states can be added as additional datalayer. First make
+  sure, you have a statisfying grid. See
+  \code{\link{plot.bandsdata.grid}}.
 }
 \seealso{
   \code{\link{rgl}}

@@ -278,12 +278,16 @@ brillouinzone.selectkpoints <- function(brillouinzone,kpoints){
       angle <- suppressWarnings(vectors.calcangle.degree(p-v1,p-v2,period=180))
       if(is.nan(angle)) return(point)
       if(abs(angle-180)<1e-6){ ## v1 v2 and p on one line
+        #p = v1+a*(v2-v1)
         a <- ((p-v1)/(v2-v1))
         a <- a[a!=0&is.finite(a)]
         if(!is.null(a)){
           a <- a[[1]]
-          if(0<=a&a<=1)
+          if(0<=a&a<=1){
             return(point) 
+          }else{
+            return(NULL)
+          }
         }                      
       } 
       anglesum <- anglesum+angle

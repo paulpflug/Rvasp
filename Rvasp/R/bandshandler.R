@@ -1015,18 +1015,12 @@ plot.bandsfit.add<-function(bandsfit,kpoints=bandsfit$knumbers,n=201,energyoffse
 #' @param bandsdata object of class bandsdata
 #' @param sym See \code{\link{dataframe.applysymoperations}} for usage.
 #' @param foldback folding of points back in the BZ can be disabled
-#' @param zone see \code{\link{reciprocalbasis.getbrillouinzone}} for usage.
 #' @param ... further plotting parameters
 #' @export
-plot.bandsdata.grid <- function(bandsdata,sym=NA,foldback=T,zone=c("bz","basis"),xlim=NA,ylim=NA,...){
+plot.bandsdata.grid <- function(bandsdata,sym=NA,foldback=T,xlim=NA,ylim=NA,...){
   rbase <- bandsdata$kbasis[1:2,1:2]
-  zone <- match.arg(zone)
-  vec2d <- reciprocalbasis.getbrillouinzone(bandsdata$kbasis,zone=zone)
-  center <- attr(vec2d,"scaled:center")
+  vec2d <- reciprocalbasis.getbrillouinzone(bandsdata$kbasis)
   kpoints <- (bandsdata$kpoints[,1:2]%*%rbase)
-  if(!is.null(center)){
-    kpoints <- scale(kpoints,center=center,scale=F)
-  }
   colnames(kpoints)<-c("kx","ky")
   if(foldback){    
     kpoints<-brillouinzone.extendkpoints(vec2d,kpoints)
@@ -1035,6 +1029,7 @@ plot.bandsdata.grid <- function(bandsdata,sym=NA,foldback=T,zone=c("bz","basis")
   if(length(sym)>1 || !is.na(sym)){
     kpoints <- dataframe.applysymoperations(kpoints,sym)
   }
+  kpoints <- unique(round(kpoints,6))
   if(any(is.na(xlim))) xlim <- range(vec2d[,1])
   if(any(is.na(ylim))) ylim <- range(vec2d[,2])
   plot(kpoints,asp=1,xlim=xlim,ylim=ylim,...)
@@ -1069,23 +1064,27 @@ plot.bandsdata.contour<-function(bandsdata,band,sym=NA,n=201,breaks=12,colorpale
                            ,projected.orbitals=list(1,2,3,4)
                            ,projected.colors=colorRampPalette(c("red","blue","green"))(length(projected.orbitals))
                            ,xlab=expression(k[x]),ylab=expression(k[y]),...
-                           ){  
-  rbase <- bandsdata$kbasis[1:2,1:2]
-  vec2d <- reciprocalbasis.getbrillouinzone(bandsdata$kbasis,zone=zone)
-  center <- attr(vec2d,"scaled:center")
-  kpoints <- (bandsdata$kpoints[,1:2]%*%rbase)
-  if(!is.null(center)){
-    kpoints <- scale(kpoints,center=center,scale=F)
-  }
+                           ){ 
+  kpoints <- (bandsdata$kpoints[,1:2])%*%(bandsdata$kbasis[1:2,1:2])
   data <- cbind(kpoints,1:nrow(kpoints))
-  data<-brillouinzone.extendkpoints(vec2d,data)
-  data <- brillouinzone.selectkpoints(vec2d,data)
-  data <- data[order(data[,1],data[,2],data[,3]),]
-  data<- as.data.frame(data)
-  colnames(data) <-c("kx","ky","index")
+  vec2d <- reciprocalbasis.getbrillouinzone(bandsdata$kbasis)  
+  data<-brillouinzone.extendkpoints(vec2d,data)   
   if(length(sym)>1 || !is.na(sym)){
     data <- dataframe.applysymoperations(data,sym)
   }
+  if(zone!="bz"){
+    vec2d <- reciprocalbasis.getbrillouinzone(bandsdata$kbasis,zone=zone)
+    center <- attr(vec2d,"scaled:center")
+    if(!is.null(center)){
+      data[,1:2] <- scale(data[,1:2],center=center,scale=F)
+    }
+    data<-brillouinzone.extendkpoints(vec2d,data) 
+  }  
+  data <- brillouinzone.selectkpoints(vec2d,data)
+  data <- unique(round(data,6))
+  data <- data[order(data[,1],data[,2],data[,3]),]
+  data<- as.data.frame(data)
+  colnames(data) <-c("kx","ky","index")
   xo <- seq(min(data[,1]),max(data[,1]),length=n)
   yo <- seq(min(data[,2]),max(data[,2]),length=n)
   e<-interp(data$kx,data$ky,bandsdata$bands[[band]]$simpledata[data$index,2],linear=linear,xo=xo,yo=yo)
@@ -1141,9 +1140,9 @@ plot.bandsdata.contour<-function(bandsdata,band,sym=NA,n=201,breaks=12,colorpale
   polygon(vec2d)
 }
 
-#' Plots the perspective bandsdata
+#' Plots 3d bandsdata
 #' 
-#' \code{plot.bandsdata.persp} plots the perspective bandsdata.
+#' \code{plot.bandsdata.3d} plots 3d bandsdata.
 #' Projected states can be added as additional datalayer.
 #' First make sure, you have a statisfying grid. See \code{\link{plot.bandsdata.grid}}.
 #' 
@@ -1173,22 +1172,26 @@ plot.bandsdata.3d<-function(bandsdata,bands,sym=NA,n=201,colorpalette=colorRampP
                             ,projected.colors= colorRampPalette(c("red","blue","green"))(length(projected.orbitals))
                                  ,xlab=expression(k[x]),ylab=expression(k[y]),zlab="energy (eV)",back="filled",front="filled",box=F,...
 ){  
-  rbase <- bandsdata$kbasis[1:2,1:2]
-  vec2d <- reciprocalbasis.getbrillouinzone(bandsdata$kbasis,zone=zone)
-  center <- attr(vec2d,"scaled:center")
-  kpoints <- (bandsdata$kpoints[,1:2]%*%rbase)
-  if(!is.null(center)){
-    kpoints <- scale(kpoints,center=center,scale=F)
-  }
+  kpoints <- (bandsdata$kpoints[,1:2])%*%(bandsdata$kbasis[1:2,1:2])
   data <- cbind(kpoints,1:nrow(kpoints))
-  data<-brillouinzone.extendkpoints(vec2d,data)
-  data <- brillouinzone.selectkpoints(vec2d,data)
-  data <- data[order(data[,1],data[,2],data[,3]),]
-  data<- as.data.frame(data)
-  colnames(data) <-c("kx","ky","index")
+  vec2d <- reciprocalbasis.getbrillouinzone(bandsdata$kbasis)  
+  data<-brillouinzone.extendkpoints(vec2d,data)   
   if(length(sym)>1 || !is.na(sym)){
     data <- dataframe.applysymoperations(data,sym)
   }
+  if(zone!="bz"){
+    vec2d <- reciprocalbasis.getbrillouinzone(bandsdata$kbasis,zone=zone)
+    center <- attr(vec2d,"scaled:center")
+    if(!is.null(center)){
+      data[,1:2] <- scale(data[,1:2],center=center,scale=F)
+    }
+    data<-brillouinzone.extendkpoints(vec2d,data) 
+  }  
+  data <- brillouinzone.selectkpoints(vec2d,data)
+  data <- unique(round(data,6))
+  data <- data[order(data[,1],data[,2],data[,3]),]
+  data<- as.data.frame(data)
+  colnames(data) <-c("kx","ky","index")
   zrange <- range(sapply(bandsdata$bands[bands],FUN=function(band){
     return (band$simpledata[,2])
   }))
@@ -1255,10 +1258,11 @@ plot.bandsdata.3d<-function(bandsdata,bands,sym=NA,n=201,colorpalette=colorRampP
 #' @param symoperations list of symmetric operations. \code{list(c("reflection",-30),c("rotation",120,60))} 
 #' for example will first reflect across a line with the slope of -30°, afterwards the new dataset (old+reflected) will be rotated by 120° and 60°
 #' the resulting dataset will consist of 6 combined datasets. The old, the reflected and the old+reflected, rotated by 120° and by 60°.
+#' @param center (optional) 2d point, which will be used as center for all symoperations
 #' @export
-dataframe.applysymoperations<-function(dataframe,symoperations){
+dataframe.applysymoperations<-function(dataframe,symoperations,center=NULL){
   stopifnot(ncol(dataframe)>=2)
-  names <- colnames(dataframe)
+  names <- colnames(dataframe)  
   for(sym in symoperations){
     if(length(sym)>1){
       for(i in 2:length(sym)){
@@ -1266,7 +1270,12 @@ dataframe.applysymoperations<-function(dataframe,symoperations){
                           "reflection" = matrix.reflection2d.degree(as.numeric(sym[[i]])),
                           "rotation" = matrix.rotation2d.degree(as.numeric(sym[[i]])),
                           default = NA)
-        d2 <-data.matrix(dataframe[,1:2])%*%t(rmatrix)
+        if(!is.null(center)){
+          d2 <- scale(scale(dataframe[,1:2],center=center,scale=F)%*%t(rmatrix),center=-center,scale=F)
+        }
+        else{
+          d2 <-data.matrix(dataframe[,1:2])%*%t(rmatrix)
+        }
         if(ncol(dataframe)>2){
           d2 <- cbind(d2,dataframe[,3:ncol(dataframe)])
         }
@@ -1276,6 +1285,7 @@ dataframe.applysymoperations<-function(dataframe,symoperations){
           d <- rbind(d,d2)        
       }
       if(ncol(d)==ncol(dataframe)){
+
         colnames(d)<-names
         dataframe <- rbind(dataframe,d)
       }

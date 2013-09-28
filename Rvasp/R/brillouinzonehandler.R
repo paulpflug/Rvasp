@@ -51,14 +51,21 @@ plot.brillouinzones.addsympoints<-function(brillouinzones
                                            ,xoffset=0
                                            ,yoffset=0
                                            ,...){  
+  vectors <- vectors[1:2]
   if (length(xoffset)<length(directcoordinates))
     xoffset <- rep(xoffset,ceiling(length(directcoordinates)/length(xoffset)))
   if (length(yoffset)<length(directcoordinates))
     yoffset <- rep(yoffset,ceiling(length(directcoordinates)/length(yoffset)))
-  library(grid)
+  #library(grid)
+  center <- attr(brillouinzones[[1]],"scaled:center")
+  if(is.null(center)){
+    center <- c(0,0)
+  }else{
+    vectors <- c(2,4)
+  }
   brillouinzones<-do.call(rbind,brillouinzones)
   invisible(lapply(1:length(directcoordinates),FUN=function(i){
-    vec <- directcoordinates[[i]]%*%brillouinzones[vectors,]  
+    vec <- (directcoordinates[[i]]%*%(brillouinzones[vectors,]+rbind(center,center))-center)
     #legend(vec[[1]],vec[[2]],legend=labels[i],seg.len=0.1,text.col=col,xjust=0.5,yjust=0.5,x.intersp=-0.4,y.intersp=0.3)
     text(vec[[1]]+xoffset[i],vec[[2]]+yoffset[i],labels=labels[i],pos=textpos,col=col,...)
     #grid.text(labels[i],vec[[1]],vec[[2]],default.units="native",...)

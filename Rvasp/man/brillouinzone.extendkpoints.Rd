@@ -1,6 +1,6 @@
 \name{brillouinzone.extendkpoints}
 \alias{brillouinzone.extendkpoints}
-\title{Extends kpoints two all second brillouinzones.}
+\title{Extends kpoints to all second brillouinzones.}
 \usage{
   brillouinzone.extendkpoints(brillouinzone, kpoints)
 }
@@ -10,7 +10,7 @@
   \item{kpoints}{object with arbitrary kpoints}
 }
 \description{
-  \code{brillouinzone.extendkpoints} translates kpoints two
+  \code{brillouinzone.extendkpoints} translates kpoints to
   all second brillouinzones.
 }
 

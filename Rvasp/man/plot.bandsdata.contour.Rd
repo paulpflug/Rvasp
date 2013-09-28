@@ -2,11 +2,11 @@
 \alias{plot.bandsdata.contour}
 \title{Plots the contour bandsdata}
 \usage{
-  plot.bandsdata.contour(bandsdata, band,
-    maxdistancetobz = 1e-04, sym = NA, n = 201,
-    breaks = 12,
+  plot.bandsdata.contour(bandsdata, band, sym = NA,
+    n = 201, breaks = 12,
     colorpalette = colorRampPalette(c("red", "blue", "green")),
-    projected = F, projected.atoms = 1:bandsdata$natoms,
+    zone = c("bz", "basis"), projected = F,
+    projected.atoms = 1:bandsdata$natoms,
     projected.energyintervall = NULL,
     projected.bands = 1:bandsdata$nbands,
     projected.orbitals = list(1, 2, 3, 4),
@@ -18,14 +18,20 @@
 
   \item{band}{index of band to plot}
 
-  \item{maxdistancetobz}{(optional) allowed kpoint distance
-  to the first brillouinzone}
-
   \item{n}{resolution of datalayers}
 
   \item{sym}{See \code{\link{dataframe.applysymoperations}}
   for usage and \code{\link{plot.bandsdata.grid}} for
   testing.}
+
+  \item{breaks}{number of steps in color coding}
+
+  \item{colorpalette}{colors which are used if
+  \code{projected} is \code{False}}
+
+  \item{zone}{see
+  \code{\link{reciprocalbasis.getbrillouinzone}} for
+  usage.}
 
   \item{projected}{activate for additional datalayer with
   projected states.}

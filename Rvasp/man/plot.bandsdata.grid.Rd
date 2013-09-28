@@ -3,7 +3,7 @@
 \title{Plots the 2d grid used in bandsdata}
 \usage{
   plot.bandsdata.grid(bandsdata, sym = NA, foldback = T,
-    maxdistancetobz = 1e-04, xlim = NA, ylim = NA, ...)
+    zone = c("bz", "basis"), xlim = NA, ylim = NA, ...)
 }
 \arguments{
   \item{bandsdata}{object of class bandsdata}
@@ -14,9 +14,9 @@
   \item{foldback}{folding of points back in the BZ can be
   disabled}
 
-  \item{maxdistancetobz}{(optional) allowed kpoint distance
-  to the first brillouinzone (only if foldback is
-  \code{True})}
+  \item{zone}{see
+  \code{\link{reciprocalbasis.getbrillouinzone}} for
+  usage.}
 
   \item{...}{further plotting parameters}
 }

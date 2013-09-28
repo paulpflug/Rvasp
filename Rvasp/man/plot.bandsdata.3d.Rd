@@ -2,11 +2,10 @@
 \alias{plot.bandsdata.3d}
 \title{Plots the perspective bandsdata}
 \usage{
-  plot.bandsdata.3d(bandsdata, bands,
-    maxdistancetobz = 1e-04, sym = NA, n = 201,
+  plot.bandsdata.3d(bandsdata, bands, sym = NA, n = 201,
     colorpalette = colorRampPalette(c("red", "white", "blue")),
-    asp = 1, breaks = 256, projected = F,
-    projected.atoms = 1:bandsdata$natoms,
+    asp = 1, breaks = 256, zone = c("bz", "basis"),
+    projected = F, projected.atoms = 1:bandsdata$natoms,
     projected.orbitals = list(1, 2, 3, 4),
     projected.bands = 1:bandsdata$nbands,
     projected.energyintervall = NULL,
@@ -20,9 +19,6 @@
 
   \item{bands}{indices of bands to plot}
 
-  \item{maxdistancetobz}{(optional) allowed kpoint distance
-  to the first brillouinzone}
-
   \item{n}{resolution of datalayers}
 
   \item{sym}{See \code{\link{dataframe.applysymoperations}}
@@ -35,6 +31,10 @@
   \item{asp}{aspect ration between energy and k-space}
 
   \item{breaks}{number of steps in color coding}
+
+  \item{zone}{see
+  \code{\link{reciprocalbasis.getbrillouinzone}} for
+  usage.}
 
   \item{projected}{activate for additional datalayer with
   projected states.}

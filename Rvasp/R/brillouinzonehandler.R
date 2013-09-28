@@ -83,48 +83,58 @@ basis.getbrillouinzone<-function(basis){
 #' \code{reciprocalbasis.getbrillouinzone} gets brillouinzone vector.
 #' 
 #' @param recbasis basis in reciprocal space
+#' @param zone specific the wished zone. \code{bz} will calculate the first brillouinzone, \code{basis} will give the simple zone conducted by the reciprocal basis vectors
 #' @export
-reciprocalbasis.getbrillouinzone<-function(recbasis){
-  baseanglexy <- round(vectors.calcangle.degree(recbasis[1,],recbasis[2,],period=180),1)
-  type <- reciprocalbasis.getbrillouinzonetype(recbasis)
-  if(!is.na(type)){
-    rbasis <- recbasis[1:2,1:2]
-    if(type=="rectangular"){
-      vec2d <- rbind(c(0,0),rbasis,rbasis[1,]+rbasis[2,])
-      vec2d <- scale(vec2d,scale=F)
-      vec2d <- vec2d[c(1,3,4,2),]
-      class(vec2d)<-"brillouinzone"
-      return(vec2d)
-    }
-    if(type=="hexagonal"){
-      if(baseanglexy==120){
-        rbasis <- rbind(rbasis[1,],rbasis[1,]+rbasis[2,],rbasis[2,])
+reciprocalbasis.getbrillouinzone<-function(recbasis,zone=c("bz","basis")){
+  zone <- match.arg(zone)
+  if(zone=="basis"){
+    vec2d <- rbind(c(0,0),recbasis[1,1:2],recbasis[1,1:2]+recbasis[2,1:2],recbasis[2,1:2])
+    vec2d <- scale(vec2d,center=colMeans(vec2d),scale=F)
+    class(vec2d)<-"basiszone"
+    return(vec2d)
+  }
+  if(zone=="bz"){ 
+    baseanglexy <- round(vectors.calcangle.degree(recbasis[1,],recbasis[2,],period=180),1)
+    type <- reciprocalbasis.getbrillouinzonetype(recbasis)
+    if(!is.na(type)){
+      rbasis <- recbasis[1:2,1:2]
+      if(type=="rectangular"){
+        vec2d <- rbind(c(0,0),rbasis,rbasis[1,]+rbasis[2,])
+        vec2d <- scale(vec2d,scale=F)
+        vec2d <- vec2d[c(1,3,4,2),]
+        class(vec2d)<-"brillouinzone"
+        return(vec2d)
       }
-      else{
-        rbasis <- rbind(rbasis[1,],rbasis[2,],rbasis[1,]-rbasis[2,])
-      }
-      rbasis <- rbasis/2
-      lineintercept2d <- function(p1,d1,p2,d2){
-        if(d1[[2]]==0){
-          p3 <- p2
-          p2 <- p1
-          p1 <- p3
-          d3 <- d2
-          d2 <- d1
-          d1 <- d3          
+      if(type=="hexagonal"){
+        if(baseanglexy==120){
+          rbasis <- rbind(rbasis[1,],rbasis[1,]+rbasis[2,],rbasis[2,])
         }
-        h <- d1[[1]]/d1[[2]]
-        s <- (h*(p1[[2]]-p2[[2]])+p2[[1]]-p1[[1]])/(h*d2[[2]]-d2[[1]])
-        return(p2+s*d2)
+        else{
+          rbasis <- rbind(rbasis[1,],rbasis[2,],rbasis[1,]-rbasis[2,])
+        }
+        rbasis <- rbasis/2
+        lineintercept2d <- function(p1,d1,p2,d2){
+          if(d1[[2]]==0){
+            p3 <- p2
+            p2 <- p1
+            p1 <- p3
+            d3 <- d2
+            d2 <- d1
+            d1 <- d3          
+          }
+          h <- d1[[1]]/d1[[2]]
+          s <- (h*(p1[[2]]-p2[[2]])+p2[[1]]-p1[[1]])/(h*d2[[2]]-d2[[1]])
+          return(p2+s*d2)
+        }
+        i1 <- lineintercept2d(rbasis[1,],rbasis[1,2:1]*c(1,-1),rbasis[2,],rbasis[2,2:1]*c(1,-1))
+        i2 <- lineintercept2d(rbasis[3,],rbasis[3,2:1]*c(-1,1),rbasis[2,],rbasis[2,2:1]*c(-1,1))
+        i3 <- lineintercept2d(-rbasis[1,],-rbasis[1,2:1]*c(1,-1),rbasis[3,],rbasis[3,2:1]*c(1,-1))
+        is <- rbind(i1,i2,i3)
+        is <- unique(round(is,7))
+        vec2d <- rbind(is,(is%*%matrix.rotation2d.degree(180))[,])
+        class(vec2d)<-"brillouinzone"
+        return(vec2d)
       }
-      i1 <- lineintercept2d(rbasis[1,],rbasis[1,2:1]*c(1,-1),rbasis[2,],rbasis[2,2:1]*c(1,-1))
-      i2 <- lineintercept2d(rbasis[3,],rbasis[3,2:1]*c(-1,1),rbasis[2,],rbasis[2,2:1]*c(-1,1))
-      i3 <- lineintercept2d(-rbasis[1,],-rbasis[1,2:1]*c(1,-1),rbasis[3,],rbasis[3,2:1]*c(1,-1))
-      is <- rbind(i1,i2,i3)
-      is <- unique(round(is,7))
-      vec2d <- rbind(is,(is%*%matrix.rotation2d.degree(180))[,])
-      class(vec2d)<-"brillouinzone"
-      return(vec2d)
     }
   }
   print("calculation of your brillouinzone is not implemented")
@@ -244,19 +254,17 @@ brillouinzone.projectkpoints <- function(brillouinzone,kpoints){
 #' 
 #' @param brillouinzone object of class brillouinzone
 #' @param kpoints object with arbitrary kpoints
-#' @param maxdistance (optional) allowed distance to first brillouinzone (shape-conserving)
 #' @export
-brillouinzone.selectkpoints <- function(brillouinzone,kpoints,maxdistance=0){
+brillouinzone.selectkpoints <- function(brillouinzone,kpoints){
   lengths <- apply(brillouinzone,1,vector.length)
-  bz <- brillouinzone+brillouinzone*maxdistance/cbind(lengths,lengths)
   newpoints <- apply(kpoints,1,FUN=function(point){
     p <- as.numeric(point[1:2])
     anglesum <-0
-    for(i in 1:nrow(bz)){
+    for(i in 1:nrow(brillouinzone)){
       i2 <- (i+1)
-      if(i==nrow(bz)) i2 <- 1
-      v1 <- bz[i,] # vertex 1
-      v2 <- bz[i2,] # vertex 2
+      if(i==nrow(brillouinzone)) i2 <- 1
+      v1 <- brillouinzone[i,] # vertex 1
+      v2 <- brillouinzone[i2,] # vertex 2
       if(all(v1==p)|all(v2==p)){
         return(point)
       }
@@ -279,9 +287,9 @@ brillouinzone.selectkpoints <- function(brillouinzone,kpoints,maxdistance=0){
   return(newpoints)
 }
 
-#' Extends kpoints two all second brillouinzones.
+#' Extends kpoints to all second brillouinzones.
 #' 
-#' \code{brillouinzone.extendkpoints} translates kpoints two all second brillouinzones.
+#' \code{brillouinzone.extendkpoints} translates kpoints to all second brillouinzones.
 #' 
 #' @param brillouinzone object of class brillouinzone
 #' @param kpoints object with arbitrary kpoints

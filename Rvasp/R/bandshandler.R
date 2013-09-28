@@ -1015,17 +1015,22 @@ plot.bandsfit.add<-function(bandsfit,kpoints=bandsfit$knumbers,n=201,energyoffse
 #' @param bandsdata object of class bandsdata
 #' @param sym See \code{\link{dataframe.applysymoperations}} for usage.
 #' @param foldback folding of points back in the BZ can be disabled
-#' @param maxdistancetobz (optional) allowed kpoint distance to the first brillouinzone (only if foldback is \code{True})
+#' @param zone see \code{\link{reciprocalbasis.getbrillouinzone}} for usage.
 #' @param ... further plotting parameters
 #' @export
-plot.bandsdata.grid <- function(bandsdata,sym=NA,foldback=T,maxdistancetobz=1e-4,xlim=NA,ylim=NA,...){
+plot.bandsdata.grid <- function(bandsdata,sym=NA,foldback=T,zone=c("bz","basis"),xlim=NA,ylim=NA,...){
   rbase <- bandsdata$kbasis[1:2,1:2]
-  vec2d <- reciprocalbasis.getbrillouinzone(bandsdata$kbasis)
+  zone <- match.arg(zone)
+  vec2d <- reciprocalbasis.getbrillouinzone(bandsdata$kbasis,zone=zone)
+  center <- attr(vec2d,"scaled:center")
   kpoints <- (bandsdata$kpoints[,1:2]%*%rbase)
+  if(!is.null(center)){
+    kpoints <- scale(kpoints,center=center,scale=F)
+  }
   colnames(kpoints)<-c("kx","ky")
   if(foldback){    
     kpoints<-brillouinzone.extendkpoints(vec2d,kpoints)
-    kpoints <- brillouinzone.selectkpoints(vec2d,kpoints,maxdistance=maxdistancetobz)    
+    kpoints <- brillouinzone.selectkpoints(vec2d,kpoints)    
   }
   if(length(sym)>1 || !is.na(sym)){
     kpoints <- dataframe.applysymoperations(kpoints,sym)
@@ -1044,9 +1049,11 @@ plot.bandsdata.grid <- function(bandsdata,sym=NA,foldback=T,maxdistancetobz=1e-4
 #' 
 #' @param bandsdata object of class bandsdata
 #' @param band index of band to plot
-#' @param maxdistancetobz (optional) allowed kpoint distance to the first brillouinzone
 #' @param n resolution of datalayers
 #' @param sym See \code{\link{dataframe.applysymoperations}} for usage and \code{\link{plot.bandsdata.grid}} for testing.
+#' @param breaks number of steps in color coding
+#' @param colorpalette colors which are used if \code{projected} is \code{False}
+#' @param zone see \code{\link{reciprocalbasis.getbrillouinzone}} for usage.
 #' @param projected activate for additional datalayer with projected states.
 #' @param projected.atoms indices of atoms over which will be summed
 #' @param projected.energyintervall in which bands will be included (overwrites \code{projected.bands})
@@ -1055,24 +1062,30 @@ plot.bandsdata.grid <- function(bandsdata,sym=NA,foldback=T,maxdistancetobz=1e-4
 #' @param projected.colorpalette color palette for orbitals
 #' @param ... further plotting parameters
 #' @export
-plot.bandsdata.contour<-function(bandsdata,band,maxdistancetobz=1e-4,sym=NA,n=201,breaks=12,colorpalette=colorRampPalette(c("red","blue","green"))
-                           ,projected=F,projected.atoms=1:bandsdata$natoms,projected.energyintervall=NULL,projected.bands=1:bandsdata$nbands
+plot.bandsdata.contour<-function(bandsdata,band,sym=NA,n=201,breaks=12,colorpalette=colorRampPalette(c("red","blue","green"))
+                                 ,zone=c("bz","basis")
+                                 ,projected=F,projected.atoms=1:bandsdata$natoms,projected.energyintervall=NULL,projected.bands=1:bandsdata$nbands
                            ,projected.orbitals=list(1,2,3,4)
                            ,projected.colors=colorRampPalette(c("red","blue","green"))(length(projected.orbitals))
                            ,xlab=expression(k[x]),ylab=expression(k[y]),...
                            ){  
   rbase <- bandsdata$kbasis[1:2,1:2]
-  vec2d <- reciprocalbasis.getbrillouinzone(bandsdata$kbasis)
+  vec2d <- reciprocalbasis.getbrillouinzone(bandsdata$kbasis,zone=zone)
+  center <- attr(vec2d,"scaled:center")
   kpoints <- (bandsdata$kpoints[,1:2]%*%rbase)
+  if(!is.null(center)){
+    kpoints <- scale(kpoints,center=center,scale=F)
+  }
   data <- cbind(kpoints,1:nrow(kpoints))
   data<-brillouinzone.extendkpoints(vec2d,data)
-  data <- brillouinzone.selectkpoints(vec2d,data,maxdistance=maxdistancetobz)
+  data <- brillouinzone.selectkpoints(vec2d,data)
   data <- data[order(data[,1],data[,2],data[,3]),]
   data<- as.data.frame(data)
   colnames(data) <-c("kx","ky","index")
   if(length(sym)>1 || !is.na(sym)){
     data <- dataframe.applysymoperations(data,sym)
   }
+
   xo <- seq(min(data[,1]),max(data[,1]),length=n)
   yo <- seq(min(data[,2]),max(data[,2]),length=n)
   e<-interp(data$kx,data$ky,bandsdata$bands[[band]]$simpledata[data$index,2],linear=F,xo=xo,yo=yo)
@@ -1133,12 +1146,12 @@ plot.bandsdata.contour<-function(bandsdata,band,maxdistancetobz=1e-4,sym=NA,n=20
 #' 
 #' @param bandsdata object of class bandsdata
 #' @param bands indices of bands to plot
-#' @param maxdistancetobz (optional) allowed kpoint distance to the first brillouinzone
 #' @param n resolution of datalayers
 #' @param sym See \code{\link{dataframe.applysymoperations}} for usage and \code{\link{plot.bandsdata.grid}} for testing.
 #' @param colorpalette colors which are used if \code{projected} is \code{False}
 #' @param asp aspect ration between energy and k-space
 #' @param breaks number of steps in color coding
+#' @param zone see \code{\link{reciprocalbasis.getbrillouinzone}} for usage.
 #' @param projected activate for additional datalayer with projected states.
 #' @param projected.atoms indices of atoms over which will be summed
 #' @param projected.bands (optional) used for normating of color. searches for maximum projected value in these bands. Make sure your desired bands are included.
@@ -1148,18 +1161,22 @@ plot.bandsdata.contour<-function(bandsdata,band,maxdistancetobz=1e-4,sym=NA,n=20
 #' @param ... further plotting parameters
 #' @seealso \code{\link{rgl}}
 #' @export
-plot.bandsdata.3d<-function(bandsdata,bands,maxdistancetobz=1e-4,sym=NA,n=201,colorpalette=colorRampPalette(c("red","white","blue")),asp=1
-                            ,breaks=256,projected=F,projected.atoms=1:bandsdata$natoms,projected.orbitals=list(1,2,3,4)
+plot.bandsdata.3d<-function(bandsdata,bands,sym=NA,n=201,colorpalette=colorRampPalette(c("red","white","blue")),asp=1
+                            ,breaks=256,zone=c("bz","basis"),projected=F,projected.atoms=1:bandsdata$natoms,projected.orbitals=list(1,2,3,4)
                             ,projected.bands=1:bandsdata$nbands,projected.energyintervall=NULL
                             ,projected.colors= colorRampPalette(c("red","blue","green"))(length(projected.orbitals))
                                  ,xlab=expression(k[x]),ylab=expression(k[y]),zlab="energy (eV)",back="filled",front="filled",box=F,...
 ){  
   rbase <- bandsdata$kbasis[1:2,1:2]
-  vec2d <- reciprocalbasis.getbrillouinzone(bandsdata$kbasis)
+  vec2d <- reciprocalbasis.getbrillouinzone(bandsdata$kbasis,zone=zone)
+  center <- attr(vec2d,"scaled:center")
   kpoints <- (bandsdata$kpoints[,1:2]%*%rbase)
+  if(!is.null(center)){
+    kpoints <- scale(kpoints,center=center,scale=F)
+  }
   data <- cbind(kpoints,1:nrow(kpoints))
   data<-brillouinzone.extendkpoints(vec2d,data)
-  data <- brillouinzone.selectkpoints(vec2d,data,maxdistance=maxdistancetobz)
+  data <- brillouinzone.selectkpoints(vec2d,data)
   data <- data[order(data[,1],data[,2],data[,3]),]
   data<- as.data.frame(data)
   colnames(data) <-c("kx","ky","index")

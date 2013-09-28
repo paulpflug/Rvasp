@@ -1054,6 +1054,7 @@ plot.bandsdata.grid <- function(bandsdata,sym=NA,foldback=T,zone=c("bz","basis")
 #' @param breaks number of steps in color coding
 #' @param colorpalette colors which are used if \code{projected} is \code{False}
 #' @param zone see \code{\link{reciprocalbasis.getbrillouinzone}} for usage.
+#' @param linear see \code{\link{akima::interp}} for usage.
 #' @param projected activate for additional datalayer with projected states.
 #' @param projected.atoms indices of atoms over which will be summed
 #' @param projected.energyintervall in which bands will be included (overwrites \code{projected.bands})
@@ -1063,7 +1064,7 @@ plot.bandsdata.grid <- function(bandsdata,sym=NA,foldback=T,zone=c("bz","basis")
 #' @param ... further plotting parameters
 #' @export
 plot.bandsdata.contour<-function(bandsdata,band,sym=NA,n=201,breaks=12,colorpalette=colorRampPalette(c("red","blue","green"))
-                                 ,zone=c("bz","basis")
+                                 ,zone=c("bz","basis"),linear=F
                                  ,projected=F,projected.atoms=1:bandsdata$natoms,projected.energyintervall=NULL,projected.bands=1:bandsdata$nbands
                            ,projected.orbitals=list(1,2,3,4)
                            ,projected.colors=colorRampPalette(c("red","blue","green"))(length(projected.orbitals))
@@ -1085,10 +1086,14 @@ plot.bandsdata.contour<-function(bandsdata,band,sym=NA,n=201,breaks=12,colorpale
   if(length(sym)>1 || !is.na(sym)){
     data <- dataframe.applysymoperations(data,sym)
   }
-
   xo <- seq(min(data[,1]),max(data[,1]),length=n)
   yo <- seq(min(data[,2]),max(data[,2]),length=n)
-  e<-interp(data$kx,data$ky,bandsdata$bands[[band]]$simpledata[data$index,2],linear=F,xo=xo,yo=yo)
+  e<-interp(data$kx,data$ky,bandsdata$bands[[band]]$simpledata[data$index,2],linear=linear,xo=xo,yo=yo)
+  if(all(is.na(e$z))){
+    warning("collinearity found, setting linear interpolation to TRUE")
+    linear<-T  
+    e <-interp(data$kx,data$ky,bandsdata$bands[[band]]$simpledata[data$index,2],linear=linear,xo=xo,yo=yo)
+  }  
   plot(1,xlim=range(vec2d[,1]),ylim=range(vec2d[,2]),type="n",asp=1,xlab=xlab,ylab=ylab)
   levels <- pretty(range(e$z,finite=T),breaks)
   if(projected){
@@ -1108,9 +1113,7 @@ plot.bandsdata.contour<-function(bandsdata,band,sym=NA,n=201,breaks=12,colorpale
     pbreaks <- pretty(c(0,maxis),breaks)
     cols <- lapply(1:length(projected.orbitals),FUN=function(orb){
       da <- projbands[[paste0("band",band)]][,orb]
-      p<-interp(data$kx,data$ky,da[data$index],linear=F,xo=xo,yo=yo)   
-      
-      
+      p<-interp(data$kx,data$ky,da[data$index],linear=linear,xo=xo,yo=yo)        
       zcol <- cut(p$z,pbreaks)
       rgbcol <- col2rgb(colors[[orb]][zcol])
       return(rbind(rgbcol,as.numeric(zcol)/length(pbreaks)))
@@ -1152,6 +1155,7 @@ plot.bandsdata.contour<-function(bandsdata,band,sym=NA,n=201,breaks=12,colorpale
 #' @param asp aspect ration between energy and k-space
 #' @param breaks number of steps in color coding
 #' @param zone see \code{\link{reciprocalbasis.getbrillouinzone}} for usage.
+#' @param linear see \code{\link{akima::interp}} for usage.
 #' @param projected activate for additional datalayer with projected states.
 #' @param projected.atoms indices of atoms over which will be summed
 #' @param projected.bands (optional) used for normating of color. searches for maximum projected value in these bands. Make sure your desired bands are included.
@@ -1162,7 +1166,9 @@ plot.bandsdata.contour<-function(bandsdata,band,sym=NA,n=201,breaks=12,colorpale
 #' @seealso \code{\link{rgl}}
 #' @export
 plot.bandsdata.3d<-function(bandsdata,bands,sym=NA,n=201,colorpalette=colorRampPalette(c("red","white","blue")),asp=1
-                            ,breaks=256,zone=c("bz","basis"),projected=F,projected.atoms=1:bandsdata$natoms,projected.orbitals=list(1,2,3,4)
+                            ,breaks=256,zone=c("bz","basis")
+                            ,linear=T
+                            ,projected=F,projected.atoms=1:bandsdata$natoms,projected.orbitals=list(1,2,3,4)
                             ,projected.bands=1:bandsdata$nbands,projected.energyintervall=NULL
                             ,projected.colors= colorRampPalette(c("red","blue","green"))(length(projected.orbitals))
                                  ,xlab=expression(k[x]),ylab=expression(k[y]),zlab="energy (eV)",back="filled",front="filled",box=F,...
@@ -1209,13 +1215,18 @@ plot.bandsdata.3d<-function(bandsdata,bands,sym=NA,n=201,colorpalette=colorRampP
     pbreaks <- pretty(c(0,maxis),breaks)
   } 
   for(iband in 1:length(bands)){
-    e<-interp(data$kx,data$ky,bandsdata$bands[[bands[[iband]]]]$simpledata[data$index,2],linear=F,xo=xo,yo=yo)
+    e<-interp(data$kx,data$ky,bandsdata$bands[[bands[[iband]]]]$simpledata[data$index,2],linear=linear,xo=xo,yo=yo)
+    if(all(is.na(e$z))){
+      warning("collinearity found, setting linear interpolation to TRUE")
+      linear<-T 
+      e<-interp(data$kx,data$ky,bandsdata$bands[[bands[[iband]]]]$simpledata[data$index,2],linear=linear,xo=xo,yo=yo)
+    }
     zcol <- cut(e$z,pbreaks)
     col <- colorpalette(length(pbreaks))[zcol]    
     if(projected){      
       cols <- lapply(1:length(projected.orbitals),FUN=function(orb){
         da <- projbands[[paste0("band",bands[[iband]])]][,orb]
-        p<-interp(data$kx,data$ky,da[data$index],linear=F,xo=xo,yo=yo)       
+        p<-interp(data$kx,data$ky,da[data$index],linear=linear,xo=xo,yo=yo)       
         zcol <- cut(p$z,pbreaks)
         rgbcol <- col2rgb(colors[[orb]][zcol])
         return(rbind(rgbcol,as.numeric(zcol)/length(pbreaks)))

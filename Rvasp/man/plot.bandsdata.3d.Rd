@@ -5,7 +5,8 @@
   plot.bandsdata.3d(bandsdata, bands, sym = NA, n = 201,
     colorpalette = colorRampPalette(c("red", "white", "blue")),
     asp = 1, breaks = 256, zone = c("bz", "basis"),
-    projected = F, projected.atoms = 1:bandsdata$natoms,
+    linear = T, projected = F,
+    projected.atoms = 1:bandsdata$natoms,
     projected.orbitals = list(1, 2, 3, 4),
     projected.bands = 1:bandsdata$nbands,
     projected.energyintervall = NULL,
@@ -35,6 +36,8 @@
   \item{zone}{see
   \code{\link{reciprocalbasis.getbrillouinzone}} for
   usage.}
+
+  \item{linear}{see \code{\link{akima::interp}} for usage.}
 
   \item{projected}{activate for additional datalayer with
   projected states.}

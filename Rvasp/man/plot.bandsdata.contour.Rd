@@ -5,7 +5,7 @@
   plot.bandsdata.contour(bandsdata, band, sym = NA,
     n = 201, breaks = 12,
     colorpalette = colorRampPalette(c("red", "blue", "green")),
-    zone = c("bz", "basis"), projected = F,
+    zone = c("bz", "basis"), linear = F, projected = F,
     projected.atoms = 1:bandsdata$natoms,
     projected.energyintervall = NULL,
     projected.bands = 1:bandsdata$nbands,
@@ -32,6 +32,8 @@
   \item{zone}{see
   \code{\link{reciprocalbasis.getbrillouinzone}} for
   usage.}
+
+  \item{linear}{see \code{\link{akima::interp}} for usage.}
 
   \item{projected}{activate for additional datalayer with
   projected states.}

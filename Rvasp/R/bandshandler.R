@@ -349,10 +349,12 @@ bandsdata.addsympoint <- function(bandsdata,indices){
 #' @param bands limits plotting to specified bands
 #' @param col.bands color of bands
 #' @param sympointpath calls \code{\link{bandsdata.calcsympointpath}}
-#' @param fermi adds blue line at Fermi level
-#' @param symnames adds labels at high symmetry points
-#' @param symcolor color of high symmetry point lines
-#' @param symlty line typ of high symmetry point lines
+#' @param fermi adds line at Fermi level
+#' @param fermi.col color of line at Fermi level
+#' @param sym.labels adds labels at high symmetry points
+#' @param sym.col.labels color of high symmetry point labes
+#' @param sym.lty line typ of high symmetry point lines
+#' @param sym.col.lines color of high symmetry point lines
 #' @param energyoffset will be added to energy of all bands
 #' @param ... further plotting parameters
 #' @export
@@ -362,9 +364,11 @@ plot.bandsdata <- function(bandsdata
                            ,col.bands="black"
                            ,type="l"
                            ,fermi=F
-                           ,symnames=NULL
-                           ,symcolor="red"
-                           ,symlty=3
+                           ,fermi.col="blue"
+                           ,sym.labels=NULL
+                           ,sym.col.labels="black"
+                           ,sym.lty=3
+                           ,sym.col.lines="red"                           
                            ,xlim=NULL
                            ,xaxs="i"
                            ,yaxs="i"
@@ -390,11 +394,12 @@ plot.bandsdata <- function(bandsdata
   if (!type=="n") plot.bandsdata.addbands(bandsdata,bands,col=col.bands,...)
   if (fermi)
   {
-    plot.bandsdata.addfermi(bandsdata,xlim=xlim,...)
+    plot.bandsdata.addfermi(bandsdata,xlim=xlim,col=fermi.col,...)
   }
-  if(!is.null(symnames))
+  if(!is.null(sym.labels))
   {
-    plot.bandsdata.addsymnnames(bandsdata,symnames,symcolor=symcolor,symlty=symlty)
+    plot.bandsdata.addsymnnames(bandsdata,labels=sym.labels,col.labels=sym.col.labels,
+                                lty=sym.lty,col.lines=sym.col.lines)
   }
   return(bandsdata)
 }
@@ -404,12 +409,13 @@ plot.bandsdata <- function(bandsdata
 #' \code{plot.bandsdata.addsymnnames} adds high symmetry point labels to existing plot
 #' 
 #' @param bandsdata object of class bandsdata
-#' @param symnames adds labels at high symmetry points
-#' @param symcolor color of high symmetry point lines
-#' @param symlty line typ of high symmetry point lines
+#' @param labels adds labels at high symmetry points
+#' @param col.labels color labels
+#' @param lty line typ of high symmetry point lines
+#' @param col.lines color of high symmetry point lines
 #' @param ... further plotting parameters
 #' @export
-plot.bandsdata.addsymnnames <- function(bandsdata,symnames,symcolor="red",symlty=3,...){
+plot.bandsdata.addsymnnames <- function(bandsdata,labels,col.labels="black",lty=3,col.lines="red",...){
   print("adding symnames")
   sp <- bandsdata$sympoints
   if(!is.null(bandsdata$sympath))
@@ -417,8 +423,8 @@ plot.bandsdata.addsymnnames <- function(bandsdata,symnames,symcolor="red",symlty
     sp<-bandsdata$sympath$sympoints
   }
   select <- !duplicated(sp)
-  abline(v=sp[select],col=symcolor,lty=symlty,...)
-  axis(1,at=sp[select],labels=symnames[select],...)
+  abline(v=sp[select],col=col.lines,lty=lty,...)
+  axis(1,at=sp[select],labels=labels[select],col=col.labels,...)
 } 
 
 #' Adds line at Fermi level to existing plot
@@ -426,19 +432,12 @@ plot.bandsdata.addsymnnames <- function(bandsdata,symnames,symcolor="red",symlty
 #' \code{plot.bandsdata.addsymnnames} adds line at Fermi level to existing plot
 #' 
 #' @param bandsdata object of class bandsdata
-#' @param fermicolor color of line at Fermi level
+#' @param col color of line at Fermi level
 #' @param lty line typ of line at Fermi level
 #' @param ... further plotting parameters
 #' @export
-plot.bandsdata.addfermi<-function(bandsdata,fermicolor="blue",lty=3,xlim=NULL,...){
-  e <- 0
-  if(!is.null(bandsdata$energyoffset))
-    e <- bandsdata$energyoffset
-  rng <- bandsdata$range
-  if (is.null(xlim))
-    xlim <- rng[1:2,1]
-  abline(h=e,col=fermicolor,lty=lty,...)
-  #text(xlim[1],0,"fermi",col=fermicolor,adj=c(-0.2,-0.5),...)
+plot.bandsdata.addfermi<-function(bandsdata,col="blue",lty=3,...){
+  abline(h=0,col=col,lty=lty,...)
 }
 
 #' Adds bands to existing plot

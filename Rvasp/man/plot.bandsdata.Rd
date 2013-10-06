@@ -5,9 +5,10 @@
   plot.bandsdata(bandsdata,
     bands = 1:length(bandsdata$bands), sympointpath = NULL,
     col.bands = "black", type = "l", fermi = F,
-    symnames = NULL, symcolor = "red", symlty = 3,
-    xlim = NULL, xaxs = "i", yaxs = "i",
-    xlab = "Wave vector", ylab = "Energy (eV)",
+    fermi.col = "blue", sym.labels = NULL,
+    sym.col.labels = "black", sym.lty = 3,
+    sym.col.lines = "red", xlim = NULL, xaxs = "i",
+    yaxs = "i", xlab = "Wave vector", ylab = "Energy (eV)",
     energyoffset = 0, ...)
 }
 \arguments{
@@ -20,13 +21,17 @@
   \item{sympointpath}{calls
   \code{\link{bandsdata.calcsympointpath}}}
 
-  \item{fermi}{adds blue line at Fermi level}
+  \item{fermi}{adds line at Fermi level}
 
-  \item{symnames}{adds labels at high symmetry points}
+  \item{fermi.col}{color of line at Fermi level}
 
-  \item{symcolor}{color of high symmetry point lines}
+  \item{sym.labels}{adds labels at high symmetry points}
 
-  \item{symlty}{line typ of high symmetry point lines}
+  \item{sym.col.labels}{color of high symmetry point labes}
+
+  \item{sym.lty}{line typ of high symmetry point lines}
+
+  \item{sym.col.lines}{color of high symmetry point lines}
 
   \item{energyoffset}{will be added to energy of all bands}
 

@@ -631,6 +631,7 @@ bandsdata.getprojecteddata <- function(bandsdata,
 #' @param projectedbands object of class projectedbands
 #' @param bands limits plotting to specified bands
 #' @param orbitals list of orbitals to plot. To sum over orbitals 2 and 3 use \code{list(1,c(2,3),4)}
+#' @param col colors for orbitals, will be recycled by the length of orbitals, if not provided, will use col.platte for generation.
 #' @param col.palette color palette for orbitals
 #' @param legend position of legend, \code{NULL} will supress plotting
 #' @param legendcex size of legend
@@ -640,6 +641,7 @@ bandsdata.getprojecteddata <- function(bandsdata,
 plot.projectedbands.add <- function(projectedbands
                                     ,bands=1:length(projectedbands$bands)
                                     ,orbitals=list(1,2,3,4)
+                                    ,col=NULL
                                     ,col.palette=colorRampPalette(c("red","blue","green"))
                                     ,pch=15:(14+length(orbitals))
                                     ,cex=0.8
@@ -677,7 +679,11 @@ plot.projectedbands.add <- function(projectedbands
     }))
   })
   maxis <- apply(do.call(rbind,projbands),2,max)
+  if(is.null(col)){
   col <- col.palette(length(orbitals))
+  }else{
+    col <- rep(col,length.out=length(orbitals))
+  }
   print("plotting")
   lapply(bands,FUN=function(band)
   {

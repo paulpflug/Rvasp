@@ -4,7 +4,7 @@
 \usage{
   plot.bandsdata.3d(bandsdata, bands, sym = NA, n = 201,
     colorpalette = colorRampPalette(c("red", "white", "blue")),
-    asp = 1, breaks = 256, zone = c("bz", "basis"),
+    asp = 0.1, breaks = 256, zone = c("bz", "basis"),
     linear = T, projected = F,
     projected.atoms = 1:bandsdata$natoms,
     projected.orbitals = list(1, 2, 3, 4),

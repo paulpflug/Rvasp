@@ -1169,7 +1169,7 @@ plot.bandsdata.contour<-function(bandsdata,band,sym=NA,n=201,breaks=12,colorpale
 #' @param ... further plotting parameters
 #' @seealso \code{\link{rgl}}
 #' @export
-plot.bandsdata.3d<-function(bandsdata,bands,sym=NA,n=201,colorpalette=colorRampPalette(c("red","white","blue")),asp=1
+plot.bandsdata.3d<-function(bandsdata,bands,sym=NA,n=201,colorpalette=colorRampPalette(c("red","white","blue")),asp=0.1
                             ,breaks=256,zone=c("bz","basis")
                             ,linear=T
                             ,projected=F,projected.atoms=1:bandsdata$natoms,projected.orbitals=list(1,2,3,4)
@@ -1205,7 +1205,10 @@ plot.bandsdata.3d<-function(bandsdata,bands,sym=NA,n=201,colorpalette=colorRampP
   yo <- seq(min(data[,2]),max(data[,2]),length=n)
   m <- cbind(vec2d[,1],vec2d[,2],rep(0,nrow(vec2d)))
   m <- rbind(m,m[1,])
-  plot3d(m,lwd=3,xlab=xlab,ylab=ylab,zlab=zlab,type="l",aspect=c(1,1,asp),box=box)  
+  energiefac <- sum(abs(range(sapply(bands,FUN=function(band)bandsdata$bands[[band]]$simpledata[,2]))))
+  xfac <- sum(abs(range(data[,1])))
+  yfac <- sum(abs(range(data[,2])))
+  plot3d(m,lwd=3,xlab=xlab,ylab=ylab,zlab=zlab,type="l",aspect=c(1,yfac/xfac,asp*energiefac/xfac),box=box)  
   if(projected){
     colors <- lapply(projected.colors,FUN=function(x)colorRampPalette(c("white",x))(breaks))
     proj<- bandsdata.getprojecteddata(bandsdata,bands=projected.bands,atomindices=projected.atoms,energyintervall=projected.energyintervall)

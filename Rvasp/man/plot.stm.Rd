@@ -2,7 +2,8 @@
 \alias{plot.stm}
 \title{Plots a constant-current stm image}
 \usage{
-  plot.stm(stm, super = 1, xlim = NULL, ylim = NULL, ...)
+  plot.stm(stm, super = 1, xlim = NULL, ylim = NULL,
+    more = F, ...)
 }
 \arguments{
   \item{stm}{object of class stm}

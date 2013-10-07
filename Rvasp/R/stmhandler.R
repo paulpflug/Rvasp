@@ -11,7 +11,7 @@ require(lattice)
 #' @param super (optional) plots a supercell (symmetric in x and y)
 #' @param ... further plotting parameters
 #' @export
-plot.stm<- function(stm,super=1,xlim=NULL,ylim=NULL                       
+plot.stm<- function(stm,super=1,xlim=NULL,ylim=NULL,more=F                       
                     ,...){ 
   base <- stm$poscar$basis*stm$poscar$a
   ##supercell
@@ -47,7 +47,7 @@ plot.stm<- function(stm,super=1,xlim=NULL,ylim=NULL
                    colorkey=list(T,raster=T,interpolate=T,labels=list(at=zat,labels=zlabels),width=1),
                    aspect="iso",contour=F,col.regions=colorRampPalette(c("orangered3","yellow"))(400),
                    xlim=xlim,ylim=ylim,...)
-  print(fig)
+  print(fig,more=more,...)
 }
 
 #' Adds atoms

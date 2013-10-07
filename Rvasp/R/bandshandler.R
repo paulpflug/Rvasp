@@ -635,6 +635,7 @@ bandsdata.getprojecteddata <- function(bandsdata,
 #' @param legend position of legend, \code{NULL} will supress plotting
 #' @param legendcex size of legend
 #' @param energyoffset will be added to energy of all bands
+#' @param usetransparent determines usage of transparency
 #' @param ... further plotting parameters
 #' @export
 plot.projectedbands.add <- function(projectedbands
@@ -647,6 +648,7 @@ plot.projectedbands.add <- function(projectedbands
                                     ,legend="topright"
                                     ,legendcex=0.8
                                     ,energyoffset=NULL
+                                    ,usetransparent=T
                                     ,...){
   if(is.null(energyoffset))
   {
@@ -694,7 +696,10 @@ plot.projectedbands.add <- function(projectedbands
       }
       #da <- da^(3/4)
       trns <- round(da*255)
-     points(cbind(k,simplify2array(projectedbands$bands[[band]][i,2])+energyoffset),col=makeTransparent(col[orb],trns)[i],cex=(da*cex)[i],pch=pch[orb],...)
+     tmpcol <- col[orb]
+     if(usetransparent)
+       tmpcol <- makeTransparent(col[orb],trns)
+     points(cbind(k,simplify2array(projectedbands$bands[[band]][i,2])+energyoffset),col=tmpcol[i],cex=(da*cex)[i],pch=pch[orb],...)
     })
   })
   names<-colnames(projectedbands$bands[[1]][,-c(1:2)])

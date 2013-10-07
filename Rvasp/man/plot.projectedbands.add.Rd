@@ -8,7 +8,7 @@
     col.palette = colorRampPalette(c("red", "blue", "green")),
     pch = 15:(14 + length(orbitals)), cex = 0.8,
     legend = "topright", legendcex = 0.8,
-    energyoffset = NULL, ...)
+    energyoffset = NULL, usetransparent = T, ...)
 }
 \arguments{
   \item{projectedbands}{object of class projectedbands}
@@ -30,6 +30,8 @@
   \item{legendcex}{size of legend}
 
   \item{energyoffset}{will be added to energy of all bands}
+
+  \item{usetransparent}{determines usage of transparency}
 
   \item{...}{further plotting parameters}
 }

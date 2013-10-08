@@ -7,7 +7,7 @@
     orbitals = list(1, 2, 3, 4), col = NULL,
     col.palette = colorRampPalette(c("red", "blue", "green")),
     pch = 15:(14 + length(orbitals)), cex = 0.8,
-    legend = "topright", legendcex = 0.8,
+    cex.cutoff = 0.2, legend = "topright", legendcex = 0.8,
     energyoffset = NULL, usetransparent = T, ...)
 }
 \arguments{
@@ -32,6 +32,10 @@
   \item{energyoffset}{will be added to energy of all bands}
 
   \item{usetransparent}{determines usage of transparency}
+
+  \item{cex.cutoff}{will only be used if usetransparent
+  equals \code{FALSE}. Prevents plotting of smaller than
+  cutoff points.}
 
   \item{...}{further plotting parameters}
 }

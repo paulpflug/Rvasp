@@ -636,6 +636,7 @@ bandsdata.getprojecteddata <- function(bandsdata,
 #' @param legendcex size of legend
 #' @param energyoffset will be added to energy of all bands
 #' @param usetransparent determines usage of transparency
+#' @param cex.cutoff will only be used if usetransparent equals \code{FALSE}. Prevents plotting of smaller than cutoff points.
 #' @param ... further plotting parameters
 #' @export
 plot.projectedbands.add <- function(projectedbands
@@ -645,6 +646,7 @@ plot.projectedbands.add <- function(projectedbands
                                     ,col.palette=colorRampPalette(c("red","blue","green"))
                                     ,pch=15:(14+length(orbitals))
                                     ,cex=0.8
+                                    ,cex.cutoff=0.2
                                     ,legend="topright"
                                     ,legendcex=0.8
                                     ,energyoffset=NULL
@@ -697,7 +699,10 @@ plot.projectedbands.add <- function(projectedbands
       #da <- da^(3/4)
       trns <- round(da*255)
      tmpcol <- makeTransparent(col[orb],trns,real=usetransparent,real.backgroundcolor="white")
-     points(cbind(k,simplify2array(projectedbands$bands[[band]][i,2])+energyoffset),col=tmpcol[i],cex=(da*cex)[i],pch=pch[orb],...)
+     tmpcex <- (da*cex)
+     if(!usetransparent)
+       tmpcex[tmpcex<cex.cutoff]<-0
+     points(cbind(k,simplify2array(projectedbands$bands[[band]][i,2])+energyoffset),col=tmpcol[i],cex=tmpcex[i],pch=pch[orb],...)
     })
   })
   names<-colnames(projectedbands$bands[[1]][,-c(1:2)])

@@ -162,11 +162,30 @@ matrix.reflection2d<-function(slope){
 #' 
 #' @param someColor colors
 #' @param alpha transparency
+#' @param real if \code{FALSE} will return a mixture with \code{real.backgroundcolor}, instead real transparent color.
+#' @param real.backgroundcolor color which will be used for mixing, if no real transparency can be used.
 #' @export
-makeTransparent<-function(someColor, alpha=100){
-  newColor<-col2rgb(someColor)
-  apply(newColor, 2, function(curcoldata){rgb(red=curcoldata[1], green=curcoldata[2],
-                                              blue=curcoldata[3],alpha=alpha, maxColorValue=255)})
+makeTransparent<-function(someColor, alpha=100,real=T,real.backgroundcolor="white")
+{
+  newColor<-col2rgb(someColor)  
+  if(!real){
+    bgcolor <- col2rgb(real.backgroundcolor)
+    index <- rep(1:ncol(bgcolor),length.out=ncol(newColor))
+    newColor <- rbind(newColor,index)
+  }
+  apply(newColor, 2, function(curcoldata){
+    r<-curcoldata[1]
+    g<-curcoldata[2]
+    b<-curcoldata[3]
+    if(real){
+      return(rgb(red=r, green=g,
+                 blue=b,alpha=alpha, maxColorValue=255))
+    }else{
+      add <- (1-alpha/255)
+      return(rgb(red=r*alpha/255+add*bgcolor[1,curcoldata[4]], green=g*alpha/255+add*bgcolor[2,curcoldata[4]],
+                 blue=b*alpha/255+add*bgcolor[3,curcoldata[4]], maxColorValue=255))
+    }
+  })
 }
 
 #' gets the fig variables of a plotinplot

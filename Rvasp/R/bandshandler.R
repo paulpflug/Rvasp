@@ -696,9 +696,7 @@ plot.projectedbands.add <- function(projectedbands
       }
       #da <- da^(3/4)
       trns <- round(da*255)
-     tmpcol <- col[orb]
-     if(usetransparent)
-       tmpcol <- makeTransparent(col[orb],trns)
+     tmpcol <- makeTransparent(col[orb],trns,real=usetransparent,real.backgroundcolor="white")
      points(cbind(k,simplify2array(projectedbands$bands[[band]][i,2])+energyoffset),col=tmpcol[i],cex=(da*cex)[i],pch=pch[orb],...)
     })
   })

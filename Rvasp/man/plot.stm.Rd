@@ -3,7 +3,7 @@
 \title{Plots a constant-current stm image}
 \usage{
   plot.stm(stm, super = 1, xlim = NULL, ylim = NULL,
-    more = F, ...)
+    more = F, useRaster = F, ...)
 }
 \arguments{
   \item{stm}{object of class stm}

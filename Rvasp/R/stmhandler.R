@@ -11,7 +11,7 @@ require(lattice)
 #' @param super (optional) plots a supercell (symmetric in x and y)
 #' @param ... further plotting parameters
 #' @export
-plot.stm<- function(stm,super=1,xlim=NULL,ylim=NULL,more=F                       
+plot.stm<- function(stm,super=1,xlim=NULL,ylim=NULL,more=F,useRaster=F                       
                     ,...){ 
   base <- stm$poscar$basis*stm$poscar$a
   ##supercell
@@ -45,7 +45,7 @@ plot.stm<- function(stm,super=1,xlim=NULL,ylim=NULL,more=F
   zlabels <- paste(format(zat,digits=2),"\u00C5")
   fig <- levelplot(z~x+y,grid,pretty=F,panel= panel.levelplot.raster,cuts=100,
                    colorkey=list(T,raster=T,interpolate=T,labels=list(at=zat,labels=zlabels),width=1),
-                   aspect="iso",contour=F,col.regions=colorRampPalette(c("orangered3","yellow"))(400),
+                   aspect="iso",contour=F,col.regions=colorRampPalette(c("orangered3","yellow"))(400),useRaster=useRaster,
                    xlim=xlim,ylim=ylim,...)
   print(fig,more=more,...)
 }

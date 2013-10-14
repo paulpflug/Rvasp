@@ -12,7 +12,7 @@ Many features originated by a need to solve a specific problem and are propably 
 All functions are implemented in pure R and are mostly easy to understand. Feel free to read the [source](../../tree/master/Rvasp/R), improve and submit changes.
 
 ### Install
-* download [Rvasp package](https://www.dropbox.com/s/g6l1p546vs8ztm3/Rvasp_0.1.tar.gz)
+* download [Rvasp package](https://www.dropbox.com/s/gtuz0o79zurro6a/Rvasp_0.2.tar.gz)
 * install in R
 
 ```R

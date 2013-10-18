@@ -15,7 +15,7 @@ All functions are implemented in pure R and are mostly easy to understand. Feel 
 
 - [Install](#install)
 - [What it does](#what-it-does)
-- [POSCAR](#poscar)
+- [POSCAR](#poscar-1)
   - [Basics](#basics)
   - [Manipulation](#manipulation)
     - [Raw manipulation](#raw-manipulation)
@@ -24,9 +24,9 @@ All functions are implemented in pure R and are mostly easy to understand. Feel 
   - [Plotting](#plotting)
     - [General plotting](#general-plotting)
     - [Slab plotting](#slab-plotting)
-- [CHGCAR](#chgcar)
+- [CHGCAR](#chgcar-1)
   - [STM](#stm)
-- [Vasprun.xml](#vasprun.xml)
+- [Vasprun.xml](#vasprunxml-1)
   - [BANDS and DOS](#bands-and-dos)
 - [Calculation](#calculation)
   - [E over a](#e-over-a)
@@ -66,16 +66,17 @@ Contains functions to work with POSCAR, CHGCAR, vasprun.xml and more
 * [plot](#plotting)
 
 ##### CHGCAR
-* [read](#chgcar)
-* calculate and [plot](../../wiki/example-Plots#stm) [stm](../../wiki/STM)
+* [read](#read-1)
+* calculate and plot [stm](#stm)
 
 ##### vasprun.xml 
 * read and [plot](../../wiki/example-Plots#dos) (projected) [dosdata](../../wiki/DOS)
 * read and [plot](../../wiki/example-Plots#bands) (projected) [bandsdata](../../wiki/BANDS) and fit a dirac cone or a quadratic function to a band
 
 #### more
-Contains a wrapper for [calculations](../../wiki/CALCULATIONS) organized in the following scheme:   
-   
+Contains a wrapper for [calculations](#calculation) organized in the following scheme:   
+
+```
 /manyCalculations/Calculation1/Parameter1/VASPfile1   
 /manyCalculations/Calculation1/Parameter1/VASPfile2   
 ..   
@@ -85,19 +86,20 @@ Contains a wrapper for [calculations](../../wiki/CALCULATIONS) organized in the 
 /manyCalculations/Calculation2/Parameter1/VASPfile1   
 /manyCalculations/Calculation2/Parameter1/VASPfile2   
 etc.
+```
 
-so there are three levels:
+with these three levels:
 * Calculations
 * Calculation
 * Parameter
 
 On calculation level there are the following functions:
-* get / [plot](../../wiki/example-Plots#e-over-a) / fit an e over a curve
-* get / [plot](../../wiki/example-Plots#local-dos) a local dos curve
-* get / [plot](../../wiki/example-Plots#bulk-bands) bulk band data
+* get / [plot](#e-over-a) / fit an e over a curve
+* get / [plot](#local-dos) a local dos curve
+* get / [plot](#bulk-bands) bulk band data
 
-Furthermore there are some [miscellaneous](../../wiki/miscellaneous) functions like
-* [ploting](../../wiki/example-Plots#periodic-table) a periodic table
+Furthermore there are some [miscellaneous](#miscellaneous) functions like
+plotting a [periodic table](#periodic-table)
 
 
 ## POSCAR

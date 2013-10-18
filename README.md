@@ -4,7 +4,7 @@ Tools for loading, manipulating and plotting VASP files within R
 
 ### Workflow
 To be somewhat efficent, even in research, I developed a workflow for scientific computation, which works quite well for me.
-![scientific computation - workflow](../../raw/master/examples/workflow-01.png "scientific computation - workflow")
+![scientific computation - workflow](/raw/master/examples/workflow-01.png "scientific computation - workflow")
 VASPmanager can be found [here](https://github.com/paulpflug/VASPmanager) 
 
 ### Important
@@ -66,7 +66,7 @@ Contains functions to work with POSCAR, CHGCAR, vasprun.xml and more
 * [plot](#plotting)
 
 ##### CHGCAR
-* [read](../../wiki/CHGCAR)
+* [read](#chgcar)
 * calculate and [plot](../../wiki/example-Plots#stm) [stm](../../wiki/STM)
 
 ##### vasprun.xml 
@@ -211,7 +211,7 @@ Mainly used to align the first vector with the x direction.
 poscar <- poscar.rotate2d(poscar)
 ```
 
-will rotate ```poscar$basis[1:2,1:2]``` so that ```poscar$basis[1,2]``` equals 0
+will rotate `poscar$basis[1:2,1:2]` so that `poscar$basis[1,2]` equals 0
 
 ##### Get reciprocal basis
 
@@ -277,7 +277,7 @@ To create a supercell simply use:
 newposcar <- poscar.createsupercell(poscar=poscar,super=c(2,2,1),center=T,center.directions=3,center.position=0.5)
 ```
 
-this will also center the newly created cell in z-direction. The default chained centering can be disabled by ```center=F```
+this will also center the newly created cell in z-direction. The default chained centering can be disabled by `center=F`
 
 #### Slab manipulation
 
@@ -309,8 +309,8 @@ plot.poscar.addlayers(poscar=temppos,layer=1:2,layers=12,color=c("blue","red"),s
 plot.poscar.addlayerdistance(poscar=temppos,layer=1:2,layers=12,direction=1)
 plot.poscar.addlayers(poscar=temppos,layer=3:12,layers=12,color="grey",size=4,direction=1)
 ```
-![POSCAR picture - top](../raw/master/examples/poscar_top.png "Structure of a silverslab plotted in R - topview")
-![POSCAR picture - side](../raw/master/examples/poscar_side.png "Structure of a silverslab plotted in R - sideview")
+![POSCAR picture - top](../../raw/master/examples/poscar_top.png "Structure of a silverslab plotted in R - topview")
+![POSCAR picture - side](../../raw/master/examples/poscar_side.png "Structure of a silverslab plotted in R - sideview")
 
 #### General plotting
 

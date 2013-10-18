@@ -4,7 +4,7 @@ Tools for loading, manipulating and plotting VASP files within R
 
 ### Workflow
 To be somewhat efficent, even in research, I developed a workflow for scientific computation, which works quite well for me.
-![scientific computation - workflow](/raw/master/examples/workflow-01.png "scientific computation - workflow")
+![scientific computation - workflow](../../raw/master/examples/workflow-01.png "scientific computation - workflow")
 VASPmanager can be found [here](https://github.com/paulpflug/VASPmanager) 
 
 ### Important
@@ -18,12 +18,7 @@ All functions are implemented in pure R and are mostly easy to understand. Feel 
 - [POSCAR](#poscar-1)
   - [Basics](#basics)
   - [Manipulation](#manipulation)
-    - [Raw manipulation](#raw-manipulation)
-    - [General manipulation](#general-manipulation)
-    - [Slab manipulation](#slab-manipulation)
   - [Plotting](#plotting)
-    - [General plotting](#general-plotting)
-    - [Slab plotting](#slab-plotting)
 - [CHGCAR](#chgcar-1)
   - [STM](#stm)
 - [Vasprun.xml](#vasprunxml-1)
@@ -69,11 +64,11 @@ Contains functions to work with POSCAR, CHGCAR, vasprun.xml and more
 * [read](#read-1)
 * calculate and plot [stm](#stm)
 
-##### vasprun.xml 
+##### Vasprun.xml 
 * read and [plot](../../wiki/example-Plots#dos) (projected) [dosdata](../../wiki/DOS)
 * read and [plot](../../wiki/example-Plots#bands) (projected) [bandsdata](../../wiki/BANDS) and fit a dirac cone or a quadratic function to a band
 
-#### more
+#### More
 Contains a wrapper for [calculations](#calculation) organized in the following scheme:   
 
 ```
@@ -373,7 +368,7 @@ plot.poscar.addnumbers<-function(poscar,layers=1,layer=1,direction=3,absolutenum
 ```
 ## CHGCAR
 
-### read
+### Read
 
 ### STM
 

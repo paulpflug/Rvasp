@@ -35,6 +35,7 @@ All functions are implemented in pure R and are mostly easy to understand. Feel 
 - [Miscellaneous](#miscellaneous)
   - [Brillouin zone](#brillouin-zone)
   - [Periodic table](#periodic-table)
+  
 ## Install
 ##### Install as a package
 * download [Rvasp package](https://www.dropbox.com/s/gtuz0o79zurro6a/Rvasp_0.2.tar.gz)

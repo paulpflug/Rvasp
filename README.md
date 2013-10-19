@@ -32,6 +32,14 @@ All functions are implemented in pure R and are mostly easy to understand. Feel 
   - [Periodic table](#periodic-table)
   
 ## Install
+##### Requirements
+* (Linux) `libxml2-dev` as a requirement of the R XML package and `xorg-dev`, `libglu1-mesa-dev` for rgl
+* the R packages snowfall, akima, XML and rgl
+
+```R
+install.packages(pkgs=c("snowfall","akima","XML","rgl"),repos="http://cran.rstudio.com/")
+```
+
 ##### Install as a package
 * download [Rvasp package](https://www.dropbox.com/s/gtuz0o79zurro6a/Rvasp_0.2.tar.gz)
 * install in R
@@ -40,16 +48,16 @@ All functions are implemented in pure R and are mostly easy to understand. Feel 
 install.packages(pkgs="Rvasp_0.2.tar.gz",repos=NULL, type="source")
 ```
 
-* load in R
-
-```R
-library(Rvasp)
-```
-
 ##### Use the sourcecode
 * clone or download & extract zip from the right
 * open `Rvasp.Proj` in [RStudio](http://www.rstudio.com/)
 * build
+
+##### Load in R
+
+```R
+library(Rvasp)
+```
 
 ## What it does
 Contains functions to work with POSCAR, CHGCAR, vasprun.xml and more

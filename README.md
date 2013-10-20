@@ -409,6 +409,7 @@ print(poscar) # real function name is print.poscar
 printraw.poscar(poscar)
 write.poscar(poscar=poscar,file="POSCAR")
 
+
 ## Manipulation
 atoms <- poscar.getbasisconvertedatoms(poscar=poscar)
 poscar$atoms <- atoms.convertbasis(atoms=atoms,basis=poscar$basis*poscar$a)
@@ -421,6 +422,7 @@ poscar <- poscar.sortatoms(poscar,sortindices=c(7,3)) # first by atom sort, then
 newposcar <- poscar.extractatoms(poscar=poscar,atomindices=1:4) # will isolate the first 4 atoms
 newposcar <- poscar.createsupercell(poscar=poscar,super=diag(c(2,2,1)) # will create a 2x2x1 supercell
 
+
 ## Slab manipulation
 indices <- poscar.getatomlayerindices(poscar=poscar,layers=5)
 poscar <- poscar.extractlayers(poscar,layer=1:2,layers=5) # will isolate first 2 layers
@@ -430,6 +432,7 @@ poscar <- poscar.translatelayers(poscar,layer=1,layers=5,directtranslation=trans
 poscar <- poscar.rotatelayer.deg(poscar,layer=1,layers=5,angle=90)
 poscar <- poscar.rotatelayer.rad(poscar,layer=1,layers=5,angle=pi)
 poscar <- poscar.mirrorlayers(poscar,layers=1,baselayer=2,mirrorlayers=1) 
+
 
 ## Plotting
 poscar <- poscar.getshapedposcar(poscar,20,20)
@@ -441,13 +444,14 @@ plot.atoms.adddistance(atoms)
 plot.atoms.addnumbers(atoms)
 plot.atoms.addarrows<(atomsold,atomsnew)
 
+
 ## Slab plotting
 plot.poscar.addlayers(poscar,layer=1:2,layers=5)
 plot.poscar.addlayerdistance(poscar,layer=1:2,layers=5) # for side view
 plot.poscar.addnumbers(poscar,layers=1:2,layer=5) # atom numbers
 
-## Brillouinzone
 
+## Brillouinzone
 bz <- basis.getbrillouinzone(poscar$basis)
 bz <- reciprocalbasis.getbrillouinzone(recbasis)
 bztype <- reciprocalbasis.getbrillouinzonetype(recbasis)
@@ -472,6 +476,7 @@ print(chgcar)
 chgcar.sumoverlayer(chgcar,layer=1:2,layers=5) 
 chgcar.sum(chgcar) # should give electron count
 
+
 ## STM
 stm <- stm(chgcar,emax=0.01,cpus=1,interpolation="linear")
 plot.stm(stm,super=4)
@@ -489,7 +494,8 @@ bandsdata <- bandsdata.addsympoint(bandsdata,c(40,80))
 bandsdata <- bandsdata.calcsympointpath(bandsdata,sympointpath=list(c(1,2),c(3,4)))
 xlim <- bandsdata.getintervallaroundsympoint(bandsdata,sympointnumber=2)
 energydistance <- bandsdata.getbanddistance(bandsdata,kpoint=40,bands=c(4,6))
-energy <- bandsdata.getenergy<-function(bandsdata,kpoint=40,band=4)
+energy <- bandsdata.getenergy(bandsdata,kpoint=40,band=4)
+
 
 ## Plotting bandstructures
 bandsdata <- plot.bandsdata(bandsdata,sympointpath=list(c(1,2),c(3,4)),energyoffset=-1)
@@ -498,9 +504,11 @@ plot.bandsdata.addfermi(bandsdata)
 plot.bandsdata.addbands(bandsdata,bands=1:10)
 plot.bandsdata.addnumbers(bandsdata)
 
+
 ## Projected bands data
 projecteddata <- bandsdata.getprojecteddata(bandsdata)
 plot.projectedbands.add(projecteddata)
+
 
 ## Fitting bandstructure
 sp <- bandsdata.fit.dirac.makeparameters(vF=10)
@@ -516,16 +524,19 @@ bandsfit.quadratic.getm(bfit)
 print(bfit)
 plot.bandsfit.add(bfit,energyoffset=-1)
 
+
 ## Plotting 3d bandstructure
 plot.bandsdata.grid(bandsdata)
 plot.bandsdata.contour(bandsdata,band=4)
 plot.bandsdata.3d(bandsdata,bands=4:6,projected=T)
 
+
 ## Basics DOSdata
 dosdata <- read.dosdata("vasprun.xml") 
 print(dosdata)
 dosdata <- dosdata.addsmearing(dosdata)
-dosvector <- dosvector.calcsmearing<-function(energy=energyvector,dos=dosvector)
+dosvector <- dosvector.calcsmearing(energy=energyvector,dos=dosvector)
+
 
 ## Plotting DOS
 dosdata <- plot.dosdata(dosdata,smearing=0.1,flip=T,fermi=T)
@@ -542,6 +553,7 @@ print(calculations)
 print(calculation)
 load.calculations(file="filename")
 
+
 ## E over a
 ea <- calculation.getea(calculation)
 fiteos <- ea.fitEOS(ea)
@@ -549,11 +561,13 @@ data <- predict(fiteos,newa)
 plot.calculation.ea(calculation)
 plot.calculation.ea.addpoints(calculation)
 plot.calculation.ea.addfit(calculation)
-plot.EOS.add<-function(fiteos)
+plot.EOS.add(fiteos)
+
 
 ## Bulkbands
 bulkbands <- calculation.getbulkbands(calculation)
 plot.bulkbands.add(bulkbands)
+
 
 ## LDOS
 position <- poscar.getpositionbyatom(poscar,1)
@@ -580,10 +594,9 @@ remainingelements <- periodictable.getremainingelements(element=3:109)
 elementpositions <- periodictable.getelementpositions(element=c("H","He"))
 
 
-
 ## other
 plot.addlabel("(a)")
-df <- dataframe.applysymoperations<-function(df,symoperations=list(c("rotation",180)))
+df <- dataframe.applysymoperations(df,symoperations=list(c("rotation",180)))
 newfilename <- file.gethighestversion(dir,filename)
 vector <- vectors.crossproduct(vector1,vector2)
 length <- vector.length(vector)

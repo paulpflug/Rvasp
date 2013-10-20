@@ -279,7 +279,7 @@ for(i in (1:length(folders))){
 
 ##### Plotting of bandstructures, incl. fitting of direction-depended dirac-cones
 
-```R
+```{R}
 require(Rvasp)
 folders <- c(
   "./Folder1/",

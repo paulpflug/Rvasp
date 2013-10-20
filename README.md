@@ -555,6 +555,16 @@ plot.EOS.add<-function(fiteos)
 bulkbands <- calculation.getbulkbands(calculation)
 plot.bulkbands.add(bulkbands)
 
+## LDOS
+position <- poscar.getpositionbyatom(poscar,1)
+position <- poscar.getpositionbylayer(poscar,layers=5,layer=1)
+plot.calculation.ldos(calculation,positions)
+plot.calculation.addldos(calculation,positions)
+plot.positions.addlegend(position)
+
+indices <- calculation.getindicesfrompositions(calculation,positions)
+data <- calculation.getdatafromindices(calculation,indices)
+ldosvector <- ldosvector.calcsmearing(energyvector,ldosvector)
 ```
 
 ### miscellaneous

@@ -20,6 +20,7 @@ All functions are implemented in pure R and are mostly easy to understand. Feel 
   - [Plotting a single 2d surface from top an side](#plotting-a-single-2d-surface-from-top-an-side)
   - [Plotting of a STM image](#plotting-of-a-stm-image)
   - [Plotting of a bandstructure with corresponding DOS](#plotting-of-a-bandstructure-with-corresponding-dos)
+  - [Plotting of an elevated bandstructure](#plotting-of-an-elevated-bandstructure)
   - [Plotting of a E over a curve](#plotting-of-a-e-over-a-curve)
   - [Plotting of bulk bands](#plotting-of-bulk-bands)
   - [Plotting a brillouin zone](#plotting-a-brillouin-zone)
@@ -191,16 +192,33 @@ plot.stm.addatoms(silverstm,super=5,xlim=c(0,0.75),ylim=c(0,0.75),atomselector=2
 
 ```S
 data(silverbands)
-proj <- bandsdata.getprojecteddata(silverbands)
-plot.bandsdata(silverbands,symnames=c(expression(Gamma),"L","W","X",expression(Gamma),"K","X"),fermi=T,ylim=c(-10,20))
-plot.projectedbands.add(proj,orbitals=c(1,2,3,4),cex=1,legendcex=1.2)
 data(silverdos)
+newfermi <- silverbands$efermi-silverdos$efermi
+bands<-plot.bandsdata(silverbands,sym.labels=c(expression(Gamma),"L","W","X",expression(Gamma),"K","X"),fermi=T,ylim=c(-10,20),energyoffset=newfermi)
+proj <- bandsdata.getprojecteddata(bands)
+plot.projectedbands.add(proj,orbitals=c(1,2,3,4),cex=1,legendcex=1.2)
 dosdata <- plot.dosdata(silverdos,flip=T,fermi=T,col.fermi="Blue",xlim=c(0,0.5),ylim=c(-10,20))
-plot.dosdata.add(silverdos,orbitals=c(1:4,"all"),type="polygon",col=c(colorRampPalette(c("red","blue","green"))(4),"grey"))
+plot.dosdata.add(dosdata,orbitals=c(1:4,"all"),type="polygon",col=c(colorRampPalette(c("red","blue","green"))(4),"grey"))
 ```
 ![BANDS picture](../../raw/master/examples/bands.png "Bands of a silver created in R")
 ![DOS picture](../../raw/master/examples/dos.png "DoS of a silver created in R")
+##### Plotting of an elevated bandstructure
 
+```S
+data(silverbands)
+data(silverdos)
+newfermi <- silverbands$efermi-silverdos$efermi
+bands<-plot.bandsdata(silverbands,sympointpath=list(c(1,2),c(2,3),c(3,4),c(7,6)),sym.labels=c(expression(Gamma),"L","W","X",expression(Gamma),"K","X"),fermi=T,ylim=c(-10,20),energyoffset=newfermi)
+proj <- bandsdata.getprojecteddata(bands)
+plot.projectedbands.add(proj,orbitals=c(1,2,3,4),cex=1,legendcex=1.2)
+axis(side=3)
+zoomplot(xpos=c(38,55),ypos=c(65,82),xmean=0.35,xwidth=0.025,ymean=6.1,ywidth=1,xaxt="n",lines=F)
+plot.bandsdata.addbands(bands)
+plot.bandsdata.addsymnnames(bands,labels=c(expression(Gamma),"L","W","X",expression(Gamma),"K","X"))
+plot.projectedbands.add(proj,orbitals=c(1,2,3,4),cex=1,legend=NULL)
+endzoomplot()
+```
+![Elevated BANDS picture](../../raw/master/examples/ebands.png "Bands of a silver created in R")
 ##### Plotting of a E over a curve
 
 ```S
@@ -214,14 +232,14 @@ plot.calculation.ea.addpoints(silverea$GGA,energyshift=silverea$GGAsingleAtom$a_
 Download silverbulkbands.RData from examples
 
 ```S
-load(silverbulkbands.RData)
+load("silverbulkbands.RData")
 bandsdata <- silverbulkbands$slab$a_4.030$banddata
 bulkbands <- calculation.getbulkbands(silverbulkbands$bulk)
-plot.bandsdata(bandsdata,type="n",symlty=NA,fermi=F,ylim=c(-10,10))
+plot.bandsdata(bandsdata,type="n",sym.lty=NA,fermi=F,ylim=c(-10,10))
 plot.bulkbands.add(bulkbands)
 plot.bandsdata.addbands(bandsdata=bandsdata,col="black")
 plot.bandsdata.addfermi(bandsdata)
-plot.bandsdata.addsymnnames(bandsdata,symnames=c(expression(Gamma),"M","K",expression(Gamma)))
+plot.bandsdata.addsymnnames(bandsdata,labels=c(expression(Gamma),"M","K",expression(Gamma)))
 ```
 ![Bulk bands](../../raw/master/examples/bulkbands.png "Silver slab bands underlayed by silver bulk bands, created in R")
 
@@ -229,13 +247,13 @@ plot.bandsdata.addsymnnames(bandsdata,symnames=c(expression(Gamma),"M","K",expre
 
 ```S
 data(silverslab)
-brillouinzone<-poscar.getbrillouinzone.hexagonal(silverslab)
-plot(brilloinzone)
-silverslab$a <- silverslab$a*sqrt(3)
-brilloinzonesqrt3<-poscar.getbrillouinzone.hexagonal(silverslab,extend=2,rotate=30)
-plot.brillouinzone.add(brilloinzonesqrt3,col="red")
-plot.brillouinzone.addsympoints(brillouinzone=brilloinzone,directcoordinates=list(c(1,0),c(0,0),c(1/2,1/2)),labels=c("K",expression(Gamma),"M"))
-plot.brillouinzone.addsympoints(brillouinzone=brilloinzone,directcoordinates=list(c(1,0),c(0,0),c(1/2,1/2)),labels=c(expression(Gamma),expression(Gamma),"M"),textpos=4,col="red")
+bzs<-poscar.getbrillouinzones(silverslab)
+plot(bzs)
+superslab <- poscar.createsupercell(silverslab,A=diag(c(2,2,1))) # 2x2x1 supercell
+bzs2<-poscar.getbrillouinzones(superslab,extend=2)
+plot.brillouinzones.add(bzs2,col="red")
+plot.brillouinzones.addsympoints(brillouinzone=bzs,directcoordinates=list(c(1,0),c(0,0),c(1/2,1/2)),labels=c("K",expression(Gamma),"M"))
+plot.brillouinzones.addsympoints(brillouinzone=bzs,directcoordinates=list(c(1,0),c(0,0),c(1/2,1/2)),labels=c("K",expression(Gamma),expression(Gamma)),textpos=4,col="red")
 ```
 ![Brillouinzone](../../raw/master/examples/brillouinzone.png "Brillouinzone of 1x1 and sqrt(3)xsqrt(3) silver, generated by R")
 
@@ -401,7 +419,7 @@ poscar <- poscar.setvacuum(poscar,vacuum=c(0,0,10),center=T)
 poscar <- poscar.centeratoms(poscar,direction=3,position=0.7)
 poscar <- poscar.sortatoms(poscar,sortindices=c(7,3)) # first by atom sort, then by z-direction
 newposcar <- poscar.extractatoms(poscar=poscar,atomindices=1:4) # will isolate the first 4 atoms
-newposcar <- poscar.createsupercell(poscar=poscar,super=diag(2,2,1)) # will create a 2x2x1 supercell
+newposcar <- poscar.createsupercell(poscar=poscar,super=diag(c(2,2,1)) # will create a 2x2x1 supercell
 
 ## Slab manipulation
 indices <- poscar.getatomlayerindices(poscar=poscar,layers=5)

@@ -148,7 +148,7 @@ for example will give you all z components of all silver atoms.
 For manipulation, changes have to be saved,
 
 ```S
-poscar$atoms[poscar$atoms$type=="Ag",3]<-poscar$atoms[poscar$atoms$type=="Ag",3]+0.2
+poscar$atoms[poscar$atoms$type=="Ag",3] <- poscar$atoms[poscar$atoms$type=="Ag",3]+0.2
 ```
 
 will increase all third coordinates of all silver atoms by 0.2.
@@ -194,7 +194,7 @@ plot.stm.addatoms(silverstm,super=5,xlim=c(0,0.75),ylim=c(0,0.75),atomselector=2
 data(silverbands)
 data(silverdos)
 newfermi <- silverbands$efermi-silverdos$efermi
-bands<-plot.bandsdata(silverbands,sym.labels=c(expression(Gamma),"L","W","X",expression(Gamma),"K","X"),fermi=T,ylim=c(-10,20),energyoffset=newfermi)
+bands <- plot.bandsdata(silverbands,sym.labels=c(expression(Gamma),"L","W","X",expression(Gamma),"K","X"),fermi=T,ylim=c(-10,20),energyoffset=newfermi)
 proj <- bandsdata.getprojecteddata(bands)
 plot.projectedbands.add(proj,orbitals=c(1,2,3,4),cex=1,legendcex=1.2)
 dosdata <- plot.dosdata(silverdos,flip=T,fermi=T,col.fermi="Blue",xlim=c(0,0.5),ylim=c(-10,20))
@@ -208,7 +208,7 @@ plot.dosdata.add(dosdata,orbitals=c(1:4,"all"),type="polygon",col=c(colorRampPal
 data(silverbands)
 data(silverdos)
 newfermi <- silverbands$efermi-silverdos$efermi
-bands<-plot.bandsdata(silverbands,sympointpath=list(c(1,2),c(2,3),c(3,4),c(7,6)),sym.labels=c(expression(Gamma),"L","W","X",expression(Gamma),"K","X"),fermi=T,ylim=c(-10,20),energyoffset=newfermi)
+bands <- plot.bandsdata(silverbands,sympointpath=list(c(1,2),c(2,3),c(3,4),c(7,6)),sym.labels=c(expression(Gamma),"L","W","X",expression(Gamma),"K","X"),fermi=T,ylim=c(-10,20),energyoffset=newfermi)
 proj <- bandsdata.getprojecteddata(bands)
 plot.projectedbands.add(proj,orbitals=c(1,2,3,4),cex=1,legendcex=1.2)
 axis(side=3)
@@ -247,10 +247,10 @@ plot.bandsdata.addsymnnames(bandsdata,labels=c(expression(Gamma),"M","K",express
 
 ```S
 data(silverslab)
-bzs<-poscar.getbrillouinzones(silverslab)
+bzs <- poscar.getbrillouinzones(silverslab)
 plot(bzs)
 superslab <- poscar.createsupercell(silverslab,A=diag(c(2,2,1))) # 2x2x1 supercell
-bzs2<-poscar.getbrillouinzones(superslab,extend=2)
+bzs2 <- poscar.getbrillouinzones(superslab,extend=2)
 plot.brillouinzones.add(bzs2,col="red")
 plot.brillouinzones.addsympoints(brillouinzone=bzs,directcoordinates=list(c(1,0),c(0,0),c(1/2,1/2)),labels=c("K",expression(Gamma),"M"))
 plot.brillouinzones.addsympoints(brillouinzone=bzs,directcoordinates=list(c(1,0),c(0,0),c(1/2,1/2)),labels=c("K",expression(Gamma),expression(Gamma)),textpos=4,col="red")
@@ -310,10 +310,10 @@ efermi <- c(0.5241,0.62341,...)
 sp <- bandsdata.fit.dirac.makeparameters(vF=20)
 bands <- list(c(28,29),c(28,29),...) # Bands which to fit
 k0 <- list(c(80,81),c(80,81),...)# Kpoints where to fit
-kwide<- 5 # how many kpoints to include
+kwide <- 5 # how many kpoints to include
 factor <- c(-1,1)
 #######
-filename<-"banddata.RData"
+filename <- "banddata.RData"
 if((!load.calculations(filename))){
   data <- read.calculations(folders=folders,bandsxmlname="vasprun.xml")
   save(data,file=filename)
@@ -321,7 +321,7 @@ if((!load.calculations(filename))){
 for (i in (1:length(folders))){   
   para <- data[[folders[[i]]]][[1]]
   if(!is.null(para)){
-    eoff<-0
+    eoff <- 0
     if(!is.na(efermi[i])){
       eoff <- efermi[i]-para$banddata$efermi
     }
@@ -363,8 +363,8 @@ for (i in 1:length(folders)){
     for (name in folders){ 
       for (para in names(rawstmdata[[name]])){
         if (!is.null(rawstmdata[[name]][[para]][["chgcar"]])){
-          stmdata[[name]]<-list()
-          stmdata[[name]][[para]]<- stm(rawstmdata[[name]][[para]][["chgcar"]],cutoff,cpus=1)
+          stmdata[[name]] <- list()
+          stmdata[[name]][[para]] <- stm(rawstmdata[[name]][[para]][["chgcar"]],cutoff,cpus=1)
         }
       }      
     }

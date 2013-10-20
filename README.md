@@ -15,21 +15,26 @@ All functions are implemented in pure R and are mostly easy to understand. Feel 
 
 - [Install](#install)
 - [What it does](#what-it-does)
-- [POSCAR](#poscar-1)
-  - [Basics](#basics)
-  - [Manipulation](#manipulation)
-  - [Plotting](#plotting)
-- [CHGCAR](#chgcar-1)
-  - [STM](#stm)
-- [Vasprun.xml](#vasprunxml-1)
-  - [BANDS and DOS](#bands-and-dos)
-- [Calculation](#calculation)
-  - [E over a](#e-over-a)
-  - [Local dos](#local-dos)
-  - [Bulk bands](#bulk-bands)
-- [Miscellaneous](#miscellaneous)
-  - [Brillouin zone](#brillouin-zone)
-  - [Periodic table](#periodic-table)
+- [Simple examples](#simple-examples)
+  - [Raw manipulation of a POSCAR](#raw-manipulation-of-a-poscar)
+  - [Plotting a single 2d surface from top an side](#plotting-a-single-2d-surface-from-top-an-side)
+  - [Plotting of a STM image](#plotting-of-a-stm-image)
+  - [Plotting of a bandstructure with corresponding DOS](#plotting-of-a-bandstructure-with-corresponding-dos)
+  - [Plotting of a E over a curve](#plotting-of-a-e-over-a-curve)
+  - [Plotting of bulk bands](#plotting-of-bulk-bands)
+  - [Plotting a brillouin zone](#plotting-a-brillouin-zone)
+  - [Plotting a periodic table](#plotting-a-periodic-table)
+- [Complex examples](#complex-examples)
+  - [Plotting of 2d surfaces from top an side](#plotting-of-2d-surfaces-from-top-an-side)
+  - [Plotting of bandstructures, incl. fitting of direction-depended dirac-cones](#plotting-of-bandstructures-incl-fitting-of-direction-depended-dirac-cones)
+  - [Plotting of STM images with top layers atom positions](#plotting-of-stm-images-with-top-layers-atom-positions)
+  - [Call for other scenarios](#call-for-other-scenarios)
+- [Overview over all functions](#overview-over-all-functions)
+  - [POSCAR based](#poscar-based)
+  - [CHGCAR based](#chgcar-based)
+  - [Vasprun.xml based](#vasprunxml-based)
+  - [Calculation based](#calculation-based)
+  - [Miscellaneous](#miscellaneous-1)
   
 ## Install
 ##### Requirements
@@ -182,7 +187,7 @@ plot.stm.addatoms(silverstm,super=5,xlim=c(0,0.75),ylim=c(0,0.75),atomselector=2
 ```
 ![STM picture](../../raw/master/examples/stm.png "STM of a silver surface created in R")
 
-##### Plotting of a bandstructure with corresponding and DOS
+##### Plotting of a bandstructure with corresponding DOS
 
 ```R
 data(silverbands)

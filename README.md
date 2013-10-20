@@ -313,7 +313,7 @@ k0 <- list(c(80,81),c(80,81),...)# Kpoints where to fit
 kwide<- 5 # how many kpoints to include
 factor <- c(-1,1)
 #######
-filename<-"./d_silicene_super/banddata.RData"
+filename<-"banddata.RData"
 if((!load.calculations(filename))){
   data <- read.calculations(folders=folders,bandsxmlname="vasprun.xml")
   save(data,file=filename)
@@ -353,7 +353,7 @@ folders <- c(
   "./Folder2/",
   "./etc/"
   )
-filename <- "./stmdata.RData" # savefile for calculated STMs
+filename <- "stmdata.RData" # savefile for calculated STMs
 cutoff <- 0.01 # cutoff for stm calculation
 layers <- c(10,10,11,...) # count of layers in the respective structures
 for (i in 1:length(folders)){  
@@ -432,7 +432,7 @@ poscar <- poscar.rotatelayer.rad(poscar,layer=1,layers=5,angle=pi)
 poscar <- poscar.mirrorlayers(poscar,layers=1,baselayer=2,mirrorlayers=1) 
 
 ## Plotting
-poscar <- poscar.getshapedposcar <- function(poscar,20,20,shape="rectangular")
+poscar <- poscar.getshapedposcar(poscar,20,20)
 plot(poscar)
 plot.poscar.addbasis(poscar)
 plot.poscar.addunitcell(poscar)

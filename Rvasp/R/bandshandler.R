@@ -442,7 +442,7 @@ plot.bandsdata.addfermi<-function(bandsdata,col="blue",lty=3,...){
 
 #' Adds bands to existing plot
 #' 
-#' \code{plot.bandsdata.addsymnnames} adds bands to existing plot
+#' \code{plot.bandsdata.addbands} adds bands to existing plot
 #' 
 #' @param bandsdata object of class bandsdata
 #' @param bands limits plotting to specified bands
@@ -481,7 +481,7 @@ plot.bandsdata.addbands <- function(bandsdata,bands=1:length(bandsdata$bands),en
 
 #' Adds number of all bands to existing plot
 #' 
-#' \code{plot.bandsdata.addsymnnames} adds number of all bands to existing plot.
+#' \code{plot.bandsdata.addnumbers} adds number of all bands to existing plot.
 #' 
 #' @param bandsdata object of class bandsdata
 #' @param kpoints at which numbers will be plotted, is recycled

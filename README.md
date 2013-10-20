@@ -33,7 +33,7 @@ All functions are implemented in pure R and are mostly easy to understand. Feel 
   
 ## Install
 ##### Requirements
-* (Linux) `libxml2-dev` as a requirement of the R XML package and `xorg-dev`, `libglu1-mesa-dev` for rgl
+* (Linux) `libxml2-dev` as a requirement of the R XML package and `xorg-dev`, `libglu1-mesa-dev` for the rgl package
 * the R packages snowfall, akima, XML and rgl
 
 ```R
@@ -60,24 +60,24 @@ library(Rvasp)
 ```
 
 ## What it does
-Contains functions to work with POSCAR, CHGCAR, vasprun.xml and more
+Contains a huge set of functions to work with the VASP output, namely the POSCAR, CHGCAR and vasprun.xml. This is extended by adding a wrapper to manage several outputs at the same time. Beside of the VASP thing, there are few miscellaneous functions
 
 ##### POSCAR
-* [read](#read) 
-* [write](#write) 
-* [manipulate](#manipulation)
-* [plot](#plotting)
+* read
+* write
+* manipulate
+* plot
 
 ##### CHGCAR
-* [read](#read-1)
-* calculate and plot [stm](#stm)
+* read
+* calculate and plot stm
 
 ##### Vasprun.xml 
-* read and [plot](../../wiki/example-Plots#dos) (projected) [dosdata](../../wiki/DOS)
-* read and [plot](../../wiki/example-Plots#bands) (projected) [bandsdata](../../wiki/BANDS) and fit a dirac cone or a quadratic function to a band
+* read and plot (projected) dosdata
+* read and plot (projected) bandsdata and fit a dirac cone or a quadratic function to a band
 
-#### More
-Contains a wrapper for [calculations](#calculation) organized in the following scheme:   
+##### Several outputs at the same time
+The output has to be organized in the following scheme:   
 
 ```
 /manyCalculations/Calculation1/Parameter1/VASPfile1   
@@ -97,63 +97,18 @@ with these three levels:
 * Parameter
 
 On calculation level there are the following functions:
-* get / [plot](#e-over-a) / fit an e over a curve
-* get / [plot](#local-dos) a local dos curve
-* get / [plot](#bulk-bands) bulk band data
+* get / plot / fit an e over a curve
+* get / plot a local dos curve
+* get / plot bulk band data
 
-Furthermore there are some [miscellaneous](#miscellaneous) functions like
-plotting a [periodic table](#periodic-table)
+##### miscellaneous
+* plotting a periodic table
 
+## Simple examples
 
-## POSCAR
-
-### Basics
-
-##### Read
-POSCAR like files can be read by using `poscar <- read.poscar(file="POSCAR")`
-
-##### Printing
-There are two versions of print. `print(poscar)` will produce output similar to this:
-
-```R
-###POSCAR###
-   firstline Argentum
-   a 4.03
-   basis length:9 (matrix)
-   eightline Selective dynamics
-   ninthline Direct
-   selectivedynamics TRUE
-   atoms length:7 (data.frame)
-   length 10
-###########
-```
-
-by using `printraw.poscar(poscar)` you'll get the ascii version of the file
-
-```R
-Argentum
-4.03
-0.0000000000 0.5000000000 0.5000000000
-0.5000000000 0.0000000000 0.5000000000
-0.5000000000 0.5000000000 0.0000000000
-Ag
-1
-Selective dynamics
-Direct
-0.0000000000 0.0000000000 0.0000000000 T T T
-```
-
-##### Write
-To write the poscar to file use
-
-```R
-write.poscar(poscar=poscar,file="POSCAR")
-```
-
-### Manipulation
-#### Raw manipulation
-If your need is very elevated you have to fall back to raw manipulation.
-Most important are the following objects
+##### Raw manipulation of a POSCAR
+First read a poscar `poscar <- read.poscar(file="POSCAR")`.
+The most important objects can be accessed like this:
 
 ```R
 poscar$a
@@ -170,7 +125,7 @@ poscar$atoms
   1  0  0  0     T     T     T   Ag
 ```
 
-With R built-in tools this can be quite powerfull
+R built-in tools are powerfull:
 
 ```R
 poscar$atoms$rz[poscar$atoms$type=="Ag"]
@@ -190,115 +145,14 @@ For manipulation, changes have to be saved,
 poscar$atoms[poscar$atoms$type=="Ag",3]<-poscar$atoms[poscar$atoms$type=="Ag",3]+0.2
 ```
 
-will increase all third coordinates of all silver atoms by 0.2 .
-
-#### General manipulation
-
-##### Basis conversion
-
-To get the atoms in cartesian coordinates use:
+will increase all third coordinates of all silver atoms by 0.2.
+After desired manipulation write the poscar to a file:
 
 ```R
-atoms <- poscar.getbasisconvertedatoms(poscar=poscar)
+write.poscar(poscar=poscar,file="POSCAR")
 ```
 
-The inversion works like this:
-
-```R
-poscar <- atoms.convertbasis(atoms=atoms,basis=poscar$basis*poscar$a)
-```
-
-##### Basis rotating
-
-Mainly used to align the first vector with the x direction.
-
-```R
-poscar <- poscar.rotate2d(poscar)
-```
-
-will rotate `poscar$basis[1:2,1:2]` so that `poscar$basis[1,2]` equals 0
-
-##### Get reciprocal basis
-
-Rarely needed but quite usefull:
-
-```R
-recbasis <- poscar.getreciprocalbasis(poscar)
-```
-
-will calculate the reciprocal basis.
-
-##### Setting vacuum
-
-The current vacuum (distance of atoms in basis direction over boundary of the unit cell) can be read by
-
-```R
-vacuum <- poscar.getvacuum(poscar)
-```
-
-and set by
-
-```R
-poscar <- poscar.setvacuum(poscar,vacuum=c(0,0,10),center=T)
-```
-
-This command will set the vacuum in z direction to 10 Å and center the atoms in the unitcell in all three directions.
-
-##### Center atoms
-
-To center atoms you can use:
-
-```R
-poscar <- poscar.centeratoms(poscar,direction=3,position=0.7)
-```
-
-This will move the center of all atoms in z-direction (default: all three directions) to the position of 0.7 (default 0.5)
-
-##### Sorting atoms
-
-Sorting is only for readability. It can be accomplished by
-
-```R
-poscar <- poscar.sortatoms(poscar,sortindices=c(1,2))
-```
-
-which will sort by x-direction followed by a sort in y-direction. (default c(7,3,1,2) equals sort by atom type, z, x and y)
-
-##### Extracting atoms
-
-For simple extraction of certain atoms followed by a optional vacuum change and optional centering you can use
-
-```R
-newposcar <- poscar.extractatoms(poscar=poscar,atomindices=1:4,vacuum=c(0,0,15),center=T)
-```
-
-which will produce a new poscar with the first four atoms of poscar and a vacuum in z-direction of 15 Å
-
-##### Creating supercell
-
-To create a supercell simply use:
-
-```R
-newposcar <- poscar.createsupercell(poscar=poscar,super=c(2,2,1),center=T,center.directions=3,center.position=0.5)
-```
-
-this will also center the newly created cell in z-direction. The default chained centering can be disabled by `center=F`
-
-#### Slab manipulation
-
-```R
-poscar.getatomlayerindices(poscar=poscar,layers=12)
-
-poscar.extractlayers <- function(poscar,layer,layers,vacuum=c(0,0,0),center=T)
-poscar.removelayers <- function(poscar,layer,layers,vacuum=c(0,0,0),center=T)
-poscar.getlayertranslation<-function(poscar,fromlayer,tolayer,layers)
-poscar.translatelayers <- function(poscar,layer,layers,directtranslation)
-poscar.rotatelayer.deg<-function(poscar,layer,layers,angle,offset=NULL)
-poscar.rotatelayer.rad
-poscar.mirrorlayers<-function(poscar,layers,baselayer,mirrorlayers)
-```
-
-### Plotting
+##### Plotting a single 2d surface from top an side
 
 ```R
 data(silverslab)
@@ -317,68 +171,7 @@ plot.poscar.addlayers(poscar=temppos,layer=3:12,layers=12,color="grey",size=4,di
 ![POSCAR picture - top](../../raw/master/examples/poscar_top.png "Structure of a silverslab plotted in R - topview")
 ![POSCAR picture - side](../../raw/master/examples/poscar_side.png "Structure of a silverslab plotted in R - sideview")
 
-#### General plotting
-
-```R
-plot.poscar <- function(poscar,direction=3,xlab="x",ylab="y",basis=F,unitcell=F,fullcell=F,...)
-
-poscar.getshapedposcar <- function(poscar  # Input poscar
-                                  ,x  # Max x (range will be c(0,x))
-                                  ,y  # Max y (range will be c(0,y))
-                                  ,shape=c("rectangular")  # Shape of area atoms are allowed
-                                  )
-
-plot.poscar.addbasis<-function(poscar
-                              ,xoffin=0.1
-                              ,yoffin=0.1
-                              ,direction=3
-                              ,basisnames=c("a","b","c")
-                              ,arrowlength=0
-                              ,arrowsize=0.1
-                              ,fullcell=F
-                              ,...)
-
-plot.poscar.addunitcell<-function(poscar,direction=3,lty=2,...)
-
-plot.atoms.addpositions<-function(atoms,basis=NULL,direction=3,col="white",cex=3,lwd=1,lty=1,...)
-
-plot.atoms.adddistance<-function(atoms
-                                 ,basis=NULL
-                                 ,direction=3
-                                 ,length=0.1
-                                 ,lwd=1
-                                 ,col="black"
-                                 ,selectedalpha=150
-                                 ,selectedsize=1.5
-                                 ,...)
-
-plot.atoms.addnumbers<-function(atoms,basis=NULL,direction=3,atomselector=NULL,...)
-
-
-plot.atoms.addarrows<-function(atomsold,atomsnew,basisold=NULL,basisnew=NULL,direction=3,length=0.1,...)
-
-```
-
-#### Slab plotting
-
-```R
-plot.poscar.addlayers<-function(poscar
-                                ,layer
-                                ,layers
-                                ,direction=3
-                                ,color=rainbow(length(layer))
-                                ,size=rep(1,length(layer))
-                                ,lwd=rep(1,length(layer)))
-
-plot.poscar.addlayerdistance<-function(poscar,layer,layers,color=rainbow(length(layer)),length=0.05,direction=1,...)
-
-plot.poscar.addnumbers<-function(poscar,layers=1,layer=1,direction=3,absolutenumber=T,...)
-```
-## CHGCAR
-
-### Read
-
-### STM
+##### Plotting of a STM image
 
 ```R
 data(silverstm)
@@ -389,9 +182,7 @@ plot.stm.addatoms(silverstm,super=5,xlim=c(0,0.75),ylim=c(0,0.75),atomselector=2
 ```
 ![STM picture](../../raw/master/examples/stm.png "STM of a silver surface created in R")
 
-## Vasprun.xml
-
-### BANDS and DOS
+##### Plotting of a bandstructure with corresponding and DOS
 
 ```R
 data(silverbands)
@@ -405,9 +196,7 @@ plot.dosdata.add(silverdos,orbitals=c(1:4,"all"),type="polygon",col=c(colorRampP
 ![BANDS picture](../../raw/master/examples/bands.png "Bands of a silver created in R")
 ![DOS picture](../../raw/master/examples/dos.png "DoS of a silver created in R")
 
-## Calculation
-
-### E over a
+##### Plotting of a E over a curve
 
 ```R
 data(silverea)
@@ -415,8 +204,8 @@ plot.calculation.ea(silverea$LDA,energyshift=silverea$LDAsingleAtom$a_20.000$ene
 plot.calculation.ea.addpoints(silverea$GGA,energyshift=silverea$GGAsingleAtom$a_20.000$energy,pch=3)
 ```
 ![E over a plot](../../raw/master/examples/eaplot.png "E over a plot created in R")
-### Local dos
-### Bulk bands
+
+##### Plotting of bulk bands
 Download silverbulkbands.RData from examples
 
 ```R
@@ -431,8 +220,7 @@ plot.bandsdata.addsymnnames(bandsdata,symnames=c(expression(Gamma),"M","K",expre
 ```
 ![Bulk bands](../../raw/master/examples/bulkbands.png "Silver slab bands underlayed by silver bulk bands, created in R")
 
-## Miscellaneous
-### Brillouin zone
+##### Plotting a brillouin zone
 
 ```R
 data(silverslab)
@@ -445,9 +233,339 @@ plot.brillouinzone.addsympoints(brillouinzone=brilloinzone,directcoordinates=lis
 plot.brillouinzone.addsympoints(brillouinzone=brilloinzone,directcoordinates=list(c(1,0),c(0,0),c(1/2,1/2)),labels=c(expression(Gamma),expression(Gamma),"M"),textpos=4,col="red")
 ```
 ![Brillouinzone](../../raw/master/examples/brillouinzone.png "Brillouinzone of 1x1 and sqrt(3)xsqrt(3) silver, generated by R")
-### Periodic table
+
+##### Plotting a periodic table
 
 ```R
 plot.periodictable(highlights=1:2,highlighttexts=list(1.008,4.0026),underlay=3:10)
 ```
 ![Periodic table](../../raw/master/examples/periodic_table.png "Periodic table generated by R")
+
+
+## Complex examples
+
+##### Plotting of 2d surfaces from top and side
+
+```R
+require(Rvasp)
+folders <- c(
+  "./Folder1/",
+  "./Folder2/",
+  "./etc/"
+  )
+layers <- c(10,10,11,...) # count of layers in the respective structures
+layerplot <- 3 # number of layers you want to plot
+if(!exists(calc))
+  calc <- read.calculations(folders=folders)
+for(i in (1:length(folders))){
+  pos <- calc[[folders[[i]]]][[1]]$contcar
+  pos <- poscar.rotate2d(pos)
+  l <- layers[[i]]
+  pos <- poscar.alignbylayer(pos,l,l,alignto=c(0.01,0.01))
+  superpos <- poscar.getshapedposcar(pos,20,20) 
+  plot.poscar(superpos,basis=F,unitcell=T,ylim=c(0,20),xlim=c(0,29))
+  plot.poscar.addlayers(superpos,layers=l,layer=(l-layerplot+1):l,size=2)
+  superpos <- poscar.extractlayers(superpos,layer=(l-layerplot+1):l,layers=l,vacuum=c(0,0,2))
+  plot(superpos,basis=F,unitcell=F,direction=1)
+  plot.poscar.addlayers(superpos,layers=layerplot,layer=1:layerplot,size=2 ,direction=1)
+  plot.poscar.addlayerdistance(superpos,layers=layerplot,layer=1:layerplot,color=c("black"),cex=0.7)
+}
+```
+
+##### Plotting of bandstructures, incl. fitting of direction-depended dirac-cones
+
+```R
+require(Rvasp)
+folders <- c(
+  "./Folder1/",
+  "./Folder2/",
+  "./etc/"
+  )
+hexsym <- c(expression(Gamma),"M","K",expression(Gamma))
+efermi <- c(0.5241,0.62341,...)
+### fitting parameters
+sp <- bandsdata.fit.dirac.makeparameters(vF=20)
+bands <- list(c(28,29),c(28,29),...) # Bands which to fit
+k0 <- list(c(80,81),c(80,81),...)# Kpoints where to fit
+kwide<- 5 # how many kpoints to include
+factor <- c(-1,1)
+#######
+filename<-"./d_silicene_super/banddata.RData"
+if((!load.calculations(filename))){
+  data <- read.calculations(folders=folders,bandsxmlname="vasprun.xml")
+  save(data,file=filename)
+}
+for (i in (1:length(folders))){   
+  para <- data[[folders[[i]]]][[1]]
+  if(!is.null(para)){
+    eoff<-0
+    if(!is.na(efermi[i])){
+      eoff <- efermi[i]-para$banddata$efermi
+    }
+    projectedbands <- bandsdata.getprojecteddata(para$banddata,energyintervall=ylim+eoff)     
+    plot(para$banddata,ylim=ylim,sym.labels=hexsym,fermi=T,energyoffset=eoff)
+    plot.projectedbands.add(projectedbands,orbitals=list(1,c(4,2),3),usetransparent=F,cex.cutoff=0.35,energyoffset=eoff)
+    plot.bandsdata.addnumbers(para$banddata)  
+    ## DIRACFIT
+    for (j in 1:2){
+      for(k in 1:2){
+        know <- k0[[i]][[k]]
+        ap <- bandsdata.fit.dirac.makeconstants(para$banddata,bands=bands[[i]],k0=know,factor=factor[[j]])
+        kpoints <- sort(know:((factor[[k]]*kwide)+know))
+        o <- bandsdata.fit(para$banddata,bands[[i]][[j]],kpoints=kpoints,"dirac",sp,ap)
+        plot.bandsfit.add(o)
+      }
+    }
+  }
+}
+```
+
+
+##### Plotting of STM images with top layers atom positions
+
+```R
+require(Rvasp)
+folders <- c(
+  "./Folder1/",
+  "./Folder2/",
+  "./etc/"
+  )
+filename <- "./stmdata.RData" # savefile for calculated STMs
+cutoff <- 0.01 # cutoff for stm calculation
+layers <- c(10,10,11,...) # count of layers in the respective structures
+for (i in 1:length(folders)){  
+  if(!load.calculations(filename) ){
+    stmdata <- list()
+    rawstmdata <- read.calculations(folders[[i]],chgcarname="PARCHG",update=update)
+    for (name in folders){ 
+      for (para in names(rawstmdata[[name]])){
+        if (!is.null(rawstmdata[[name]][[para]][["chgcar"]])){
+          stmdata[[name]]<-list()
+          stmdata[[name]][[para]]<- stm(rawstmdata[[name]][[para]][["chgcar"]],cutoff,cpus=1)
+        }
+      }      
+    }
+    save(stmdata,file=filename)
+  }
+  for (name in folders)
+  {      
+    for (para in names(stmdata[[name]]))
+    {
+      para2 <- strsplit(para,"_")[[1]][[2]]
+      parsedpara <- round(as.numeric(strsplit(para2," +")[[1]]))
+      parsedpara <- paste(parsedpara,collapse="_")
+      stm <- stmdata[[name]][[para]] 
+      print(paste("creating stm from",folders[[i]],"with",para))
+      xlim <- ylim <- c(0,4)
+      super <- 7
+      plot.stm(stm,super=super,xlim=xlim,ylim=ylim)
+      layerindices <- poscar.getatomlayerindices(stm$poscar,layers[[i]])
+      plot.stm.addatoms(stm,layerindices==1,super=super,xlim=xlim/2,ylim=ylim/2)
+      plot.stm.addatoms(stm,layerindices==2,super=super,xlim=xlim/2,ylim=ylim/2)
+      plot.stm.addunitcell(stm,col="black",lwd=2)
+    }    
+  }  
+}
+```
+
+
+##### Call for other scenarios
+
+if you encounter scenarios you think sharing will help others, feel free to submit these.
+
+## Overview over all functions
+To get information about a function use `help(functionname)` or `?functionname` in R.
+If you want to look under the hood of a function just use `functionname` (without brackets) in R or look directly in the sourcecode here on Github.
+All functions are given with a typical call
+### POSCAR based
+
+```R
+## Basics
+poscar <- read.poscar(file="POSCAR")
+print(poscar) # real function name is print.poscar
+printraw.poscar(poscar)
+write.poscar(poscar=poscar,file="POSCAR")
+
+## Manipulation
+atoms <- poscar.getbasisconvertedatoms(poscar=poscar)
+poscar$atoms <- atoms.convertbasis(atoms=atoms,basis=poscar$basis*poscar$a)
+poscar <- poscar.rotate2d(poscar) # poscar$basis[1,2] will equal 0 afterwards
+recbasis <- poscar.getreciprocalbasis(poscar)
+vacuum <- poscar.getvacuum(poscar)
+poscar <- poscar.setvacuum(poscar,vacuum=c(0,0,10),center=T)
+poscar <- poscar.centeratoms(poscar,direction=3,position=0.7)
+poscar <- poscar.sortatoms(poscar,sortindices=c(7,3)) # first by atom sort, then by z-direction
+newposcar <- poscar.extractatoms(poscar=poscar,atomindices=1:4) # will isolate the first 4 atoms
+newposcar <- poscar.createsupercell(poscar=poscar,super=diag(2,2,1)) # will create a 2x2x1 supercell
+
+## Slab manipulation
+indices <- poscar.getatomlayerindices(poscar=poscar,layers=5)
+poscar <- poscar.extractlayers(poscar,layer=1:2,layers=5) # will isolate first 2 layers
+poscar <- poscar.removelayers(poscar,layer=1:2,layers=5) # will remove first 2 layers
+translationvector <- poscar.getlayertranslation(poscar,fromlayer=1,tolayer=2,layers=5) # will give the 2d offset (x,y) of two layers
+poscar <- poscar.translatelayers(poscar,layer=1,layers=5,directtranslation=translationvector)
+poscar <- poscar.rotatelayer.deg(poscar,layer=1,layers=5,angle=90)
+poscar <- poscar.rotatelayer.rad(poscar,layer=1,layers=5,angle=pi)
+poscar <- poscar.mirrorlayers(poscar,layers=1,baselayer=2,mirrorlayers=1) 
+
+## Plotting
+poscar <- poscar.getshapedposcar <- function(poscar,20,20,shape="rectangular")
+plot(poscar)
+plot.poscar.addbasis(poscar)
+plot.poscar.addunitcell(poscar)
+plot.atoms.addpositions(atoms)
+plot.atoms.adddistance(atoms)
+plot.atoms.addnumbers(atoms)
+plot.atoms.addarrows<(atomsold,atomsnew)
+
+## Slab plotting
+plot.poscar.addlayers(poscar,layer=1:2,layers=5)
+plot.poscar.addlayerdistance(poscar,layer=1:2,layers=5) # for side view
+plot.poscar.addnumbers(poscar,layers=1:2,layer=5) # atom numbers
+
+## Brillouinzone
+
+bz <- basis.getbrillouinzone(poscar$basis)
+bz <- reciprocalbasis.getbrillouinzone(recbasis)
+bztype <- reciprocalbasis.getbrillouinzonetype(recbasis)
+bzs <- list(bz1,bz2,bz3)
+bzs <- poscar.getbrillouinzones(poscar)
+
+plot.brillouinzones(bzs)
+plot.brillouinzones.add<-function(bzs)
+plot.brillouinzones.addsympoints(brillouinzones,labels=expression(Gamma)
+
+newkpoints <- brillouinzone.projectkpoints(bz,oldkpoints)
+newkpoints <- brillouinzone.selectkpoints(bz,oldkpoints)
+newkpoints <- brillouinzone.extendkpoints(bz,oldkpoints)
+```
+
+### CHGCAR based
+
+```R
+## Basics
+chgcar <- read.chgcar("CHGCAR")
+print(chgcar)
+chgcar.sumoverlayer(chgcar,layer=1:2,layers=5) 
+chgcar.sum(chgcar) # should give electron count
+
+## STM
+stm <- stm(chgcar,emax=0.01,cpus=1,interpolation="linear")
+plot.stm(stm,super=4)
+plot.stm.addatoms(stm,atomselector=1:10,super=4)
+plot.stm.addunitcell(stm)
+```
+### Vasprun.xml based
+
+```R
+## Basics for bandstructures
+bandsdata <- read.bandsdata("vasprun.xml")
+print(bandsdata)
+print(bandsdata$band1)
+bandsdata <- bandsdata.addsympoint(bandsdata,c(40,80))
+bandsdata <- bandsdata.calcsympointpath(bandsdata,sympointpath=list(c(1,2),c(3,4)))
+xlim <- bandsdata.getintervallaroundsympoint(bandsdata,sympointnumber=2)
+energydistance <- bandsdata.getbanddistance(bandsdata,kpoint=40,bands=c(4,6))
+energy <- bandsdata.getenergy<-function(bandsdata,kpoint=40,band=4)
+
+## Plotting bandstructures
+bandsdata <- plot.bandsdata(bandsdata,sympointpath=list(c(1,2),c(3,4)),energyoffset=-1)
+plot.bandsdata.addsymnnames(bandsdata,labels=c(expression(Gamma),"M","K",expression(Gamma)))
+plot.bandsdata.addfermi(bandsdata)
+plot.bandsdata.addbands(bandsdata,bands=1:10)
+plot.bandsdata.addnumbers(bandsdata)
+
+## Projected bands data
+projecteddata <- bandsdata.getprojecteddata(bandsdata)
+plot.projectedbands.add(projecteddata)
+
+## Fitting bandstructure
+sp <- bandsdata.fit.dirac.makeparameters(vF=10)
+sp <- bandsdata.fit.quadratic.makeparameters(m=10)
+ap <- bandsdata.fit.dirac.makeconstants(bandsdata,bands=4:5,k0=40,factor=-1)
+ap <- bandsdata.fit.quadratic.makeconstants(bandsdata,band=4,k0=40)
+bfit <- bandsdata.fit(bandsdata,bandnr=4,kpoints=36:40,fitname="dirac",startingparameters=sp,constants=ap)
+fitfunc <- bandsdata.fit.dirac.function(parameters=sp,kpoints=36:40,constants=ap)
+fitfunc <- bandsdata.fit.quadratic.function(parameters=sp,kpoints=36:40,constants=ap)
+predicteddata <- predict(bfit,seq(bfit$kdist[[1]],bfit$kdist[[length(bfit$kdist)]],length.out=101))
+bandsfit.dirac.getv(bfit)
+bandsfit.quadratic.getm(bfit)
+print(bfit)
+plot.bandsfit.add(bfit,energyoffset=-1)
+
+## Plotting 3d bandstructure
+plot.bandsdata.grid(bandsdata)
+plot.bandsdata.contour(bandsdata,band=4)
+plot.bandsdata.3d(bandsdata,bands=4:6,projected=T)
+
+## Basics DOSdata
+dosdata <- read.dosdata("vasprun.xml") 
+print(dosdata)
+dosdata <- dosdata.addsmearing(dosdata)
+dosvector <- dosvector.calcsmearing<-function(energy=energyvector,dos=dosvector)
+
+## Plotting DOS
+dosdata <- plot.dosdata(dosdata,smearing=0.1,flip=T,fermi=T)
+dosdata <- plot.dosdata.add(dosdata,type="polygon",smearing=0.1,orbitals=c(1,2,3,4,"all"),atomindices=1:2)
+plot.dosdata.addfermi(dosdata)
+```
+
+### Calculation based
+
+```R
+## Basics
+calculation <- read.calculations(folders)
+print(calculations)
+print(calculation)
+load.calculations(file="filename")
+
+## E over a
+ea <- calculation.getea(calculation)
+fiteos <- ea.fitEOS(ea)
+data <- predict(fiteos,newa)
+plot.calculation.ea(calculation)
+plot.calculation.ea.addpoints(calculation)
+plot.calculation.ea.addfit(calculation)
+plot.EOS.add<-function(fiteos)
+
+## Bulkbands
+bulkbands <- calculation.getbulkbands(calculation)
+plot.bulkbands.add(bulkbands)
+
+```
+
+### miscellaneous
+```R
+## Periodic table
+plot.periodictable(highlights=c("H","He"),highlighttexts=list(1,2),underlay=c("Si"))
+plot.periodictable.addelements(c("H","He"),texts=list(1,2)) # usefull if first plot with typ="n"
+plot.periodictable.addunderlay(c("Si"))
+
+elementnames <- periodictable.getelementnames(element=1:2)
+elementselector <- periodictable.getelementselector(element=c("H","He"))
+remainingelements <- periodictable.getremainingelements(element=3:109)
+elementpositions <- periodictable.getelementpositions(element=c("H","He"))
+
+
+
+## other
+plot.addlabel("(a)")
+df <- dataframe.applysymoperations<-function(df,symoperations=list(c("rotation",180)))
+newfilename <- file.gethighestversion(dir,filename)
+vector <- vectors.crossproduct(vector1,vector2)
+length <- vector.length(vector)
+angle <- vectors.calcangle(vector1,vector2)
+angle <- vectors.calcangle.degree(vector1,vector2)
+matrix <- matrix.rotation2d(angle)
+matrix <- matrix.rotation2d.degree(angle)
+matrix <- matrix.reflection2d.degree(slope)
+matrix <- matrix.reflection2d(slope)
+newcolor <- makeTransparent(color, alpha=100)
+
+fig <- getplotinplotfig(x,y,coords="ndc")
+plotinplot(x,y)
+endplotinplot()
+zoomplot(x,y,xmean,xwidth,ymean,ywidth)
+endzoomplot()
+range <- calcrange(listofobjects)
+```

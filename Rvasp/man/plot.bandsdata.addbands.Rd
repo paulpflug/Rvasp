@@ -16,7 +16,7 @@
   \item{...}{further plotting parameters}
 }
 \description{
-  \code{plot.bandsdata.addsymnnames} adds bands to existing
+  \code{plot.bandsdata.addbands} adds bands to existing
   plot
 }
 

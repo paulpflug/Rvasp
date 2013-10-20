@@ -211,7 +211,6 @@ newfermi <- silverbands$efermi-silverdos$efermi
 bands <- plot.bandsdata(silverbands,sympointpath=list(c(1,2),c(2,3),c(3,4),c(7,6)),sym.labels=c(expression(Gamma),"L","W","X",expression(Gamma),"K","X"),fermi=T,ylim=c(-10,20),energyoffset=newfermi)
 proj <- bandsdata.getprojecteddata(bands)
 plot.projectedbands.add(proj,orbitals=c(1,2,3,4),cex=1,legendcex=1.2)
-axis(side=3)
 zoomplot(xpos=c(38,55),ypos=c(65,82),xmean=0.35,xwidth=0.025,ymean=6.1,ywidth=1,xaxt="n",lines=F)
 plot.bandsdata.addbands(bands)
 plot.bandsdata.addsymnnames(bands,labels=c(expression(Gamma),"L","W","X",expression(Gamma),"K","X"))

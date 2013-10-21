@@ -458,7 +458,7 @@ bzs <- list(bz1,bz2,bz3)
 bzs <- poscar.getbrillouinzones(poscar)
 
 plot.brillouinzones(bzs)
-plot.brillouinzones.add<-function(bzs)
+plot.brillouinzones.add(bzs)
 plot.brillouinzones.addsympoints(brillouinzones,labels=expression(Gamma)
 
 newkpoints <- brillouinzone.projectkpoints(bz,oldkpoints)

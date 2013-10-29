@@ -474,7 +474,7 @@ chgcar <- read.chgcar("CHGCAR")
 print(chgcar)
 chgcar.sumoverlayer(chgcar,layer=1:2,layers=5) 
 chgcar.sum(chgcar) # should give electron count
-
+data <- chgcar.calcdensity(chgcar,paramter="phi",smearing=pi/100)
 
 ## STM
 stm <- stm(chgcar,emax=0.01,cpus=1,interpolation="linear")

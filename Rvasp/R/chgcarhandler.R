@@ -101,3 +101,35 @@ chgcar.sumoverlayer <- function(chgcar,layer,layers){
 chgcar.sum<- function(chgcar){
   return(chgcar.sumoverlayer(chgcar,1,1))
 }
+
+#' Calculates the charge density
+#' 
+#' \code{chgcar.calcdensity} calculates the charge density in dependence of a spherical parameter of choice.
+#' Will return a dataframe with the spherical parameter and the calculated charge density.
+#' @param chgcar object of chgcar class
+#' @param paramter spherical paramter which is used
+#' @param nsum count of adjacent density values, which will be averaged
+#' @param smearing (optional) sigma for gaussian smearing
+#' @export
+chgcar.calcdensity <- function(chgcar,parameter=c("r","phi","theta"),nmean=pchg$n[[1]]*10,smearing=NA){
+  stopifnot(nrow(chgcar)%%nmean==0)
+  parameter <- match.arg(parameter)
+  means <- colMeans(chgcar$data[,1:3])
+  r <- sqrt(rowSums((chgcar$data[,1:3]-matrix(nrow=nrow(chgcar$data),ncol=3,byrow=T,data=means))^2))
+  val <- switch(parameter,
+                "r" = r,
+                "phi" = atan2(pchg$data[,2]-means[[2]],pchg$data[,1]-means[[1]]),
+                "theta" = acos((pchg$data[,3]-means[[3]])/r)
+  )
+  o <- order(val)
+  matrix(nrow=nmean,val[o])->valmat
+  colMeans(valmat)->valnew
+  matrix(nrow=nmean,chgcar$data[o,4])->chgmat
+  colMeans(chgmat)->chgnew
+  if(!is.na(smearing)){
+    chgnew<-ldosvector.calcsmearing(valnew,dos=chgnew,sigma=smearing)
+  }
+  data <- cbind(valnew,chgnew)
+  names(data)<-c(parameter,"chargedensity")
+  return(data)
+}

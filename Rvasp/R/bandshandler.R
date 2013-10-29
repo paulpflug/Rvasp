@@ -34,8 +34,8 @@ read.bandsdata <- function(xmlfile){
   {
     for (i in 1:(result$nkpoints-1))
     {
-      point1 <- result$kpoints[i,]%*%t(result$kbasis)
-      point2 <- result$kpoints[i+1,]%*%t(result$kbasis)
+      point1 <- result$kpoints[i,]%*%result$kbasis
+      point2 <- result$kpoints[i+1,]%*%result$kbasis
       d <- dist(rbind(point1,point2))[[1]]*2*pi
       if(d == 0 | i == (result$nkpoints-1))
       {

@@ -23,7 +23,7 @@ read.chgcar<-function(filename){
   rep(do.call(c,lapply(y,rep,coords[1])),coords[3]),
   do.call(c,lapply(z,rep,coords[1]*coords[2])))
   poscart <- pos %*%(chgcar$poscar$basis*chgcar$poscar$a)
-  chgcar$cellvolume <- det(chgcar$poscar$basis)*chgcar$poscar$a
+  chgcar$cellvolume <- det(chgcar$poscar$basis*chgcar$poscar$a)
   chgcar$data <- data.frame(poscart, block / chgcar$cellvolume)
   chgcar$xy <- unique(chgcar$data[,c(1,2)])
   chgcar$z <- unique(chgcar$data[,3])
